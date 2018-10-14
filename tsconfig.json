@@ -1,0 +1,35 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src",
+    "jsx": "react",
+    "lib": ["es2015", "es2016", "es2017", "es2018", "dom"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "dist/",
+    "paths": {
+      "components/*": ["components/*"],
+      "containers/*": ["containers/*"],
+      "reducers/*": ["reducers/*"],
+      "styles": ["styles.ts"],
+      "utils/*": ["utils/*"],
+      "thunks/*": ["thunks/*"],
+      "types/*": ["types/*"]
+    },
+    "plugins": [{ "name": "typescript-styled-plugin" }],
+    "removeComments": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "target": "es5"
+  },
+  "exclude": ["node_modules"]
+}
