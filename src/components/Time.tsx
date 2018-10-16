@@ -6,7 +6,6 @@ import { min2Ms } from "../utils/time";
 
 type State = {
   timestamp: number;
-  error?: any;
 };
 
 const TimeView = styled.h2`
@@ -34,7 +33,10 @@ const DateView = styled.h4`
   }
 `;
 
-export class Time extends React.Component<{}, State> {
+export class Time extends React.Component<
+  { reportError(e: Error): void },
+  State
+> {
   state: State = { timestamp: Math.floor(Date.now() / 1000) };
 
   fetchTimer: NodeJS.Timer;
@@ -46,7 +48,7 @@ export class Time extends React.Component<{}, State> {
       .then((data: TimeZone) =>
         this.setState({ timestamp: dayjs(data.formatted).unix() })
       )
-      .catch(error => this.setState({ error }));
+      .catch(error => this.props.reportError(error));
 
   tick = () => {
     this.interval = setInterval(

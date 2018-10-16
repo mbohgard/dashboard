@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 
-import { bus } from "../components/Icon";
+import { bus, train } from "./Icon";
 
 import { min2Ms, sec2Ms } from "../utils/time";
 
@@ -30,7 +30,7 @@ const Container = styled.div`
   display: flex;
 `;
 
-const BusContainer = styled.div`
+const TransportContainer = styled.div`
   margin-left: 30px;
 
   &:first-child {
@@ -80,36 +80,53 @@ const formatTime = (time: string) => {
   );
 };
 
-const Bus: React.SFC<{ data: Bus }> = ({ data }) => (
-  <BusContainer>
+type TransportProps = {
+  data: TransportItem;
+  icon: JSX.Element;
+};
+
+const Transport: React.SFC<TransportProps> = ({ data, icon }) => (
+  <TransportContainer>
     <LineNumber>
-      {bus} {data.LineNumber}
+      {icon} {data.LineNumber}
     </LineNumber>
     <Time>{formatTime(data.DisplayTime)}</Time>
     <Destination>{data.Destination}</Destination>
-  </BusContainer>
+  </TransportContainer>
 );
 
+const Placeholder = styled.div`
+  font-size: 14px;
+`;
+
 type State = {
-  data?: Timetable;
-  error?: any;
+  buses?: Timetable;
+  trains?: Timetable;
 };
 
-export class Buses extends React.Component<{}, State> {
+export class Transports extends React.Component<
+  { reportError(e: Error): void },
+  State
+> {
   state: State = {};
 
   timer: NodeJS.Timer;
   visible: true;
 
-  getData = () =>
+  getData = (endpoint: "buses" | "trains") =>
     (document.hidden === false || document.hidden === undefined) &&
-    fetch("/buses", { mode: "no-cors" })
+    fetch(`/${endpoint}`, { mode: "no-cors" })
       .then(res => res.json())
-      .then((data: Timetable) => this.setState({ data }))
-      .catch(error => this.setState({ error }));
+      .then((data: Timetable) => this.setState({ [endpoint]: data }))
+      .then(
+        () =>
+          endpoint === "buses" &&
+          setTimeout(this.getData.bind(this, "trains"), 2000)
+      )
+      .catch(error => this.props.reportError(error));
 
   fetcher = (delay: number) => () => {
-    this.getData();
+    this.getData("buses");
 
     this.timer = setTimeout(this.fetcher(getDelay()), delay);
   };
@@ -123,19 +140,28 @@ export class Buses extends React.Component<{}, State> {
   }
 
   render() {
-    const { data } = this.state;
-
-    if (!data) {
-      return <div>Hämtar bussar...</div>;
-    }
+    const { buses, trains } = this.state;
 
     return (
       <Container>
-        {data.ResponseData.Buses.filter(b =>
-          b.Destination.includes("Väsby")
-        ).map(bus => (
-          <Bus key={bus.JourneyNumber} data={bus} />
-        ))}
+        {buses ? (
+          buses.ResponseData.Buses.filter(b => b.Destination.includes("Väsby"))
+            .filter((_, i) => !i)
+            .map(b => <Transport key={b.JourneyNumber} data={b} icon={bus} />)
+        ) : (
+          <TransportContainer>
+            <Placeholder>Hämtar bussar...</Placeholder>
+          </TransportContainer>
+        )}
+        {trains ? (
+          trains.ResponseData.Trains.filter(b => b.JourneyDirection === 1)
+            .filter((_, i) => i < 2)
+            .map(b => <Transport key={b.JourneyNumber} data={b} icon={train} />)
+        ) : (
+          <TransportContainer>
+            <Placeholder>Hämtar tåg...</Placeholder>
+          </TransportContainer>
+        )}
       </Container>
     );
   }

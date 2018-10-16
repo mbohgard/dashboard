@@ -11,6 +11,11 @@ const port = 8081;
 
 const app = express();
 
+const getTransportUrl = (type: "buses" | "trains", siteId: string) =>
+  `http://api.sl.se/api2/realtimedeparturesV4.json?key=${sl}&siteId=${siteId}&timewindow=60&bus=${String(
+    type === "buses"
+  )}&train=${String(type === "trains")}&metro=false&ship=false&tram=false`;
+
 app.get("/weather", (_: Request, res: Response) => {
   request(
     "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/17.88/lat/59.515/data.json"
@@ -24,9 +29,11 @@ app.get("/time", (_: Request, res: Response) => {
 });
 
 app.get("/buses", (_: Request, res: Response) => {
-  request(
-    `http://api.sl.se/api2/realtimedeparturesV4.json?key=${sl}&timewindow=60&metro=false&train=false&ship=false&tram=false`
-  ).pipe(res);
+  request(getTransportUrl("buses", "5493")).pipe(res);
+});
+
+app.get("/trains", (_: Request, res: Response) => {
+  request(getTransportUrl("trains", "9502")).pipe(res);
 });
 
 if (prod) {

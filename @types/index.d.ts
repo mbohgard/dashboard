@@ -39,7 +39,7 @@ interface TimeZone {
   formatted: string;
 }
 
-interface Bus {
+interface TransportItem {
   TransportMode: string;
   LineNumber: string;
   Destination: string;
@@ -59,7 +59,8 @@ interface TimetableResponse {
   LatestUpdate: string;
   DataAge: number;
   Metros: any[];
-  Buses: Bus[];
+  Buses: TransportItem[];
+  Trains: TransportItem[];
 }
 
 interface Timetable {

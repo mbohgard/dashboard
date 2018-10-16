@@ -8,7 +8,7 @@ import { baseStyles } from "./styles";
 
 import { BigWeather, SmallWeather } from "./components/Weather";
 import { Time } from "./components/Time";
-import { Buses } from "./components/Buses";
+import { Transports } from "./components/Transports";
 
 import { min2Ms } from "./utils/time";
 
@@ -56,9 +56,27 @@ const Whole = styled(Half)`
   align-items: ${({ last }: WholeProps) => (last ? "flex-end" : "normal")};
 `;
 
+const ErrorContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+`;
+
+const ErrorBox = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #bf2f2f;
+  padding: 20px;
+`;
+
 type State = {
-  weatherError?: any;
   weatherData?: Forecast;
+  error?: Error;
 };
 
 class App extends React.Component {
@@ -72,13 +90,15 @@ class App extends React.Component {
       .then(data =>
         this.setState({ weatherData: data, weatherError: undefined })
       )
-      .catch(error => this.setState({ weatherError: error }));
+      .catch(error => this.setState({ error }));
 
   fetcher = () => {
     this.getData();
 
     this.timer = setTimeout(this.fetcher, min2Ms(15));
   };
+
+  reportError = (error: Error) => this.setState({ error });
 
   componentDidMount() {
     this.fetcher();
@@ -90,6 +110,7 @@ class App extends React.Component {
 
   render() {
     const weather = this.state.weatherData;
+    const err = this.state.error;
     let currentWeather, forecast;
 
     if (weather) {
@@ -103,13 +124,20 @@ class App extends React.Component {
             {currentWeather && <BigWeather data={currentWeather} />}
           </Half>
           <Half right top>
-            <Time />
+            <Time reportError={this.reportError} />
           </Half>
           <Whole>{forecast && <SmallWeather data={forecast} />}</Whole>
           <Whole left last>
-            <Buses />
+            <Transports reportError={this.reportError} />
           </Whole>
         </Container>
+        {err && (
+          <ErrorContainer>
+            <ErrorBox>
+              {err.name} - {err.message}
+            </ErrorBox>
+          </ErrorContainer>
+        )}
       </Wrapper>
     );
   }
