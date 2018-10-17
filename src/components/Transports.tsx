@@ -16,7 +16,7 @@ const getDelay = () => {
     !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 17));
 
   if (peakTime) {
-    return sec2Ms(10);
+    return sec2Ms(20);
   }
 
   if (dayTime) {
@@ -28,14 +28,8 @@ const getDelay = () => {
 
 const Container = styled.div`
   display: flex;
-`;
-
-const TransportContainer = styled.div`
-  margin-left: 30px;
-
-  &:first-child {
-    margin-left: 0;
-  }
+  width: 100%;
+  justify-content: space-between;
 `;
 
 const LineNumber = styled.div`
@@ -54,20 +48,19 @@ const Time = styled.h3`
   margin-top: 8px;
 
   span {
-    margin-left: 2px;
     font-size: 32px;
     color: #aaa;
   }
 `;
 
-const Destination = styled.div`
-  font-size: 20px;
-  margin-top: 10px;
-  max-width: 238px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+// const Destination = styled.div`
+//   font-size: 20px;
+//   margin-top: 10px;
+//   max-width: 238px;
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+// `;
 
 const formatTime = (time: string) => {
   const arr = time.split("min");
@@ -86,13 +79,12 @@ type TransportProps = {
 };
 
 const Transport: React.SFC<TransportProps> = ({ data, icon }) => (
-  <TransportContainer>
+  <div>
     <LineNumber>
       {icon} {data.LineNumber}
     </LineNumber>
     <Time>{formatTime(data.DisplayTime)}</Time>
-    <Destination>{data.Destination}</Destination>
-  </TransportContainer>
+  </div>
 );
 
 const Placeholder = styled.div`
@@ -146,21 +138,30 @@ export class Transports extends React.Component<
       <Container>
         {buses ? (
           buses.ResponseData.Buses.filter(b => b.Destination.includes("Väsby"))
-            .filter((_, i) => !i)
+            .filter((_, i) => i < 2)
             .map(b => <Transport key={b.JourneyNumber} data={b} icon={bus} />)
         ) : (
-          <TransportContainer>
+          <div>
             <Placeholder>Hämtar bussar...</Placeholder>
-          </TransportContainer>
+          </div>
         )}
         {trains ? (
-          trains.ResponseData.Trains.filter(b => b.JourneyDirection === 1)
-            .filter((_, i) => i < 2)
+          trains.ResponseData.Trains.filter(t => {
+            if (t.JourneyDirection !== 1) {
+              return false;
+            }
+
+            const now = dayjs(Date.now());
+            const time = dayjs(t.ExpectedDateTime);
+
+            return time.unix() - now.unix() > 60 * 5;
+          })
+            .filter((_, i) => i < 3)
             .map(b => <Transport key={b.JourneyNumber} data={b} icon={train} />)
         ) : (
-          <TransportContainer>
+          <div>
             <Placeholder>Hämtar tåg...</Placeholder>
-          </TransportContainer>
+          </div>
         )}
       </Container>
     );

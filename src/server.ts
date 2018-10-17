@@ -4,37 +4,52 @@ import * as express from "express";
 import * as request from "request";
 import * as path from "path";
 
-import { sl, time } from "../secrets";
+import * as secrets from "../secrets";
+import * as config from "../config";
 
 const prod = process.env.NODE_ENV === "production";
 const port = 8081;
 
 const app = express();
 
-const getTransportUrl = (type: "buses" | "trains", siteId: string) =>
-  `http://api.sl.se/api2/realtimedeparturesV4.json?key=${sl}&siteId=${siteId}&timewindow=60&bus=${String(
-    type === "buses"
-  )}&train=${String(type === "trains")}&metro=false&ship=false&tram=false`;
+const getTransportUrl = (type: string, siteId: string) => {
+  const q = (t: string) => `&${t}=${String(type === t)}`;
+
+  return `http://api.sl.se/api2/realtimedeparturesV4.json?key=${
+    secrets.transports
+  }&siteId=${siteId}&timewindow=60${q("bus")}${q("train")}${q("metro")}${q(
+    "ship"
+  )}${q("tram")}`;
+};
 
 app.get("/weather", (_: Request, res: Response) => {
   request(
-    "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/17.88/lat/59.515/data.json"
+    `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${
+      config.weather.lon
+    }/lat/${config.weather.lat}/data.json`
   ).pipe(res);
 });
 
 app.get("/time", (_: Request, res: Response) => {
   request(
-    `http://api.timezonedb.com/v2.1/get-time-zone?key=${time}&format=json&by=zone&zone=CEST`
+    `http://api.timezonedb.com/v2.1/get-time-zone?key=${
+      secrets.time
+    }&format=json&by=zone&zone=${config.time.timezone}`
   ).pipe(res);
 });
 
-app.get("/buses", (_: Request, res: Response) => {
-  request(getTransportUrl("buses", "5493")).pipe(res);
-});
-
-app.get("/trains", (_: Request, res: Response) => {
-  request(getTransportUrl("trains", "9502")).pipe(res);
-});
+if (config.transports) {
+  Object.keys(config.transports).forEach(k => {
+    app.get(`/${k}`, (_: Request, res: Response) => {
+      request(
+        getTransportUrl(
+          k,
+          config.transports[k as keyof typeof config.transports].siteId
+        )
+      ).pipe(res);
+    });
+  });
+}
 
 if (prod) {
   app.use("/", express.static(path.join(__dirname, "..", "dist")));

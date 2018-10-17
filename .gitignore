@@ -73,6 +73,3 @@ typings/
 
 # parcel cache
 .cache
-
-# secrets
-secrets.js
