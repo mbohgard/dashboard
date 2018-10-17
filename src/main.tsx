@@ -127,14 +127,14 @@ class App extends React.Component {
             <Time reportError={this.reportError} />
           </Half>
           <Whole>{forecast && <SmallWeather data={forecast} />}</Whole>
-          <Whole left last>
+          <Whole last>
             <Transports reportError={this.reportError} />
           </Whole>
         </Container>
         {err && (
           <ErrorContainer>
             <ErrorBox>
-              {err.name} - {err.message}
+              {err.name}: {err.message} {console.dir(err)}
             </ErrorBox>
           </ErrorContainer>
         )}
