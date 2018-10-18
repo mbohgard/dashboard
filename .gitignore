@@ -76,3 +76,6 @@ typings/
 
 # secrets
 secrets.js
+
+# vs code workspace file
+.code-workspace
