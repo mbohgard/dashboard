@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 
-import { bus, train } from "./Icon";
+import { bus as busIcon, train as trainIcon } from "./Icon";
 
 import { min2Ms, sec2Ms } from "../utils/time";
 
@@ -92,8 +92,8 @@ const Placeholder = styled.div`
 `;
 
 type State = {
-  buses?: Timetable;
-  trains?: Timetable;
+  bus?: Timetable;
+  train?: Timetable;
 };
 
 export class Transports extends React.Component<
@@ -105,20 +105,20 @@ export class Transports extends React.Component<
   timer: NodeJS.Timer;
   visible: true;
 
-  getData = (endpoint: "buses" | "trains") =>
+  getData = (endpoint: "bus" | "train") =>
     (document.hidden === false || document.hidden === undefined) &&
     fetch(`/${endpoint}`, { mode: "no-cors" })
       .then(res => res.json())
       .then((data: Timetable) => this.setState({ [endpoint]: data }))
       .then(
         () =>
-          endpoint === "buses" &&
-          setTimeout(this.getData.bind(this, "trains"), 2000)
+          endpoint === "bus" &&
+          setTimeout(this.getData.bind(this, "train"), 2000)
       )
       .catch(error => this.props.reportError(error));
 
   fetcher = (delay: number) => () => {
-    this.getData("buses");
+    this.getData("bus");
 
     this.timer = setTimeout(this.fetcher(getDelay()), delay);
   };
@@ -132,21 +132,23 @@ export class Transports extends React.Component<
   }
 
   render() {
-    const { buses, trains } = this.state;
+    const { bus, train } = this.state;
 
     return (
       <Container>
-        {buses ? (
-          buses.ResponseData.Buses.filter(b => b.Destination.includes("Väsby"))
+        {bus ? (
+          bus.ResponseData.Buses.filter(b => b.Destination.includes("Väsby"))
             .filter((_, i) => i < 2)
-            .map(b => <Transport key={b.JourneyNumber} data={b} icon={bus} />)
+            .map(b => (
+              <Transport key={b.JourneyNumber} data={b} icon={busIcon} />
+            ))
         ) : (
           <div>
             <Placeholder>Hämtar bussar...</Placeholder>
           </div>
         )}
-        {trains ? (
-          trains.ResponseData.Trains.filter(t => {
+        {train ? (
+          train.ResponseData.Trains.filter(t => {
             if (t.JourneyDirection !== 1) {
               return false;
             }
@@ -157,7 +159,9 @@ export class Transports extends React.Component<
             return time.unix() - now.unix() > 60 * 5;
           })
             .filter((_, i) => i < 3)
-            .map(b => <Transport key={b.JourneyNumber} data={b} icon={train} />)
+            .map(b => (
+              <Transport key={b.JourneyNumber} data={b} icon={trainIcon} />
+            ))
         ) : (
           <div>
             <Placeholder>Hämtar tåg...</Placeholder>
