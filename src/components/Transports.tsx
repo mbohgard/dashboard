@@ -13,7 +13,7 @@ const getDelay = () => {
   const hour = time.hour();
   const dayTime = (weekend ? hour >= 8 : hour >= 7) && hour <= 21;
   const peakTime =
-    !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 17));
+    !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 16));
 
   if (peakTime) {
     return sec2Ms(20);
