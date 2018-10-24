@@ -2,29 +2,8 @@ import * as React from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 
+import { CommonProps } from "../main";
 import { bus as busIcon, train as trainIcon } from "./Icon";
-
-import { min2Ms, sec2Ms } from "../utils/time";
-
-const getDelay = () => {
-  const time = dayjs(Date.now());
-  const day = time.day();
-  const weekend = day === 0 || day === 6;
-  const hour = time.hour();
-  const dayTime = (weekend ? hour >= 8 : hour >= 7) && hour <= 21;
-  const peakTime =
-    !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 16));
-
-  if (peakTime) {
-    return sec2Ms(20);
-  }
-
-  if (dayTime) {
-    return sec2Ms(30);
-  }
-
-  return min2Ms(1);
-};
 
 const Container = styled.div`
   display: flex;
@@ -96,39 +75,20 @@ type State = {
   train?: Timetable;
 };
 
-export class Transports extends React.Component<
-  { reportError(e: Error): void },
-  State
-> {
+export class Transports extends React.Component<CommonProps, State> {
   state: State = {};
 
-  timer: NodeJS.Timer;
-  visible: true;
-
-  getData = (endpoint: "bus" | "train") =>
-    (document.hidden === false || document.hidden === undefined) &&
-    fetch(`/${endpoint}`, { mode: "no-cors" })
-      .then(res => res.json())
-      .then((data: Timetable) => this.setState({ [endpoint]: data }))
-      .then(
-        () =>
-          endpoint === "bus" &&
-          setTimeout(this.getData.bind(this, "train"), 2000)
-      )
-      .catch(error => this.props.reportError(error));
-
-  fetcher = (delay: number) => () => {
-    this.getData("bus");
-
-    this.timer = setTimeout(this.fetcher(getDelay()), delay);
-  };
-
   componentDidMount() {
-    this.fetcher(getDelay())();
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.timer);
+    this.props.socket.on(
+      "transports",
+      (res: TransportsServiceData) =>
+        res.data
+          ? this.setState({
+              bus: res.data.find(d => d.ResponseData.Buses.length > 0),
+              train: res.data.find(d => d.ResponseData.Trains.length > 0)
+            })
+          : this.props.reportError(res.service, res.error)
+    );
   }
 
   render() {
@@ -144,11 +104,12 @@ export class Transports extends React.Component<
             ))
         ) : (
           <div>
-            <Placeholder>Hämtar bussar...</Placeholder>
+            <Placeholder>Väntar på bussdata...</Placeholder>
           </div>
         )}
         {train ? (
           train.ResponseData.Trains.filter(t => {
+            // Only interrested in journeys in a single direction
             if (t.JourneyDirection !== 1) {
               return false;
             }
@@ -164,7 +125,7 @@ export class Transports extends React.Component<
             ))
         ) : (
           <div>
-            <Placeholder>Hämtar tåg...</Placeholder>
+            <Placeholder>Väntar på tågdata...</Placeholder>
           </div>
         )}
       </Container>

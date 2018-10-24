@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 
-import { min2Ms } from "../utils/time";
+import { CommonProps } from "../main";
 
 type State = {
   timestamp: number;
@@ -33,22 +33,10 @@ const DateView = styled.h4`
   }
 `;
 
-export class Time extends React.Component<
-  { reportError(e: Error): void },
-  State
-> {
+export class Time extends React.Component<CommonProps, State> {
   state: State = { timestamp: Math.floor(Date.now() / 1000) };
 
-  fetchTimer: NodeJS.Timer;
   interval: NodeJS.Timer;
-
-  getData = () =>
-    fetch("/time")
-      .then(res => res.json())
-      .then((data: TimeZone) =>
-        this.setState({ timestamp: dayjs(data.formatted).unix() })
-      )
-      .catch(error => this.props.reportError(error));
 
   tick = () => {
     this.interval = setInterval(
@@ -57,22 +45,20 @@ export class Time extends React.Component<
     );
   };
 
-  startClock = () => {
-    clearTimeout(this.fetchTimer);
+  componentDidMount() {
     clearInterval(this.interval);
 
-    this.fetchTimer = setTimeout(this.startClock, min2Ms(5));
     this.tick();
-
-    this.getData();
-  };
-
-  componentDidMount() {
-    this.startClock();
+    this.props.socket.on(
+      "time",
+      (res: TimeServiceData) =>
+        res.data
+          ? this.setState({ timestamp: dayjs(res.data.formatted).unix() })
+          : this.props.reportError(res.service, res.error)
+    );
   }
 
   componentWillUnmount() {
-    clearTimeout(this.fetchTimer);
     clearInterval(this.interval);
   }
 

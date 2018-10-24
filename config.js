@@ -1,12 +1,14 @@
 module.exports = {
-  transports: {
-    bus: {
-      siteId: "5493"
+  transports: [
+    {
+      siteId: "5493",
+      types: ["bus"]
     },
-    train: {
-      siteId: "9502"
+    {
+      siteId: "9502",
+      types: ["train"]
     }
-  },
+  ],
   weather: {
     lon: "17.88",
     lat: "59.515"

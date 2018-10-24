@@ -2,15 +2,12 @@ import * as React from "react";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
 
+import { CommonProps } from "../main";
 import { WeatherIcon } from "./WeatherIcon";
 import { celsius } from "./Icon";
 
 type Type = {
   type?: "normal" | "big";
-};
-
-type WeatherData = {
-  data: TimeSerie;
 };
 
 const param = (params: Parameter[], name: string) =>
@@ -43,7 +40,11 @@ const DegreesContainer = styled.div`
   }
 `;
 
-const Degrees: React.SFC<WeatherData & Type> = ({ data, type = "normal" }) => (
+type WeatherProps = {
+  data: TimeSerie;
+};
+
+const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => (
   <DegreesContainer type={type}>
     <span>{Math.round(param(data.parameters, "t"))}</span>
     {celsius}
@@ -61,7 +62,7 @@ const BigContainer = styled.div`
   }
 `;
 
-export const BigWeather: React.SFC<WeatherData> = ({ data }) => {
+export const BigWeather: React.SFC<WeatherProps> = ({ data }) => {
   return (
     <BigContainer>
       <WeatherIcon
@@ -98,7 +99,7 @@ const SmallWrapper = styled.div`
   margin-top: 20px;
 `;
 
-const Small: React.SFC<WeatherData> = ({ data }) => {
+const Small: React.SFC<WeatherProps> = ({ data }) => {
   return (
     <SmallContainer>
       <span>{dayjs(data.validTime).format("HH:mm")}</span>
@@ -125,3 +126,43 @@ export const SmallWeather: React.SFC<{ data: TimeSerie[] }> = ({ data }) => (
       ))}
   </SmallWrapper>
 );
+
+export type Props = {
+  type?: "big" | "small";
+} & CommonProps;
+
+type State = {
+  data?: Forecast;
+};
+
+export class Weather extends React.Component<Props, State> {
+  state: State = {};
+
+  componentDidMount() {
+    this.props.socket.on(
+      "weather",
+      (res: WeatherServiceData) =>
+        res.data
+          ? this.setState({ data: res.data })
+          : this.props.reportError(res.service, res.error)
+    );
+  }
+
+  render() {
+    const { type = "small" } = this.props;
+    const { data } = this.state;
+    let currentWeather, forecast;
+
+    if (data) {
+      [currentWeather, ...forecast] = data.timeSeries;
+    } else {
+      return <div>Väntar på väderdata...</div>;
+    }
+
+    return type === "small" ? (
+      <SmallWeather data={forecast} />
+    ) : (
+      <BigWeather data={currentWeather} />
+    );
+  }
+}
