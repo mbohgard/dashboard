@@ -64,7 +64,7 @@ io.on("connection", s => {
 });
 
 if (prod) {
-  app.use("/", express.static(path.join(__dirname, "..", "dist")));
+  app.use("/", express.static(path.join(__dirname, "..", "..", "dist")));
 } else {
   const bundler = new Bundler(__dirname + "/../index.html");
 
@@ -73,5 +73,6 @@ if (prod) {
 }
 
 console.log("Server running on port " + port);
+console.log("i am in", __dirname);
 
 server.listen(port);
