@@ -1,16 +1,15 @@
 import * as React from "react";
 import { render } from "react-dom";
 import styled from "styled-components";
+import io from "socket.io-client";
 import dayjs from "dayjs";
 import "dayjs/locale/sv";
 
 import { baseStyles } from "./styles";
 
-import { BigWeather, SmallWeather } from "./components/Weather";
+import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
-
-import { min2Ms } from "./utils/time";
 
 dayjs.locale("sv");
 
@@ -74,66 +73,67 @@ const ErrorBox = styled.div`
   padding: 20px;
 `;
 
+export type CommonProps = {
+  socket: SocketIOClient.Socket;
+  reportError(service: string, err: any): void;
+};
+
+type ServiceError = {
+  code: number;
+  message: string;
+  name: string;
+  service: string;
+};
+
 type State = {
-  weatherData?: Forecast;
-  error?: Error;
+  error?: ServiceError;
 };
 
 class App extends React.Component {
   state: State = {};
+  socket = io();
 
-  timer: NodeJS.Timer;
+  reportError = (service: string, err: any) => {
+    const isObj = err === "object";
+    const code = typeof isObj ? err.statusCode || err.status : 0;
+    const message = typeof isObj
+      ? err.message || err.msg || err.text
+      : String(err);
+    const name = (isObj && err.name) || "Error";
+    const error: ServiceError = {
+      code,
+      service,
+      message,
+      name
+    };
 
-  getData = () =>
-    fetch("/weather")
-      .then(res => res.json())
-      .then(data =>
-        this.setState({ weatherData: data, weatherError: undefined })
-      )
-      .catch(error => this.setState({ error }));
-
-  fetcher = () => {
-    this.getData();
-
-    this.timer = setTimeout(this.fetcher, min2Ms(15));
+    this.setState({ error });
   };
 
-  reportError = (error: Error) => this.setState({ error });
-
-  componentDidMount() {
-    this.fetcher();
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.timer);
-  }
-
   render() {
-    const weather = this.state.weatherData;
     const err = this.state.error;
-    let currentWeather, forecast;
-
-    if (weather) {
-      [currentWeather, ...forecast] = weather.timeSeries;
-    }
+    const common = { reportError: this.reportError, socket: this.socket };
 
     return (
       <Wrapper>
         <Container>
           <Half top>
-            {currentWeather && <BigWeather data={currentWeather} />}
+            <Weather type="big" {...common} />
           </Half>
           <Half right top>
-            <Time reportError={this.reportError} />
+            <Time {...common} />
           </Half>
-          <Whole>{forecast && <SmallWeather data={forecast} />}</Whole>
+          <Whole>
+            <Weather {...common} />
+          </Whole>
           <Whole last>
-            <Transports reportError={this.reportError} />
+            <Transports {...common} />
           </Whole>
         </Container>
         {err && (
           <ErrorContainer>
             <ErrorBox>
+              {err.code && `(${err.code} )`}
               {err.name}: {err.message} {console.dir(err)}
             </ErrorBox>
           </ErrorContainer>

@@ -1,4 +1,4 @@
-interface Parameter {
+declare interface Parameter {
   level: number;
   levelType: string;
   name: string;
@@ -6,67 +6,77 @@ interface Parameter {
   values: number[];
 }
 
-interface Geometry {
+declare interface Geometry {
   coordinates: [number, number][];
   type: string;
 }
 
-interface TimeSerie {
+declare interface TimeSerie {
   parameters: Parameter[];
   validTime: string;
 }
 
-interface Forecast {
+declare interface Forecast {
   approvedTime: string;
   geometry: Geometry;
   referenceTime: string;
   timeSeries: TimeSerie[];
 }
 
-interface TimeZone {
-  status: string;
-  message: string;
+declare interface TimeZone {
+  abbreviation: string;
   countryCode: string;
   countryName: string;
-  zoneName: string;
-  abbreviation: string;
-  gmtOffset: number;
   dst: string;
-  zoneStart: number;
-  zoneEnd: number;
-  nextAbbreviation: string;
-  timestamp: number;
   formatted: string;
+  gmtOffset: number;
+  message: string;
+  nextAbbreviation: string;
+  status: string;
+  timestamp: number;
+  zoneEnd: number;
+  zoneName: string;
+  zoneStart: number;
 }
 
-interface TransportItem {
-  TransportMode: string;
-  LineNumber: string;
+declare interface TransportItem {
   Destination: string;
+  Deviations: any;
+  DisplayTime: string;
+  ExpectedDateTime: string;
   JourneyDirection: number;
+  JourneyNumber: number;
+  LineNumber: string;
   StopAreaName: string;
   StopAreaNumber: number;
-  StopPointNumber: number;
   StopPointDesignation: null;
+  StopPointNumber: number;
   TimeTabledDateTime: string;
-  ExpectedDateTime: string;
-  DisplayTime: string;
-  JourneyNumber: number;
-  Deviations: any;
+  TransportMode: string;
 }
 
-interface TimetableResponse {
-  LatestUpdate: string;
-  DataAge: number;
-  Metros: any[];
+declare interface TimetableResponse {
   Buses: TransportItem[];
+  DataAge: number;
+  LatestUpdate: string;
+  Metros: TransportItem[];
   Trains: TransportItem[];
 }
 
-interface Timetable {
-  StatusCode: number;
-  Message: null;
+declare interface Timetable {
   ExecutionTime: number;
+  Message: null;
   ResponseData: TimetableResponse;
+  StatusCode: number;
   StopPointDeviations: any[];
 }
+
+declare interface ServiceData<T = any> {
+  data?: T;
+  error?: any;
+  service: string;
+}
+
+declare type TimeServiceData = ServiceData<TimeZone>;
+declare type WeatherServiceData = ServiceData<Forecast>;
+declare type TransportsServiceData = ServiceData<Timetable[]>;
