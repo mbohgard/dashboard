@@ -2,12 +2,14 @@
   "name": "dashboard",
   "version": "0.0.1",
   "main": "src/main.tsx",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "ts-node --files ./src/server/index.ts",
-    "build": "parcel build ./src/index.html",
-    "serve": "NODE_ENV=production ts-node ./src/server.ts",
-    "host": "yarn build && yarn serve"
+    "build": "yarn install && parcel build ./src/index.html",
+    "serve": "NODE_ENV=production TS_NODE_FILES=true ts-node ./src/server/index.ts",
+    "serve-forever": "NODE_ENV=production TS_NODE_FILES=true forever start -c 'node -r ts-node/register' ./src/server/index.ts",
+    "host": "yarn build && yarn serve",
+    "host-forever": "yarn build && yarn serve-forever"
   },
   "dependencies": {
     "dayjs": "^1.7.7",
