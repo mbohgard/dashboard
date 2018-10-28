@@ -33,6 +33,12 @@ const DateView = styled.h4`
   }
 `;
 
+const getUnix = (data: TimeZone) => {
+  const date = dayjs(data.formatted);
+  
+  return data.dst === "1" ? date.subtract(1, "hour").unix() : date.unix();
+}
+
 export class Time extends React.Component<CommonProps, State> {
   state: State = { timestamp: Math.floor(Date.now() / 1000) };
 
@@ -53,7 +59,7 @@ export class Time extends React.Component<CommonProps, State> {
       "time",
       (res: TimeServiceData) =>
         res.data
-          ? this.setState({ timestamp: dayjs(res.data.formatted).unix() })
+          ? this.setState({ timestamp: getUnix(res.data) })
           : this.props.reportError(res.service, res.error)
     );
   }
