@@ -83,9 +83,15 @@ export class Transports extends React.Component<CommonProps, State> {
       "transports",
       (res: TransportsServiceData) =>
         res.data
-          ? this.setState({
-              bus: res.data.find(d => d.ResponseData.Buses.length > 0),
-              train: res.data.find(d => d.ResponseData.Trains.length > 0)
+          ? this.setState(state => {
+              return {
+                bus:
+                  res.data!.find(d => d.ResponseData.Buses.length > 0) ||
+                  state.bus,
+                train:
+                  res.data!.find(d => d.ResponseData.Trains.length > 0) ||
+                  state.train
+              };
             })
           : this.props.reportError(res.service, res.error)
     );
