@@ -97,6 +97,10 @@ export class Transports extends React.Component<CommonProps, State> {
     );
   }
 
+  componentDidCatch(err: any) {
+    this.props.reportError("catch in Transports", err);
+  }
+
   render() {
     const { bus, train } = this.state;
 
