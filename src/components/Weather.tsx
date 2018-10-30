@@ -148,6 +148,10 @@ export class Weather extends React.Component<Props, State> {
     );
   }
 
+  componentDidCatch(err: any) {
+    this.props.reportError("catch in Weather", err);
+  }
+
   render() {
     const { type = "small" } = this.props;
     const { data } = this.state;

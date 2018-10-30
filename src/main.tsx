@@ -110,6 +110,10 @@ class App extends React.Component {
     this.setState({ error });
   };
 
+  componentDidCatch(err: any) {
+    this.reportError("catch in Main", err);
+  }
+
   render() {
     const err = this.state.error;
     const common = { reportError: this.reportError, socket: this.socket };
@@ -133,8 +137,8 @@ class App extends React.Component {
         {err && (
           <ErrorContainer>
             <ErrorBox>
-              {err.code && `(${err.code} )`}
-              {err.name}: {err.message} {console.dir(err)}
+              {err.code && `(${err.code}) `}
+              {err.name}: {err.message} [by {err.service}]{console.dir(err)}
             </ErrorBox>
           </ErrorContainer>
         )}

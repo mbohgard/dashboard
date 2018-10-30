@@ -68,6 +68,10 @@ export class Time extends React.Component<CommonProps, State> {
     clearInterval(this.interval);
   }
 
+  componentDidCatch(err: any) {
+    this.props.reportError("catch in Time", err);
+  }
+
   render() {
     const ts = (dayjs as any).unix(this.state.timestamp);
     const time = ts.format("HH:mm");
