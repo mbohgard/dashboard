@@ -35,9 +35,9 @@ const DateView = styled.h4`
 
 const getUnix = (data: TimeZone) => {
   const date = dayjs(data.formatted);
-  
+
   return data.dst === "1" ? date.subtract(1, "hour").unix() : date.unix();
-}
+};
 
 export class Time extends React.Component<CommonProps, State> {
   state: State = { timestamp: Math.floor(Date.now() / 1000) };
@@ -66,10 +66,6 @@ export class Time extends React.Component<CommonProps, State> {
 
   componentWillUnmount() {
     clearInterval(this.interval);
-  }
-
-  componentDidCatch(err: any) {
-    this.props.reportError("catch in Time", err);
   }
 
   render() {

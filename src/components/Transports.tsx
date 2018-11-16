@@ -71,8 +71,19 @@ const Placeholder = styled.div`
 `;
 
 type State = {
-  bus?: Timetable;
-  train?: Timetable;
+  buses?: TransportItem[];
+  trains?: TransportItem[];
+};
+
+const getTransports = (data: Timetable[], t: keyof TimetableResponse) => {
+  const timetable = data.find(d => {
+    const transport =
+      d && d.ResponseData && (d.ResponseData[t] as TransportItem[] | undefined);
+
+    return transport ? transport.length > 0 : false;
+  });
+
+  return timetable && (timetable.ResponseData[t] as TransportItem[]);
 };
 
 export class Transports extends React.Component<CommonProps, State> {
@@ -85,29 +96,22 @@ export class Transports extends React.Component<CommonProps, State> {
         res.data
           ? this.setState(state => {
               return {
-                bus:
-                  res.data!.find(d => d.ResponseData.Buses.length > 0) ||
-                  state.bus,
-                train:
-                  res.data!.find(d => d.ResponseData.Trains.length > 0) ||
-                  state.train
+                buses: getTransports(res.data!, "Buses") || state.buses,
+                trains: getTransports(res.data!, "Trains") || state.trains
               };
             })
           : this.props.reportError(res.service, res.error)
     );
   }
 
-  componentDidCatch(err: any) {
-    this.props.reportError("catch in Transports", err);
-  }
-
   render() {
-    const { bus, train } = this.state;
+    const { buses, trains } = this.state;
 
     return (
       <Container>
-        {bus ? (
-          bus.ResponseData.Buses.filter(b => b.Destination.includes("Väsby"))
+        {buses ? (
+          buses
+            .filter(b => b.Destination.includes("Väsby"))
             .filter((_, i) => i < 2)
             .map(b => (
               <Transport key={b.JourneyNumber} data={b} icon={busIcon} />
@@ -117,18 +121,19 @@ export class Transports extends React.Component<CommonProps, State> {
             <Placeholder>Väntar på bussdata...</Placeholder>
           </div>
         )}
-        {train ? (
-          train.ResponseData.Trains.filter(t => {
-            // Only interrested in journeys in a single direction
-            if (t.JourneyDirection !== 1) {
-              return false;
-            }
+        {trains ? (
+          trains
+            .filter(t => {
+              // Only interrested in journeys in a single direction
+              if (t.JourneyDirection !== 1) {
+                return false;
+              }
 
-            const now = dayjs(Date.now());
-            const time = dayjs(t.ExpectedDateTime);
+              const now = dayjs(Date.now());
+              const time = dayjs(t.ExpectedDateTime);
 
-            return time.unix() - now.unix() > 60 * 5;
-          })
+              return time.unix() - now.unix() > 60 * 5;
+            })
             .filter((_, i) => i < 3)
             .map(b => (
               <Transport key={b.JourneyNumber} data={b} icon={trainIcon} />
