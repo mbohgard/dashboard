@@ -27,12 +27,17 @@ const fetcher = (
 ) =>
   args.forEach(s => {
     const get = () =>
-      s.get().then(res => {
-        io.emit(res.service, res);
+      s
+        .get()
+        .then(res => {
+          io.emit(res.service, res);
 
-        cache[res.service] = res;
-        timers[res.service] = setTimeout(get, s.delay());
-      });
+          cache[res.service] = res;
+          timers[res.service] = setTimeout(get, s.delay());
+        })
+        .catch(() => {
+          // no data to send
+        });
 
     get();
   });
