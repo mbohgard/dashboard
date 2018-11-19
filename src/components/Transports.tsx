@@ -78,12 +78,16 @@ type State = {
 const getTransports = (data: Timetable[], t: keyof TimetableResponse) => {
   const timetable = data.find(d => {
     const transport =
-      d && d.ResponseData && (d.ResponseData[t] as TransportItem[] | undefined);
+      d && d.ResponseData && (d.ResponseData[t] as TransportItem[]);
 
     return transport ? transport.length > 0 : false;
   });
 
-  return timetable && (timetable.ResponseData[t] as TransportItem[]);
+  return (
+    timetable &&
+    timetable.ResponseData &&
+    (timetable.ResponseData[t] as TransportItem[])
+  );
 };
 
 export class Transports extends React.Component<CommonProps, State> {

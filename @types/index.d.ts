@@ -56,17 +56,17 @@ declare interface TransportItem {
 }
 
 declare interface TimetableResponse {
-  Buses?: TransportItem[];
+  Buses: TransportItem[];
   DataAge: number;
   LatestUpdate: string;
-  Metros?: TransportItem[];
-  Trains?: TransportItem[];
+  Metros: TransportItem[];
+  Trains: TransportItem[];
 }
 
 declare interface Timetable {
   ExecutionTime: number;
   Message: null;
-  ResponseData: TimetableResponse;
+  ResponseData?: TimetableResponse;
   StatusCode: number;
   StopPointDeviations: any[];
 }

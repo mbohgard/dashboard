@@ -5,15 +5,13 @@ import io from "socket.io-client";
 import dayjs from "dayjs";
 import "dayjs/locale/sv";
 
-import { baseStyles } from "./styles";
+import { BaseStyles } from "./styles";
 
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
 
 dayjs.locale("sv");
-
-baseStyles();
 
 const Wrapper = styled.div`
   padding: 40px;
@@ -87,6 +85,7 @@ type ServiceError = {
 
 type State = {
   error?: ServiceError;
+  showError?: boolean;
 };
 
 class App extends React.Component {
@@ -115,11 +114,12 @@ class App extends React.Component {
   }
 
   render() {
-    const err = this.state.error;
+    const { error: err, showError } = this.state;
     const common = { reportError: this.reportError, socket: this.socket };
 
     return (
       <Wrapper>
+        <BaseStyles />
         <Container>
           <Half top>
             <Weather type="big" {...common} />
@@ -136,10 +136,12 @@ class App extends React.Component {
         </Container>
         {err && (
           <ErrorContainer>
-            <ErrorBox>
-              {err.code && `(${err.code}) `}
-              {err.name}: {err.message} [by {err.service}]{console.dir(err)}
-            </ErrorBox>
+            {showError && (
+              <ErrorBox>
+                {err.code && `(${err.code}) `}
+                {err.name}: {err.message} [by {err.service}]{console.dir(err)}
+              </ErrorBox>
+            )}
           </ErrorContainer>
         )}
       </Wrapper>

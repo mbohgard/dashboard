@@ -5,12 +5,12 @@ type Props = {
   viewBox?: string;
 };
 
-const Svg = styled.svg.attrs({
+const Svg = styled.svg.attrs(({ viewBox }: Props) => ({
   version: "1.1",
   x: "0px",
   y: "0px",
-  viewBox: ({ viewBox }: Props) => viewBox || "0 0 56.69 56.69"
-})`
+  viewBox: viewBox || "0 0 56.69 56.69"
+}))`
   width: 40px;
   height: 40px;
 
