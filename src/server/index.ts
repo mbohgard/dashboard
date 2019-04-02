@@ -9,7 +9,7 @@ import * as time from "./time";
 import * as transports from "./transports";
 
 const prod = process.env.NODE_ENV === "production";
-const port = 3000;
+const port = 8081;
 
 const app = express();
 
