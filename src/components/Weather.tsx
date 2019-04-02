@@ -1,10 +1,14 @@
 import * as React from "react";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
+import CustomParseFormat from "dayjs/plugin/customParseFormat";
 
 import { CommonProps } from "../main";
 import { WeatherIcon } from "./WeatherIcon";
 import { celsius } from "./Icon";
+import { SunriseIcon, SunsetIcon } from "./SunIcons";
+
+dayjs.extend(CustomParseFormat);
 
 type Type = {
   type?: "normal" | "big";
@@ -18,6 +22,7 @@ const DegreesContainer = styled.div`
   font-size: ${({ type }: Type) => (type === "big" ? "100px" : "32px")};
   letter-spacing: ${({ type }: Type) => (type === "big" ? "-10px" : "-3px")};
   white-space: nowrap;
+  align-self: center;
 
   > span {
     display: inline-block;
@@ -53,7 +58,6 @@ const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => (
 
 const BigContainer = styled.div`
   display: flex;
-  align-items: center;
 
   > svg {
     width: 180px;
@@ -62,17 +66,49 @@ const BigContainer = styled.div`
   }
 `;
 
-export const BigWeather: React.SFC<WeatherProps> = ({ data }) => {
-  return (
-    <BigContainer>
-      <WeatherIcon
-        code={param(data.parameters, "Wsymb2")}
-        time={data.validTime}
-      />
-      <Degrees data={data} type="big" />
-    </BigContainer>
-  );
-};
+const SunData = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 30px;
+  justify-content: space-evenly;
+
+  > div:first-child {
+    margin-bottom: 10px;
+  }
+`;
+
+const SunTime = styled.p`
+  font-weight: 300;
+  color: #aaa;
+  text-align: center;
+`;
+
+export const BigWeather: React.SFC<WeatherProps & { sun: Sun }> = ({
+  data,
+  sun
+}) => (
+  <BigContainer>
+    <WeatherIcon
+      code={param(data.parameters, "Wsymb2")}
+      time={data.validTime}
+    />
+    <Degrees data={data} type="big" />
+    <SunData>
+      <div>
+        <SunriseIcon />
+        <SunTime>
+          {dayjs(sun.results.sunrise, "h:mm:ss A").format("HH:mm")}
+        </SunTime>
+      </div>
+      <div>
+        <SunsetIcon />
+        <SunTime>
+          {dayjs(sun.results.sunset, "h:mm:ss A").format("HH:mm")}
+        </SunTime>
+      </div>
+    </SunData>
+  </BigContainer>
+);
 
 const SmallContainer = styled.div`
   display: flex;
@@ -139,12 +175,10 @@ export class Weather extends React.Component<Props, State> {
   state: State = {};
 
   componentDidMount() {
-    this.props.socket.on(
-      "weather",
-      (res: WeatherServiceData) =>
-        res.data
-          ? this.setState({ data: res.data })
-          : this.props.reportError(res.service, res.error)
+    this.props.socket.on("weather", (res: WeatherServiceData) =>
+      res.data
+        ? this.setState({ data: res.data })
+        : this.props.reportError(res.service, res.error)
     );
   }
 
@@ -162,7 +196,7 @@ export class Weather extends React.Component<Props, State> {
     return type === "small" ? (
       <SmallWeather data={forecast} />
     ) : (
-      <BigWeather data={currentWeather} />
+      <BigWeather data={currentWeather} sun={data.sun} />
     );
   }
 }
