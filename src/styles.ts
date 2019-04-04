@@ -1,6 +1,15 @@
 import { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 
+export const colors = {
+  white: "#fff",
+  gray: "#aaa",
+  orange: "#ff9647",
+  yellow: "#ffda47",
+  cold: "#00c3f9",
+  hot: "#ff3700"
+};
+
 export const BaseStyles = createGlobalStyle`
   ${reset}
   

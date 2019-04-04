@@ -22,7 +22,7 @@ const sun: ServiceResponse = new Promise(resolve =>
   request(
     `https://api.sunrise-sunset.org/json?lat=${config.weather.lat}&lng=${
       config.weather.lon
-    }`,
+    }&formatted=0`,
     (error, _, body) =>
       resolve({
         service: "sun",

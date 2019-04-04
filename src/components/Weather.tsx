@@ -1,28 +1,51 @@
 import * as React from "react";
 import styled, { css } from "styled-components";
-import dayjs from "dayjs";
-import CustomParseFormat from "dayjs/plugin/customParseFormat";
+import dayjs, { Dayjs } from "dayjs";
+import tinycolor from "tinycolor2";
 
 import { CommonProps } from "../main";
+import { colors } from "../styles";
+import { percentageOfRange } from "../utils/helpers";
 import { WeatherIcon } from "./WeatherIcon";
 import { celsius } from "./Icon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
-
-dayjs.extend(CustomParseFormat);
 
 type Type = {
   type?: "normal" | "big";
 };
 
+type SunData = {
+  sunrise: Dayjs;
+  sunriseMinutes: number;
+  sunset: Dayjs;
+  sunsetMinutes: number;
+};
+
+const percentage = percentageOfRange(-15, 30);
+
 const param = (params: Parameter[], name: string) =>
   params.find(p => p.name === name)!.values[0];
 
-const DegreesContainer = styled.div`
+const minutes = (t: Dayjs) => t.minute() + t.hour() * 60;
+
+const isNight = (time: string, { sunriseMinutes, sunsetMinutes }: SunData) => {
+  const current = minutes(dayjs(time));
+
+  return current < sunriseMinutes || current > sunsetMinutes;
+};
+
+type DegreesProps = {
+  type: Type;
+  color: string;
+};
+
+const DegreesContainer = styled.div<DegreesProps>`
   font-weight: 300;
-  font-size: ${({ type }: Type) => (type === "big" ? "100px" : "32px")};
-  letter-spacing: ${({ type }: Type) => (type === "big" ? "-10px" : "-3px")};
+  font-size: ${({ type }) => (type === "big" ? "100px" : "32px")};
+  letter-spacing: ${({ type }) => (type === "big" ? "-10px" : "-3px")};
   white-space: nowrap;
   align-self: center;
+  color: ${({ color }) => color};
 
   > span {
     display: inline-block;
@@ -30,7 +53,7 @@ const DegreesContainer = styled.div`
   }
 
   > svg {
-    ${({ type }: Type) =>
+    ${({ type }) =>
       type === "big"
         ? css`
             margin-left: 20px;
@@ -42,6 +65,10 @@ const DegreesContainer = styled.div`
             width: 20px;
             height: 20px;
           `};
+
+    path {
+      fill: ${({ color }) => color};
+    }
   }
 `;
 
@@ -49,12 +76,23 @@ type WeatherProps = {
   data: TimeSerie;
 };
 
-const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => (
-  <DegreesContainer type={type}>
-    <span>{Math.round(param(data.parameters, "t"))}</span>
-    {celsius}
-  </DegreesContainer>
-);
+const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => {
+  const deg = Math.round(param(data.parameters, "t"));
+  const color = tinycolor
+    .mix(tinycolor(colors.cold), tinycolor(colors.hot), percentage(deg))
+    .toHsv();
+  const boosted = {
+    ...color,
+    v: 100
+  };
+
+  return (
+    <DegreesContainer type={type} color={tinycolor(boosted).toString("hex6")}>
+      <span>{deg}</span>
+      {celsius}
+    </DegreesContainer>
+  );
+};
 
 const BigContainer = styled.div`
   display: flex;
@@ -69,7 +107,7 @@ const BigContainer = styled.div`
 const SunData = styled.div`
   display: flex;
   flex-direction: column;
-  margin-left: 30px;
+  margin-left: 40px;
   justify-content: space-evenly;
 
   > div:first-child {
@@ -81,30 +119,26 @@ const SunTime = styled.p`
   font-weight: 300;
   color: #aaa;
   text-align: center;
+  font-size: 24px;
 `;
 
-export const BigWeather: React.SFC<WeatherProps & { sun: Sun }> = ({
-  data,
-  sun
-}) => (
+type SingleWeatherProps = WeatherProps & { sun: SunData };
+
+export const BigWeather: React.SFC<SingleWeatherProps> = ({ data, sun }) => (
   <BigContainer>
     <WeatherIcon
       code={param(data.parameters, "Wsymb2")}
-      time={data.validTime}
+      night={isNight(data.validTime, sun)}
     />
     <Degrees data={data} type="big" />
     <SunData>
       <div>
         <SunriseIcon />
-        <SunTime>
-          {dayjs(sun.results.sunrise, "h:mm:ss A").format("HH:mm")}
-        </SunTime>
+        <SunTime>{sun.sunrise.format("HH:mm")}</SunTime>
       </div>
       <div>
         <SunsetIcon />
-        <SunTime>
-          {dayjs(sun.results.sunset, "h:mm:ss A").format("HH:mm")}
-        </SunTime>
+        <SunTime>{sun.sunset.format("HH:mm")}</SunTime>
       </div>
     </SunData>
   </BigContainer>
@@ -135,20 +169,23 @@ const SmallWrapper = styled.div`
   margin-top: 20px;
 `;
 
-const Small: React.SFC<WeatherProps> = ({ data }) => {
+const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
   return (
     <SmallContainer>
       <span>{dayjs(data.validTime).format("HH:mm")}</span>
       <WeatherIcon
         code={param(data.parameters, "Wsymb2")}
-        time={data.validTime}
+        night={isNight(data.validTime, sun)}
       />
       <Degrees data={data} />
     </SmallContainer>
   );
 };
 
-export const SmallWeather: React.SFC<{ data: TimeSerie[] }> = ({ data }) => (
+export const SmallWeather: React.SFC<{ data: TimeSerie[]; sun: SunData }> = ({
+  data,
+  sun
+}) => (
   <SmallWrapper>
     {data
       .filter(x => {
@@ -158,7 +195,7 @@ export const SmallWeather: React.SFC<{ data: TimeSerie[] }> = ({ data }) => (
       })
       .filter((_, ix) => ix < 10)
       .map(t => (
-        <Small key={t.validTime} data={t} />
+        <Small key={t.validTime} data={t} sun={sun} />
       ))}
   </SmallWrapper>
 );
@@ -193,10 +230,20 @@ export class Weather extends React.Component<Props, State> {
       return <div>Väntar på väderdata...</div>;
     }
 
+    const sunrise = dayjs(data.sun.results.sunrise);
+    const sunset = dayjs(data.sun.results.sunset);
+
+    const sun = {
+      sunrise,
+      sunriseMinutes: minutes(sunrise),
+      sunset,
+      sunsetMinutes: minutes(sunset)
+    };
+
     return type === "small" ? (
-      <SmallWeather data={forecast} />
+      <SmallWeather data={forecast} sun={sun} />
     ) : (
-      <BigWeather data={currentWeather} sun={data.sun} />
+      <BigWeather data={currentWeather} sun={sun} />
     );
   }
 }
