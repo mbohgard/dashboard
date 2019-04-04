@@ -35,9 +35,8 @@ const isNight = (time: string, { sunriseMinutes, sunsetMinutes }: SunData) => {
 };
 
 type DegreesProps = {
-  type: Type;
   color: string;
-};
+} & Type;
 
 const DegreesContainer = styled.div<DegreesProps>`
   font-weight: 300;
