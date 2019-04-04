@@ -33,13 +33,6 @@ const DateView = styled.h4`
   }
 `;
 
-const getUnix = (data: TimeZone) => {
-  const date = dayjs(data.formatted);
-
-  // return data.dst === "1" ? date.subtract(1, "hour").unix() : date.unix();
-  return date.unix();
-};
-
 export class Time extends React.Component<CommonProps, State> {
   state: State = { timestamp: Math.floor(Date.now() / 1000) };
 
@@ -58,7 +51,7 @@ export class Time extends React.Component<CommonProps, State> {
     this.tick();
     this.props.socket.on("time", (res: TimeServiceData) =>
       res.data
-        ? this.setState({ timestamp: getUnix(res.data) })
+        ? this.setState({ timestamp: res.data.timestamp - res.data.gmtOffset })
         : this.props.reportError(res.service, res.error)
     );
   }

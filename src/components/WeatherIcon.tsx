@@ -1,5 +1,4 @@
 import * as React from "react";
-import dayjs from "dayjs";
 
 import {
   clear,
@@ -18,13 +17,10 @@ import {
   variableNight
 } from "./Icon";
 
-export const WeatherIcon: React.SFC<{ code: number; time: string }> = ({
+export const WeatherIcon: React.SFC<{ code: number; night: boolean }> = ({
   code,
-  time
+  night
 }) => {
-  const hour = dayjs(time).hour();
-  const night = hour < 7 || hour > 20;
-
   const iconMap: { [code: number]: JSX.Element } = {
     1: night ? clearNight : clear,
     2: night ? clearNight : clear,

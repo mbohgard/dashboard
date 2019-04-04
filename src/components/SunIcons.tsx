@@ -1,13 +1,21 @@
 import * as React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+
+import { colors } from "../styles";
 
 import { arrow, sunrise } from "./Icon";
+
+const fill = css<Props>`
+  path {
+    fill: ${({ color }) => color} !important;
+  }
+`;
 
 const Wrapper = styled.div`
   height: 50px;
 `;
 
-const SunWrapper = styled.div`
+const SunWrapper = styled.div<Props>`
   overflow: hidden;
   height: 30px;
   text-align: center;
@@ -15,6 +23,7 @@ const SunWrapper = styled.div`
   > svg {
     height: 60px;
     width: 60px;
+    ${fill}
   }
 `;
 
@@ -27,17 +36,18 @@ const ArrowWrapper = styled.div<Props>`
     transform: rotate(${({ down }) => (down ? "90deg" : "-90deg")});
     height: 15px;
     width: 15px;
+    ${fill}
   }
 `;
 
-type Props = { down?: boolean };
+type Props = { down?: boolean; color: string };
 
-const Icon: React.SFC<Props> = ({ down }) => (
+const Icon: React.SFC<Props> = props => (
   <Wrapper>
-    <SunWrapper>{sunrise}</SunWrapper>
-    <ArrowWrapper down={down}>{arrow}</ArrowWrapper>
+    <SunWrapper {...props}>{sunrise}</SunWrapper>
+    <ArrowWrapper {...props}>{arrow}</ArrowWrapper>
   </Wrapper>
 );
 
-export const SunriseIcon = () => <Icon />;
-export const SunsetIcon = () => <Icon down />;
+export const SunriseIcon = () => <Icon color={colors.yellow} />;
+export const SunsetIcon = () => <Icon color={colors.orange} down />;
