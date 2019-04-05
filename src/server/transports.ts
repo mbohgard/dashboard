@@ -35,9 +35,9 @@ const getTransportUrl = (types: string[], siteId: string) => {
   )}${q("tram")}`;
 };
 
-type Caller = (delay: number) => ServiceResponse;
+type Caller = (delay: number) => ServiceResponse<Timetable>;
 
-const callers: Caller[] = config.transports.map<Caller>(t => delay =>
+const callers: Caller[] = config.transports.map(t => delay =>
   new Promise(resolve =>
     setTimeout(
       () =>
@@ -54,7 +54,7 @@ const callers: Caller[] = config.transports.map<Caller>(t => delay =>
 );
 
 const requests = async () => {
-  let results: TransportsServiceData | undefined;
+  let results: ServiceData | undefined;
 
   for (const call of callers) {
     const result = await call(results ? sec2Ms(2) : 0);
@@ -70,9 +70,9 @@ const requests = async () => {
       : result;
   }
 
-  return results as ServiceData;
+  return results as TransportsServiceData;
 };
 
-export const get = (): ServiceResponse => requests();
+export const get = () => requests();
 
 export const delay = () => getDelay();

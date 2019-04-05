@@ -2,10 +2,9 @@ import * as request from "request";
 
 import * as secrets from "../../secrets";
 import * as config from "../../config";
-import { ServiceResponse } from "./index";
 import { min2Ms } from "../utils/time";
 
-export const get = (): ServiceResponse =>
+export const get = (): Promise<TimeServiceData> =>
   new Promise(resolve =>
     request(
       `http://api.timezonedb.com/v2.1/get-time-zone?key=${
