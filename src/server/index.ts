@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socket(server);
 
-export type ServiceResponse = Promise<ServiceData>;
+export type ServiceResponse<T = any> = Promise<ServiceData<T>>;
 
 let users: number = 0;
 const timers: { [service: string]: NodeJS.Timer } = {};
