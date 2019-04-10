@@ -35,9 +35,9 @@ const getTransportUrl = (types: string[], siteId: string) => {
   )}${q("tram")}`;
 };
 
-type Caller = (delay: number) => ServiceResponse<Timetable>;
-
-const callers: Caller[] = config.transports.map(t => delay =>
+const callers = config.transports.map(t => (delay: number): ServiceResponse<
+  Timetable
+> =>
   new Promise(resolve =>
     setTimeout(
       () =>

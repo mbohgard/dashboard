@@ -5,6 +5,8 @@ export const colors = {
   white: "#fff",
   gray: "#aaa",
   orange: "#ff9647",
+  dimmed: "#aaa",
+  superDimmed: "#666",
   yellow: "#ffda47",
   cold: "#00c3f9",
   hot: "#ff3700"

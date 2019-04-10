@@ -3,6 +3,7 @@ import styled from "styled-components";
 import dayjs from "dayjs";
 
 import { CommonProps } from "../main";
+import { colors } from "../styles";
 
 type State = {
   timestamp: number;
@@ -16,7 +17,7 @@ const TimeView = styled.h2`
 
   span {
     font-size: 62px;
-    color: #aaa;
+    color: ${colors.dimmed};
     letter-spacing: 0;
     margin-left: 10px;
   }
@@ -29,17 +30,17 @@ const DateView = styled.h4`
   margin-top: 12px;
 
   span {
-    color: #aaa;
+    color: ${colors.dimmed};
   }
 `;
 
 export class Time extends React.Component<CommonProps, State> {
   state: State = { timestamp: Math.floor(Date.now() / 1000) };
 
-  interval: NodeJS.Timer;
+  interval: number = 0;
 
   tick = () => {
-    this.interval = setInterval(
+    this.interval = window.setInterval(
       () => this.setState(state => ({ timestamp: state.timestamp + 1 })),
       1000
     );

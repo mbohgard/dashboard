@@ -15,5 +15,8 @@ module.exports = {
   },
   time: {
     timezone: "CEST"
+  },
+  hue: {
+    ip: "192.168.1.231"
   }
 };

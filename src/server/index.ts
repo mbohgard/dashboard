@@ -2,11 +2,12 @@ import * as Bundler from "parcel-bundler";
 import * as express from "express";
 import * as path from "path";
 import * as http from "http";
-import * as socket from "socket.io";
+import * as ws from "socket.io";
 
 import * as weather from "./weather";
 import * as time from "./time";
 import * as transports from "./transports";
+import * as hue from "./hue";
 
 const prod = process.env.NODE_ENV === "production";
 const port = 8081;
@@ -14,7 +15,7 @@ const port = 8081;
 const app = express();
 
 const server = http.createServer(app);
-const io = socket(server);
+const io = ws(server);
 
 export type ServiceResponse<T = any> = Promise<ServiceData<T>>;
 
@@ -44,7 +45,7 @@ const fetcher = (
 
 const services = (action: "start" | "stop") => {
   if (action === "start") {
-    fetcher(time, weather, transports);
+    fetcher(time, weather, transports, hue);
   } else {
     Object.keys(timers).forEach(t => {
       clearTimeout(timers[t]);
@@ -52,7 +53,7 @@ const services = (action: "start" | "stop") => {
   }
 };
 
-io.on("connection", s => {
+io.on("connection", socket => {
   users++;
 
   console.log("user connected", users);
@@ -61,11 +62,13 @@ io.on("connection", s => {
 
   Object.keys(cache).forEach(s => (cache[s] ? io.emit(s, cache[s]) : null));
 
-  s.on("disconnect", () => {
+  socket.on("disconnect", () => {
     users--;
 
     if (!users) services("stop");
   });
+
+  socket.on("hue", hue.listener);
 });
 
 if (prod) {

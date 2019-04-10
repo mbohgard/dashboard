@@ -10,11 +10,12 @@ import { BaseStyles } from "./styles";
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
+import { Hue } from "./components/Hue";
 
 dayjs.locale("sv");
 
 const Wrapper = styled.div`
-  padding: 40px;
+  padding: 30px;
   max-height: 100%;
   height: 100%;
 `;
@@ -132,6 +133,7 @@ class App extends React.Component {
           </Whole>
           <Whole last>
             <Transports {...common} />
+            <Hue {...common} />
           </Whole>
         </Container>
         {err && (

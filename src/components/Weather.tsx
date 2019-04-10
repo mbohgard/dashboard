@@ -116,7 +116,7 @@ const SunData = styled.div`
 
 const SunTime = styled.p`
   font-weight: 300;
-  color: #aaa;
+  color: ${colors.dimmed};
   text-align: center;
   font-size: 24px;
 `;
