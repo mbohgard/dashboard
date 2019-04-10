@@ -79,3 +79,9 @@ secrets.js
 
 # vs code workspace file
 .code-workspace
+
+# mac os
+.DS_Store
+
+# temp
+temp
