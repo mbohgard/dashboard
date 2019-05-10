@@ -14,28 +14,30 @@ export const get = (): Promise<HueServiceData> =>
         url,
         rejectUnauthorized: false
       },
-      (error, _, body) => {
+      (error, _, body?) => {
         const res: HueGroupsResponse | undefined = body
           ? JSON.parse(body)
           : undefined;
-        const data: HueGroups | undefined =
+        const data =
           res &&
           Object.keys(res).reduce((acc, k) => {
             const {
-              action: { on, bri, hue, sat },
+              action: { on, bri, hue, sat, ct },
               ...item
             } = res[k];
+            const group: HueGroup = {
+              name: item.name,
+              class: item.class,
+              on,
+              bri,
+              ct,
+              hue,
+              sat
+            };
 
             return {
               ...acc,
-              [k]: {
-                name: item.name,
-                class: item.class,
-                on,
-                bri,
-                hue,
-                sat
-              }
+              [k]: group
             };
           }, {});
 
