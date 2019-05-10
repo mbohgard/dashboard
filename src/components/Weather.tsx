@@ -121,25 +121,27 @@ const SunTime = styled.p`
   font-size: 24px;
 `;
 
-type SingleWeatherProps = WeatherProps & { sun: SunData };
+type SingleWeatherProps = WeatherProps & { sun?: SunData };
 
 export const BigWeather: React.SFC<SingleWeatherProps> = ({ data, sun }) => (
   <BigContainer>
     <WeatherIcon
       code={param(data.parameters, "Wsymb2")}
-      night={isNight(data.validTime, sun)}
+      night={sun ? isNight(data.validTime, sun) : false}
     />
     <Degrees data={data} type="big" />
-    <SunData>
-      <div>
-        <SunriseIcon />
-        <SunTime>{sun.sunrise.format("HH:mm")}</SunTime>
-      </div>
-      <div>
-        <SunsetIcon />
-        <SunTime>{sun.sunset.format("HH:mm")}</SunTime>
-      </div>
-    </SunData>
+    {sun && (
+      <SunData>
+        <div>
+          <SunriseIcon />
+          <SunTime>{sun.sunrise.format("HH:mm")}</SunTime>
+        </div>
+        <div>
+          <SunsetIcon />
+          <SunTime>{sun.sunset.format("HH:mm")}</SunTime>
+        </div>
+      </SunData>
+    )}
   </BigContainer>
 );
 
@@ -174,14 +176,14 @@ const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
       <span>{dayjs(data.validTime).format("HH:mm")}</span>
       <WeatherIcon
         code={param(data.parameters, "Wsymb2")}
-        night={isNight(data.validTime, sun)}
+        night={sun ? isNight(data.validTime, sun) : false}
       />
       <Degrees data={data} />
     </SmallContainer>
   );
 };
 
-export const SmallWeather: React.SFC<{ data: TimeSerie[]; sun: SunData }> = ({
+export const SmallWeather: React.SFC<{ data: TimeSerie[]; sun?: SunData }> = ({
   data,
   sun
 }) => (
@@ -229,15 +231,16 @@ export class Weather extends React.Component<Props, State> {
       return <div>Väntar på väderdata...</div>;
     }
 
-    const sunrise = dayjs(data.sun.results.sunrise);
-    const sunset = dayjs(data.sun.results.sunset);
+    const sunrise = data.sun && dayjs(data.sun.results.sunrise);
+    const sunset = data.sun && dayjs(data.sun.results.sunset);
 
-    const sun = {
-      sunrise,
-      sunriseMinutes: minutes(sunrise),
-      sunset,
-      sunsetMinutes: minutes(sunset)
-    };
+    const sun = sunrise &&
+      sunset && {
+        sunrise,
+        sunriseMinutes: minutes(sunrise),
+        sunset,
+        sunsetMinutes: minutes(sunset)
+      };
 
     return type === "small" ? (
       <SmallWeather data={forecast} sun={sun} />
