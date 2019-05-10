@@ -9,7 +9,7 @@ import { bus as busIcon, train as trainIcon } from "./Icon";
 
 const Container = styled.div`
   display: flex;
-  width: 100%;
+  min-height: 160px;
 `;
 
 const LineNumber = styled.span`
@@ -40,12 +40,7 @@ type TranportTimeProps = {
 } & TimeProps;
 
 const TransportTime: React.SFC<TranportTimeProps> = ({ data, size }) => {
-  if (!data)
-    return (
-      <TimeWrapper size={size} empty>
-        --:--
-      </TimeWrapper>
-    );
+  if (!data) return null;
 
   const time = data.DisplayTime.split("min");
 
@@ -82,13 +77,23 @@ const getTransports = (
 const TransportWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  margin-right: 40px;
+  margin: 0 20px;
+  margin-right: 0;
+  position: relative;
 
   > svg {
-    height: 60px;
-    width: 60px;
+    height: 100px;
+    width: 100px;
     margin-top: 10px;
     margin-right: 10px;
+    position: absolute;
+    top: 12px;
+    left: -34px;
+    z-index: -1;
+
+    path {
+      fill: ${colors.ultraDimmed};
+    }
   }
 `;
 
