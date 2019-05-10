@@ -5,12 +5,14 @@ import io from "socket.io-client";
 import dayjs from "dayjs";
 import "dayjs/locale/sv";
 
-import { BaseStyles } from "./styles";
+import { BaseStyles, colors } from "./styles";
 
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
+import { warning } from "./components/Icon";
+import { VOC } from "./components/VOC";
 
 dayjs.locale("sv");
 
@@ -33,29 +35,39 @@ type HalfProps = {
   top?: boolean;
 };
 
-const Half = styled.div`
+const Half = styled.div<HalfProps>`
   width: 50%;
   display: flex;
-  align-items: ${({ top }: HalfProps) => (top ? "flex-start" : "center")};
-  justify-content: ${({ right }: HalfProps) =>
-    right ? "flex-end" : "flex-start"};
+  align-items: ${({ top }) => (top ? "flex-start" : "center")};
+  justify-content: ${({ right }) => (right ? "flex-end" : "flex-start")};
 `;
 
 type WholeProps = {
   left?: boolean;
   right?: boolean;
   last?: boolean;
+  stretched?: boolean;
 };
 
-const Whole = styled(Half)`
+const Whole = styled(Half)<WholeProps>`
   width: 100%;
-  justify-content: ${({ left, right }: WholeProps) =>
-    left ? "flex-start" : right ? "flex-start" : "center"};
-  align-items: ${({ last }: WholeProps) => (last ? "flex-end" : "normal")};
+  justify-content: ${({ left, right, stretched }) =>
+    left
+      ? "flex-start"
+      : right
+      ? "flex-start"
+      : stretched
+      ? "space-between"
+      : "center"};
+  align-items: ${({ last }) => (last ? "flex-end" : "normal")};
 `;
 
-const ErrorContainer = styled.div`
+const ErrorsContainer = styled.div`
   position: fixed;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  flex-direction: column;
   top: 0;
   left: 0;
   width: 100%;
@@ -63,13 +75,34 @@ const ErrorContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
 `;
 
+const ErrorsContent = styled.div`
+  max-height: calc(100% - 40px);
+  overflow: auto;
+`;
+
 const ErrorBox = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #bf2f2f;
+  background: ${colors.red};
   padding: 20px;
+  margin: auto;
+  margin-bottom: 20px;
+  width: max-content;
+`;
+
+const ErrorIndicator = styled.a<{ newError?: boolean }>`
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 0 0 10px 15px;
+  opacity: ${({ newError }) => (newError ? 1 : 0)};
+
+  & > svg {
+    width: 50px;
+    height: 50px;
+
+    & path {
+      fill: ${colors.red};
+    }
+  }
 `;
 
 export type CommonProps = {
@@ -78,44 +111,55 @@ export type CommonProps = {
 };
 
 type ServiceError = {
+  id: number;
   code: number;
   message: string;
   name: string;
   service: string;
+  time: string;
 };
 
 type State = {
-  error?: ServiceError;
-  showError?: boolean;
+  errors: ServiceError[];
+  newError?: boolean;
+  showErrors?: boolean;
 };
 
+let errI = 0;
+
 class App extends React.Component {
-  state: State = {};
+  state: State = { errors: [] };
   socket = io();
 
   reportError = (service: string, err: any) => {
-    const isObj = err === "object";
-    const code = typeof isObj ? err.statusCode || err.status : 0;
-    const message = typeof isObj
-      ? err.message || err.msg || err.text
-      : String(err);
-    const name = (isObj && err.name) || "Error";
+    const isObj = typeof err === "object";
+    const code = isObj ? err.statusCode || err.status : 0;
+    const message = isObj ? err.message || err.msg || err.text : String(err);
+    const name = (isObj && err.name) || err.code || "Error";
     const error: ServiceError = {
+      id: ++errI,
       code,
       service,
       message,
-      name
+      name,
+      time: dayjs().format("DD/MM HH:mm")
     };
 
-    this.setState({ error });
+    this.setState((s: State) => ({
+      errors: [error, ...s.errors.slice(0, 9)],
+      newError: true
+    }));
   };
+
+  toggleError = (showErrors: boolean) =>
+    this.setState({ showErrors, newError: false });
 
   componentDidCatch(err: any) {
     this.reportError("catch in Main", err);
   }
 
   render() {
-    const { error: err, showError } = this.state;
+    const { errors, showErrors, newError } = this.state;
     const common = { reportError: this.reportError, socket: this.socket };
 
     return (
@@ -131,20 +175,29 @@ class App extends React.Component {
           <Whole>
             <Weather {...common} />
           </Whole>
-          <Whole last>
+          <Whole stretched last>
             <Transports {...common} />
+            <VOC {...common} />
             <Hue {...common} />
           </Whole>
         </Container>
-        {err && (
-          <ErrorContainer>
-            {showError && (
-              <ErrorBox>
-                {err.code && `(${err.code}) `}
-                {err.name}: {err.message} [by {err.service}]{console.dir(err)}
-              </ErrorBox>
-            )}
-          </ErrorContainer>
+        <ErrorIndicator
+          newError={newError}
+          onClick={() => this.toggleError(true)}
+        >
+          {warning}
+        </ErrorIndicator>
+        {showErrors && (
+          <ErrorsContainer onClick={() => this.toggleError(false)}>
+            <ErrorsContent>
+              {errors.map(err => (
+                <ErrorBox key={err.id} onClick={e => e.stopPropagation()}>
+                  {err.code ? `(${err.code}) ` : ""}
+                  {err.name}: {err.message} [by {err.service} at {err.time}]
+                </ErrorBox>
+              ))}
+            </ErrorsContent>
+          </ErrorsContainer>
         )}
       </Wrapper>
     );

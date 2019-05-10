@@ -8,6 +8,7 @@ import * as weather from "./weather";
 import * as time from "./time";
 import * as transports from "./transports";
 import * as hue from "./hue";
+import * as voc from "./voc";
 
 const prod = process.env.NODE_ENV === "production";
 const port = 8081;
@@ -45,7 +46,7 @@ const fetcher = (
 
 const services = (action: "start" | "stop") => {
   if (action === "start") {
-    fetcher(time, weather, transports, hue);
+    fetcher(time, weather, transports, hue, voc);
   } else {
     Object.keys(timers).forEach(t => {
       clearTimeout(timers[t]);

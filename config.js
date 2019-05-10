@@ -18,5 +18,8 @@ module.exports = {
   },
   hue: {
     ip: "192.168.1.231"
+  },
+  voc: {
+    region: ""
   }
 };
