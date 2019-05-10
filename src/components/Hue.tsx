@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
 import { colors } from "../styles";
+import { def, percentageOfRange } from "../utils/helpers";
 import { CommonProps } from "../main";
 
-import { bed, chair, child, lamp, sofa } from "./Icon";
+import { bed, chair, child, lamp, pot, sofa } from "./Icon";
 
 const Container = styled.div`
   display: grid;
@@ -42,13 +43,14 @@ const iconMap: { [key in GroupClass]?: JSX.Element } = {
   Office: chair,
   Bedroom: bed,
   "Kids bedroom": child,
+  Kitchen: pot,
   Hallway: lamp
 };
 
 export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
   const [groups, setGroups] = useState<HueGroups>({});
 
-  const toggle = (id: string, action: HueEmitPayload) => {
+  const toggle = useCallback((id: string, action: HueEmitPayload) => {
     socket.emit("hue", { id, ...action });
 
     setGroups(state => ({
@@ -58,7 +60,7 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
         ...action
       }
     }));
-  };
+  }, []);
 
   useEffect(() => {
     const listener = (res: HueServiceData) =>
@@ -74,15 +76,33 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
   return (
     <Container>
       {Object.keys(groups)
-        .filter(k => groups[k].name !== "Kök")
+        .filter(k => !groups[k].name.includes("Group for"))
         .map(k => {
-          const group = groups[k];
+          const { hue, sat, bri, ct, ...group } = groups[k];
           const icon = iconMap[group.class];
-          const color = tinycolor({
-            h: (group.hue / 65535) * 360, // hue in degrees,
-            s: (group.sat / 254) * 100, // saturation in percentage
-            l: (group.bri / 254) * 100 // lightness (brightness) in percentage
-          }).toHexString();
+
+          Array.isArray;
+          const color = def(hue, sat, bri)
+            ? tinycolor({
+                // hue in degrees
+                h: (hue! / 65535) * 360,
+                // saturation in percentage
+                s: (sat! / 254) * 100,
+                // lightness (brightness) in percentage
+                l: (bri! / 254) * 100
+              }).toHexString()
+            : def(ct, bri)
+            ? tinycolor({
+                ...tinycolor
+                  .mix(
+                    tinycolor("#ffa500"),
+                    tinycolor("fff"),
+                    percentageOfRange(153, 500)(ct!)
+                  )
+                  .toHsl(),
+                l: (bri! / 254) * 100
+              }).toHexString()
+            : "#ddd";
 
           return (
             <Group
