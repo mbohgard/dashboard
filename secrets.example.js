@@ -6,5 +6,11 @@ module.exports = {
   // key for timezone.db
   time: "",
   // philips hue username
-  hue: ""
+  hue: "",
+  // volvo on call
+  voc: {
+    username: "",
+    password: "",
+    vin: ""
+  }
 };

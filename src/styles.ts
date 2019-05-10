@@ -7,9 +7,11 @@ export const colors = {
   orange: "#ff9647",
   dimmed: "#aaa",
   superDimmed: "#666",
+  ultraDimmed: "#444",
   yellow: "#ffda47",
   cold: "#00c3f9",
-  hot: "#ff3700"
+  hot: "#ff3700",
+  red: "#bf2f2f"
 };
 
 export const BaseStyles = createGlobalStyle`

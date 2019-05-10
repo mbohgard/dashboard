@@ -21,7 +21,7 @@ declare interface Forecast {
   geometry: Geometry;
   referenceTime: string;
   timeSeries: TimeSerie[];
-  sun: Sun;
+  sun?: Sun;
 }
 
 declare interface Sun {
@@ -66,7 +66,7 @@ declare interface TransportItem {
   LineNumber: string;
   StopAreaName: string;
   StopAreaNumber: number;
-  StopPointDesignation: null;
+  StopPointDesignation: any;
   StopPointNumber: number;
   TimeTabledDateTime: string;
   TransportMode: string;
@@ -81,7 +81,7 @@ declare interface TimetableResponse {
 
 declare interface Timetable {
   ExecutionTime: number;
-  Message: null;
+  Message: any;
   ResponseData?: TimetableResponse;
   StatusCode: number;
   StopPointDeviations: any[];
@@ -150,8 +150,9 @@ declare interface HueGroupsResponse {
     action: {
       on: boolean;
       bri: number;
-      hue: number;
-      sat: number;
+      hue?: number;
+      sat?: number;
+      ct?: number;
       effect: string;
       xy: number[];
       ct: number;
@@ -161,15 +162,18 @@ declare interface HueGroupsResponse {
   };
 }
 
+declare interface HueGroup {
+  name: string;
+  class: GroupClass;
+  on: boolean;
+  bri?: number;
+  hue?: number;
+  sat?: number;
+  ct?: number;
+}
+
 declare interface HueGroups {
-  [id: string]: {
-    name: string;
-    class: GroupClass;
-    on: boolean;
-    bri: number;
-    hue: number;
-    sat: number;
-  };
+  [id: string]: HueGroup;
 }
 
 declare interface HueEmitPayload {
@@ -187,7 +191,91 @@ declare interface HueActionReponseItem {
 
 declare type HueActionReponse = HueActionReponseItem[];
 
+declare interface VOCResponse {
+  ERS: {
+    status: string;
+    timestamp: string;
+    engineStartWarning: string;
+    engineStartWarningTimestamp: string;
+  };
+  averageFuelConsumption: number;
+  averageFuelConsumptionTimestamp: string;
+  averageSpeed: number;
+  averageSpeedTimestamp: string;
+  brakeFluid: string;
+  brakeFluidTimestamp: string;
+  bulbFailures: any[];
+  bulbFailuresTimestamp: string;
+  carLocked: boolean;
+  carLockedTimestamp: string;
+  distanceToEmpty: number;
+  distanceToEmptyTimestamp: string;
+  doors: {
+    tailgateOpen: boolean;
+    rearRightDoorOpen: boolean;
+    rearLeftDoorOpen: boolean;
+    frontRightDoorOpen: boolean;
+    frontLeftDoorOpen: boolean;
+    hoodOpen: boolean;
+    timestamp: string;
+  };
+  engineRunning: boolean;
+  engineRunningTimestamp: string;
+  fuelAmount: number;
+  fuelAmountLevel: number;
+  fuelAmountLevelTimestamp: string;
+  fuelAmountTimestamp: string;
+  heater: {
+    seatSelection: {
+      frontDriverSide: boolean;
+      frontPassengerSide: boolean;
+      rearDriverSide: boolean;
+      rearPassengerSide: boolean;
+      rearMid: boolean;
+    };
+    status: string;
+    timestamp: string;
+  };
+  odometer: number;
+  odometerTimestamp: string;
+  privacyPolicyEnabled: boolean;
+  privacyPolicyEnabledTimestamp: string;
+  remoteClimatizationStatus: any;
+  remoteClimatizationStatusTimestamp: any;
+  serviceWarningStatus: string;
+  serviceWarningStatusTimestamp: string;
+  theftAlarm: any;
+  timeFullyAccessibleUntil: string;
+  timePartiallyAccessibleUntil: string;
+  tripMeter1: number;
+  tripMeter1Timestamp: string;
+  tripMeter2: number;
+  tripMeter2Timestamp: string;
+  tyrePressure: {
+    frontLeftTyrePressure: string;
+    frontRightTyrePressure: string;
+    rearLeftTyrePressure: string;
+    rearRightTyrePressure: string;
+    timestamp: string;
+  };
+  washerFluidLevel: string;
+  washerFluidLevelTimestamp: string;
+  windows: {
+    frontLeftWindowOpen: boolean;
+    frontRightWindowOpen: boolean;
+    timestamp: string;
+    rearLeftWindowOpen: boolean;
+    rearRightWindowOpen: boolean;
+  };
+}
+
+declare interface VOCData {
+  locked: boolean;
+  running: boolean;
+}
+
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type WeatherServiceData = ServiceData<Forecast>;
 declare type TransportsServiceData = ServiceData<Timetable[]>;
 declare type HueServiceData = ServiceData<HueGroups>;
+declare type VOCServiceData = ServiceData<VOCData>;
