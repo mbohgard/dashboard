@@ -2,7 +2,7 @@ import * as request from "request";
 
 import * as secrets from "../../secrets";
 import * as config from "../../config";
-import { sec2Ms } from "../utils/time";
+import { sec2Ms, min2Ms } from "../utils/time";
 
 const {
   voc: { region }
@@ -30,23 +30,46 @@ export const get = (): Promise<VOCServiceData> =>
         },
         url: `${url}/status`
       },
-      (error, _, body?) => {
-        const res: VOCResponse | undefined = body && JSON.parse(body);
-        const data = res && {
-          locked: res.carLocked,
-          running: res.engineRunning || res.ERS.status === "onByDirectCtrl"
-        };
+      (err, _, body?) => {
+        try {
+          const res: VOCResponse | undefined = body && JSON.parse(body);
+          const data =
+            res && "ERS" in res
+              ? {
+                  locked: res.carLocked,
+                  running:
+                    res.engineRunning || res.ERS.status === "onByDirectCtrl"
+                }
+              : undefined;
+          const error = res && "errorLabel" in res ? res : err;
 
-        resolve({
-          service: "voc",
-          error,
-          data
-        });
+          resolve({
+            service: "voc",
+            error,
+            data
+          });
+        } catch (error) {
+          resolve({
+            service: "voc",
+            error
+          });
+        }
       }
     )
   );
 
-export const delay = () => sec2Ms(15);
+export const delay = () => {
+  const d = new Date();
+  const day = d.getDay();
+  const weekend = day === 0 || day === 6;
+  const hour = d.getHours();
+
+  if (hour < 7) return min2Ms(5);
+
+  if (hour > 15 || weekend) return sec2Ms(30);
+
+  return min2Ms(1);
+};
 
 // export const listener = ({ id, ...payload }: HueEmitPayload) => {
 //   request.put(

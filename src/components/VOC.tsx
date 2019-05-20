@@ -1,44 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-// import tinycolor from "tinycolor2";
 
-import { colors } from "../styles";
 import { CommonProps } from "../main";
 
-import { volvo, locked, unlocked, power } from "./Icon";
+import { car, locked, unlocked, power } from "./Icon";
+import { ActionButton, DimmedIconBox as Box, ButtonGrid } from "./Atoms";
 
-const Container = styled.div`
-  display: grid;
-  grid-gap: 36px;
-  grid-template-rows: 1fr 1fr;
-  position: relative;
-  margin-bottom: 25px;
-  width: 160px;
-
-  > svg {
-    position: absolute;
-    width: 160px;
-    height: 160px;
-    top: -24px;
-    z-index: -1;
-
-    path {
-      fill: ${colors.ultraDimmed};
-    }
-  }
-`;
-
-const Item = styled.div<{ active?: boolean }>`
-  text-align: center;
-
-  svg {
-    width: 36px;
-    height: 36px;
-
-    path {
-      fill: ${({ active }) => (active ? colors.white : colors.superDimmed)};
-    }
-  }
+const Buttons = styled(ButtonGrid)`
+  grid-template-columns: auto;
 `;
 
 export const VOC: React.SFC<CommonProps> = ({ reportError, socket }) => {
@@ -55,17 +24,19 @@ export const VOC: React.SFC<CommonProps> = ({ reportError, socket }) => {
     };
   }, []);
 
-  console.log(data);
-
   return (
-    <Container>
-      {volvo}
+    <Box>
+      {car}
       {data && (
-        <>
-          <Item active={!data.locked}>{data.locked ? locked : unlocked}</Item>
-          <Item active={data.running}>{power}</Item>
-        </>
+        <Buttons>
+          <ActionButton
+            active={data.locked === undefined ? false : !data.locked}
+          >
+            {data.locked ? locked : unlocked}
+          </ActionButton>
+          <ActionButton active={!!data.running}>{power}</ActionButton>
+        </Buttons>
       )}
-    </Container>
+    </Box>
   );
 };
