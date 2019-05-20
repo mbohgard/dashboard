@@ -191,7 +191,7 @@ declare interface HueActionReponseItem {
 
 declare type HueActionReponse = HueActionReponseItem[];
 
-declare interface VOCResponse {
+declare interface VOCResults {
   ERS: {
     status: string;
     timestamp: string;
@@ -268,6 +268,13 @@ declare interface VOCResponse {
     rearRightWindowOpen: boolean;
   };
 }
+
+declare type VOCResponse =
+  | VOCResults
+  | {
+      errorLabel: string;
+      errorDescription: string;
+    };
 
 declare interface VOCData {
   locked: boolean;

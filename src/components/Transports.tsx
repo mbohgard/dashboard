@@ -6,6 +6,7 @@ import { Omit } from "utility-types";
 import { CommonProps } from "../main";
 import { colors } from "../styles";
 import { bus as busIcon, train as trainIcon } from "./Icon";
+import { DimmedIconBox as Box } from "./Atoms";
 
 const Container = styled.div`
   display: flex;
@@ -16,16 +17,16 @@ const LineNumber = styled.span`
   color: ${colors.superDimmed};
 `;
 
-type TimeProps = { empty?: boolean; size: number };
+type TimeProps = { empty?: boolean };
 
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
-  font-size: ${({ size }) => `${48 - size * 5}px`};
+  font-size: 44px;
   margin-top: 8px;
   line-height: 1.2;
 
   > span {
-    font-size: ${({ size }) => `${36 - size * 4}px`};
+    font-size: 32px;
   }
 
   ${({ empty }) =>
@@ -39,13 +40,13 @@ type TranportTimeProps = {
   data?: TransportItem;
 } & TimeProps;
 
-const TransportTime: React.SFC<TranportTimeProps> = ({ data, size }) => {
+const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
   if (!data) return null;
 
   const time = data.DisplayTime.split("min");
 
   return (
-    <TimeWrapper size={size}>
+    <TimeWrapper>
       {time[0]}
       {time.length > 1 && <span>min</span>}{" "}
       <LineNumber>({data.LineNumber})</LineNumber>
@@ -74,29 +75,6 @@ const getTransports = (
   );
 };
 
-const TransportWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin: 0 20px;
-  margin-right: 0;
-  position: relative;
-
-  > svg {
-    height: 100px;
-    width: 100px;
-    margin-top: 10px;
-    margin-right: 10px;
-    position: absolute;
-    top: 12px;
-    left: -34px;
-    z-index: -1;
-
-    path {
-      fill: ${colors.ultraDimmed};
-    }
-  }
-`;
-
 type TransportItems = (TransportItem | undefined)[];
 
 type TransportProps = {
@@ -110,18 +88,18 @@ const Transport: React.SFC<TransportProps> = ({
   items,
   placeholderText
 }) => (
-  <TransportWrapper>
+  <Box>
     {icon}
     <div>
       {items ? (
         items.map((b, i) => (
-          <TransportTime key={b ? b.JourneyNumber : i} data={b} size={i + 1} />
+          <TransportTime key={b ? b.JourneyNumber : i} data={b} />
         ))
       ) : (
         <Placeholder>{placeholderText}</Placeholder>
       )}
     </div>
-  </TransportWrapper>
+  </Box>
 );
 
 const fill = (x: TransportItems): TransportItems =>

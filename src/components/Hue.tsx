@@ -1,42 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
-import { colors } from "../styles";
 import { def, percentageOfRange } from "../utils/helpers";
 import { CommonProps } from "../main";
 
 import { bed, chair, child, lamp, pot, sofa } from "./Icon";
-
-const Container = styled.div`
-  display: grid;
-  grid-gap: 12px;
-  grid-template-columns: 1fr 1fr 1fr;
-`;
-
-const Group = styled.a<{ active: boolean; color: string; size?: string }>`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-  border: solid 3px
-    ${({ active, color }) => (active ? color : colors.superDimmed)};
-  width: 85px;
-  height: 75px;
-  cursor: pointer;
-
-  svg {
-    ${({ size }) =>
-      css`
-        height: ${size || "45px"};
-        width: ${size || "45px"};
-      `}
-
-    path {
-      fill: ${({ active, color }) => (active ? color : colors.superDimmed)};
-    }
-  }
-`;
+import { ActionButton, ButtonGrid } from "./Atoms";
 
 const iconMap: { [key in GroupClass]?: JSX.Element } = {
   "Living room": sofa,
@@ -74,7 +43,7 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
   }, []);
 
   return (
-    <Container>
+    <ButtonGrid>
       {Object.keys(groups)
         .filter(k => !groups[k].name.includes("Group for"))
         .map(k => {
@@ -105,7 +74,7 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
             : "#ddd";
 
           return (
-            <Group
+            <ActionButton
               key={group.name}
               color={color}
               active={group.on}
@@ -113,9 +82,9 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
               onClick={() => toggle(k, { on: !group.on })}
             >
               {icon}
-            </Group>
+            </ActionButton>
           );
         })}
-    </Container>
+    </ButtonGrid>
   );
 };
