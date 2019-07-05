@@ -10,13 +10,13 @@ type State = {
 };
 
 const TimeView = styled.h2`
-  font-size: 125px;
+  font-size: 180px;
   font-weight: 300;
   text-align: right;
   letter-spacing: -7px;
 
   span {
-    font-size: 62px;
+    font-size: 80px;
     color: ${colors.dimmed};
     letter-spacing: 0;
     margin-left: 10px;
@@ -24,10 +24,10 @@ const TimeView = styled.h2`
 `;
 
 const DateView = styled.h4`
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 300;
   text-align: right;
-  margin-top: 12px;
+  margin-top: 20px;
 
   span {
     color: ${colors.dimmed};

@@ -17,12 +17,12 @@ const Wrapper = styled.div`
 
 const SunWrapper = styled.div<Props>`
   overflow: hidden;
-  height: 30px;
+  height: 40px;
   text-align: center;
 
   > svg {
-    height: 60px;
-    width: 60px;
+    height: 80px;
+    width: 80px;
     ${fill}
   }
 `;
@@ -34,8 +34,8 @@ const ArrowWrapper = styled.div<Props>`
 
   > svg {
     transform: rotate(${({ down }) => (down ? "90deg" : "-90deg")});
-    height: 15px;
-    width: 15px;
+    height: 22px;
+    width: 22px;
     ${fill}
   }
 `;

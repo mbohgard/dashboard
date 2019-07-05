@@ -20,7 +20,7 @@ declare interface Forecast {
   approvedTime: string;
   geometry: Geometry;
   referenceTime: string;
-  timeSeries: TimeSerie[];
+  timeSeries?: TimeSerie[];
   sun?: Sun;
 }
 

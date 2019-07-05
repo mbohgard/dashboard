@@ -4,7 +4,7 @@ import { colors } from "../styles";
 
 export const ButtonGrid = styled.div`
   display: grid;
-  grid-gap: 12px;
+  grid-gap: 18px;
   grid-template-columns: 1fr 1fr 1fr;
 `;
 
@@ -20,15 +20,15 @@ export const ActionButton = styled.a<{
   border: solid 3px
     ${({ active, color = colors.white }) =>
       active ? color : colors.superDimmed};
-  width: 85px;
-  height: 75px;
+  width: 110px;
+  height: 100px;
   cursor: pointer;
 
   svg {
     ${({ size }) =>
       css`
-        height: ${size || "45px"};
-        width: ${size || "45px"};
+        height: ${size || "55px"};
+        width: ${size || "55px"};
       `}
 
     path {
@@ -46,8 +46,8 @@ export const DimmedIconBox = styled.div`
   position: relative;
 
   > svg {
-    height: 100px;
-    width: 100px;
+    height: 140px;
+    width: 140px;
     margin-top: 10px;
     margin-right: 10px;
     position: absolute;
