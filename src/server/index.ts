@@ -21,7 +21,7 @@ const io = ws(server);
 export type ServiceResponse<T = any> = Promise<ServiceData<T>>;
 
 let users: number = 0;
-const timers: { [service: string]: NodeJS.Timer } = {};
+const timers: { [service: string]: number } = {};
 const cache: { [service: string]: any } = {};
 
 const fetcher = (
