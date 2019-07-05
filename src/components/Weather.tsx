@@ -40,7 +40,7 @@ type DegreesProps = {
 
 const DegreesContainer = styled.div<DegreesProps>`
   font-weight: 300;
-  font-size: ${({ type }) => (type === "big" ? "100px" : "32px")};
+  font-size: ${({ type }) => (type === "big" ? "140px" : "48px")};
   letter-spacing: ${({ type }) => (type === "big" ? "-10px" : "-3px")};
   white-space: nowrap;
   align-self: center;
@@ -97,8 +97,8 @@ const BigContainer = styled.div`
   display: flex;
 
   > svg {
-    width: 180px;
-    height: 180px;
+    width: 220px;
+    height: 220px;
     margin-right: 22px;
   }
 `;
@@ -118,7 +118,8 @@ const SunTime = styled.p`
   font-weight: 300;
   color: ${colors.dimmed};
   text-align: center;
-  font-size: 24px;
+  font-size: 40px;
+  margin-top: 10px;
 `;
 
 type SingleWeatherProps = WeatherProps & { sun?: SunData };
@@ -152,12 +153,12 @@ const SmallContainer = styled.div`
 
   > span {
     font-weight: 300;
-    font-size: 18px;
+    font-size: 26px;
   }
 
   > svg {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     margin: 10px 0;
   }
 `;
@@ -167,7 +168,7 @@ const SmallWrapper = styled.div`
   max-width: 100%;
   width: 100%;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: 40px;
 `;
 
 const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
@@ -214,7 +215,7 @@ export class Weather extends React.Component<Props, State> {
 
   componentDidMount() {
     this.props.socket.on("weather", (res: WeatherServiceData) =>
-      res.data
+      res.data && res.data.timeSeries
         ? this.setState({ data: res.data })
         : this.props.reportError(res.service, res.error)
     );
@@ -226,7 +227,7 @@ export class Weather extends React.Component<Props, State> {
     let currentWeather, forecast;
 
     if (data) {
-      [currentWeather, ...forecast] = data.timeSeries;
+      [currentWeather, ...forecast] = data.timeSeries!;
     } else {
       return <div>Väntar på väderdata...</div>;
     }

@@ -78,7 +78,7 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
               key={group.name}
               color={color}
               active={group.on}
-              size={group.name === "Hjalmar" ? "35px" : undefined}
+              size={group.name === "Hjalmar" ? "48px" : undefined}
               onClick={() => toggle(k, { on: !group.on })}
             >
               {icon}

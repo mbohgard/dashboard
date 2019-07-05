@@ -10,7 +10,7 @@ import { DimmedIconBox as Box } from "./Atoms";
 
 const Container = styled.div`
   display: flex;
-  min-height: 160px;
+  min-height: 180px;
 `;
 
 const LineNumber = styled.span`
@@ -21,12 +21,12 @@ type TimeProps = { empty?: boolean };
 
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
-  font-size: 44px;
+  font-size: 60px;
   margin-top: 8px;
   line-height: 1.2;
 
   > span {
-    font-size: 32px;
+    font-size: 40px;
   }
 
   ${({ empty }) =>

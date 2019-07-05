@@ -31,6 +31,7 @@ export const BaseStyles = createGlobalStyle`
 
   body {
       background: #222;
+      border: solid 1px #aaa;
       color: #fff;
       height: 100%;
   }
