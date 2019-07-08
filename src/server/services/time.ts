@@ -1,8 +1,10 @@
 import * as request from "request";
 
-import * as secrets from "../../secrets";
-import * as config from "../../config";
-import { min2Ms } from "../utils/time";
+import * as secrets from "../../../secrets";
+import * as config from "../../../config";
+import { min2Ms } from "../../utils/time";
+
+export const name = "time";
 
 export const get = (): Promise<TimeServiceData> =>
   new Promise(resolve =>

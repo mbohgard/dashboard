@@ -32,8 +32,10 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
   }, []);
 
   useEffect(() => {
-    const listener = (res: HueServiceData) =>
-      res.data ? setGroups(res.data) : reportError(res.service, res.error);
+    const listener = (res: HueServiceData) => (
+      console.log(res),
+      res.data ? setGroups(res.data) : reportError(res.service, res.error)
+    );
 
     socket.on("hue", listener);
 

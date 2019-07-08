@@ -1,15 +1,12 @@
 import * as request from "request";
 
-import * as config from "../../config";
-import { ServiceResponse } from "./index";
-import { min2Ms } from "../utils/time";
+import * as config from "../../../config";
+import { min2Ms } from "../../utils/time";
 
 const weather = (): ServiceResponse =>
   new Promise(resolve =>
     request(
-      `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${
-        config.weather.lon
-      }/lat/${config.weather.lat}/data.json`,
+      `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${config.weather.lon}/lat/${config.weather.lat}/data.json`,
       (error, _, body) =>
         resolve({
           service: "smhi",
@@ -22,9 +19,7 @@ const weather = (): ServiceResponse =>
 const sun = (): ServiceResponse =>
   new Promise(resolve =>
     request(
-      `https://api.sunrise-sunset.org/json?lat=${config.weather.lat}&lng=${
-        config.weather.lon
-      }&formatted=0`,
+      `https://api.sunrise-sunset.org/json?lat=${config.weather.lat}&lng=${config.weather.lon}&formatted=0`,
       (error, _, body) =>
         resolve({
           service: "sun",
@@ -33,6 +28,8 @@ const sun = (): ServiceResponse =>
         })
     )
   );
+
+export const name = "weather";
 
 export const get = (): Promise<WeatherServiceData> =>
   Promise.all([weather(), sun()]).then(([weather, sun]) => ({
