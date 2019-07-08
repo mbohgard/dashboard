@@ -1,10 +1,12 @@
 import * as request from "request";
 
-import * as secrets from "../../secrets";
-import * as config from "../../config";
-import { sec2Ms } from "../utils/time";
+import * as secrets from "../../../secrets";
+import * as config from "../../../config";
+import { sec2Ms } from "../../utils/time";
 
 const url = `https://${config.hue.ip}/api/${secrets.hue}/groups`;
+
+export const name = "hue";
 
 export const get = (): Promise<HueServiceData> =>
   new Promise(resolve =>
