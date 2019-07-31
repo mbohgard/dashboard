@@ -4,7 +4,7 @@ import tinycolor from "tinycolor2";
 import { def, percentageOfRange } from "../utils/helpers";
 import { CommonProps } from "../main";
 
-import { bed, chair, child, lamp, pot, sofa } from "./Icon";
+import { bed, chair, child, computer, lamp, pot, sofa } from "./Icon";
 import { ActionButton, ButtonGrid } from "./Atoms";
 
 const iconMap: { [key in GroupClass]?: JSX.Element } = {
@@ -13,7 +13,8 @@ const iconMap: { [key in GroupClass]?: JSX.Element } = {
   Bedroom: bed,
   "Kids bedroom": child,
   Kitchen: pot,
-  Hallway: lamp
+  Hallway: lamp,
+  Computer: computer
 };
 
 export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
@@ -45,7 +46,7 @@ export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
   return (
     <ButtonGrid>
       {Object.keys(groups)
-        .filter(k => !groups[k].name.includes("Group for"))
+        .filter(k => Object.keys(iconMap).includes(groups[k].class))
         .map(k => {
           const { hue, sat, bri, ct, ...group } = groups[k];
           const icon = iconMap[group.class];
