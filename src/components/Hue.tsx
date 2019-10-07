@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import tinycolor from "tinycolor2";
 
 import { useService } from "../hooks";
-import { def, percentageOfRange } from "../utils/helpers";
+import { def, percentageOfRange, limiter } from "../utils/helpers";
 
 import { bed, chair, child, computer, lamp, pot, sofa, hue } from "./Icon";
 import { ActionButton, DimmedIconBox as Box, ButtonGrid } from "./Atoms";
@@ -47,21 +47,19 @@ export const Hue: React.FC = () => {
               ? tinycolor({
                   // hue in degrees
                   h: (hue! / 65535) * 360,
-                  // saturation in percentage
-                  s: (sat! / 254) * 100,
-                  // lightness (brightness) in percentage
-                  l: (bri! / 254) * 100
+                  s: sat! / 254,
+                  v: limiter(bri! / 254, 0.15)
                 }).toHexString()
               : def(ct, bri)
               ? tinycolor({
                   ...tinycolor
                     .mix(
+                      tinycolor("#7ad3ff"),
                       tinycolor("#ffa500"),
-                      tinycolor("fff"),
                       percentageOfRange(153, 500)(ct!)
                     )
-                    .toHsl(),
-                  l: (bri! / 254) * 100
+                    .toHsv(),
+                  v: limiter(bri! / 254, 0.15)
                 }).toHexString()
               : "#ddd";
 

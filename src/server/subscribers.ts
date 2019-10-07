@@ -4,29 +4,28 @@ type Subscribers = { [key in ServiceName]?: string[] };
 
 const subscribers: Subscribers = {};
 
+const clone = (arr?: any[]) => (arr ? [...arr] : []);
+
 interface Remove {
   (id: string): Subscribers;
   (id: string, s: ServiceName): string[];
 }
 
 export const add = (id: string, s: ServiceName) => {
-  const service = subscribers[s];
+  const subs = subscribers[s] || [];
 
-  if (service && service.includes(id)) return service;
-  else subscribers[s] = [...new Set([...(service || []), id])];
+  if (subs.includes(id)) return false;
 
-  return subscribers[s]!;
+  subscribers[s] = Array.from(new Set([...subs, id]));
+
+  return subscribers[s]!.length === 1;
 };
 
 export const remove: Remove = (id: any, s?: ServiceName): any => {
   if (s) {
-    subscribers[s] = (subscribers[s] || []).reduce<string[]>(
-      (acc, presentId: string) =>
-        id === presentId ? acc : [...acc, presentId],
-      []
-    );
+    subscribers[s] = (subscribers[s] || []).filter(x => x !== id);
 
-    return subscribers[s];
+    return clone(subscribers[s]);
   } else {
     Object.keys(subscribers).forEach(service =>
       remove(id, service as ServiceName)
@@ -38,15 +37,16 @@ export const remove: Remove = (id: any, s?: ServiceName): any => {
 
 export const get = (s?: ServiceName) =>
   s
-    ? subscribers[s] || []
+    ? clone(subscribers[s])
     : Object.keys(subscribers).reduce<string[]>(
-        (acc, key) => [
-          ...new Set([...acc, ...subscribers[key as ServiceName]])
-        ],
+        (acc, key) =>
+          Array.from(
+            new Set([...acc, ...(subscribers[key as ServiceName] || [])])
+          ),
         []
       );
 
-export const getSubsriptions = (id?: string) => {
+export const getServices = (id?: string) => {
   const keys = Object.keys(subscribers) as ServiceName[];
 
   return id

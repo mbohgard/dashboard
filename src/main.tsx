@@ -136,9 +136,12 @@ const App: React.FC = () => {
   const [newError, setNewError] = useState(false);
 
   const reportError: ReportError = (service, err) => {
+    console.log(err);
     const isObj = typeof err === "object";
     const code = isObj ? err.statusCode || err.status : 0;
-    const message = isObj ? err.message || err.msg || err.text : String(err);
+    const message = isObj
+      ? err.message || err.msg || err.text || JSON.stringify(err)
+      : String(err);
     const name = (isObj && err.name) || err.code || "Error";
     const error: ServiceError = {
       id: ++errI,

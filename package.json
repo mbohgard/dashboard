@@ -1,6 +1,6 @@
 {
   "name": "dashboard",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "src/main.tsx",
   "license": "GPL-3.0-or-later",
   "scripts": {

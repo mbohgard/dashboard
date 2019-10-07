@@ -21,6 +21,20 @@ const cache: { [key in ServiceName]?: ServiceData } = {};
 const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
 
+const startPoll = (s: Service) => {
+  const name = s.name as ServiceName;
+  stopPoll(name);
+
+  if (poll) {
+    timers[name] = setTimeout(() => fetcher(s), s.delay());
+  }
+};
+const stopPoll = (s: ServiceName) => clearTimeout(timers[s]);
+
+const saveToCache = (s: string, data: ServiceData) =>
+  (cache[s as ServiceName] = data);
+const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
+
 const emit = (data: ServiceData) => {
   io.emit(data.service, data);
 
@@ -40,13 +54,8 @@ const fetcher = (service: Service) =>
     .get()
     .then((data: ServiceData) => {
       emit(data);
-
-      cache[data.service as ServiceName] = data;
-      if (poll)
-        timers[data.service as ServiceName] = setTimeout(
-          () => fetcher(service),
-          service.delay()
-        );
+      saveToCache(data.service, data);
+      startPoll(service);
     })
     .catch(error => {
       emit({
@@ -56,11 +65,11 @@ const fetcher = (service: Service) =>
     });
 
 const subscribe = (id: string, s: ServiceName) => {
-  if (cache[s]) emit(cache[s]!);
+  sendCached(s);
 
-  const u = subscribers.add(id, s);
+  const init = subscribers.add(id, s);
 
-  if (u.length === 1) {
+  if (init) {
     const service = services[s];
 
     if (service) fetcher(service);
@@ -76,19 +85,16 @@ const subscribe = (id: string, s: ServiceName) => {
 const unsubscribe = (id: string, s?: ServiceName) => {
   const u = s ? subscribers.remove(id, s) : subscribers.remove(id);
 
-  if (s && u instanceof Array && u.length === 0) clearTimeout(timers[s]);
-  else if (!s) {
+  if (s && u instanceof Array && u.length === 0) stopPoll(s);
+  else {
     subscribers
-      .getSubsriptions(id)
-      .forEach(
-        service =>
-          subscribers.get(service).length === 1 && clearTimeout(timers[service])
-      );
+      .getServices()
+      .forEach(s => subscribers.get(s).length === 0 && stopPoll(s));
   }
 };
 
 io.on("connection", socket => {
-  console.log("user connected", subscribers.get());
+  console.log("user connected");
 
   socket.on("subscribe", service => subscribe(socket.id, service));
   socket.on("unsubscribe", service => unsubscribe(socket.id, service));

@@ -25,6 +25,7 @@ const TimeWrapper = styled.div<TimeProps>`
   margin-top: 8px;
   line-height: 1.2;
   white-space: nowrap;
+  min-width: 200px;
 
   > span {
     font-size: 40px;
@@ -33,7 +34,7 @@ const TimeWrapper = styled.div<TimeProps>`
   ${({ empty }) =>
     empty &&
     css`
-      color: ${colors.superDimmed};
+      color: ${colors.dimmed};
     `};
 `;
 
