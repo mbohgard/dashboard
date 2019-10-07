@@ -1,7 +1,6 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { render } from "react-dom";
 import styled from "styled-components";
-import io from "socket.io-client";
 import dayjs from "dayjs";
 import "dayjs/locale/sv";
 
@@ -11,8 +10,8 @@ import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
-import { warning } from "./components/Icon";
 import { VOC } from "./components/VOC";
+import { warning } from "./components/Icon";
 
 dayjs.locale("sv");
 
@@ -72,6 +71,7 @@ const ErrorsContainer = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
+  border: solid 10px ${colors.red};
   background: rgba(0, 0, 0, 0.4);
 `;
 
@@ -105,10 +105,17 @@ const ErrorIndicator = styled.a<{ newError?: boolean }>`
   }
 `;
 
-export type CommonProps = {
-  socket: SocketIOClient.Socket;
-  reportError(service: string, err: any): void;
-};
+export type ReportError = (service: string, err: any) => void;
+
+class ErrorBoundary extends React.Component<{ report(err: any): void }> {
+  componentDidCatch(err: any) {
+    this.props.report(err);
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
 
 type ServiceError = {
   id: number;
@@ -119,22 +126,22 @@ type ServiceError = {
   time: string;
 };
 
-type State = {
-  errors: ServiceError[];
-  newError?: boolean;
-  showErrors?: boolean;
-};
-
 let errI = 0;
 
-class App extends React.Component {
-  state: State = { errors: [] };
-  socket = io();
+export const ReportContext = React.createContext<ReportError>(() => {});
 
-  reportError = (service: string, err: any) => {
+const App: React.FC = () => {
+  const [errors, setSerrors] = useState<ServiceError[]>([]);
+  const [showErrors, setShowErrors] = useState(false);
+  const [newError, setNewError] = useState(false);
+
+  const reportError: ReportError = (service, err) => {
+    console.log(err);
     const isObj = typeof err === "object";
     const code = isObj ? err.statusCode || err.status : 0;
-    const message = isObj ? err.message || err.msg || err.text : String(err);
+    const message = isObj
+      ? err.message || err.msg || err.text || JSON.stringify(err)
+      : String(err);
     const name = (isObj && err.name) || err.code || "Error";
     const error: ServiceError = {
       id: ++errI,
@@ -145,63 +152,55 @@ class App extends React.Component {
       time: dayjs().format("DD/MM HH:mm")
     };
 
-    this.setState((s: State) => ({
-      errors: [error, ...s.errors.slice(0, 9)],
-      newError: true
-    }));
+    setSerrors(s => [error, ...s.slice(0, 9)]);
+    setNewError(true);
   };
 
-  toggleError = (showErrors: boolean) =>
-    this.setState({ showErrors, newError: false });
+  const toggleError = (showErrors: boolean) => {
+    setShowErrors(showErrors);
+    setNewError(false);
+  };
 
-  componentDidCatch(err: any) {
-    this.reportError("catch in Main", err);
-  }
-
-  render() {
-    const { errors, showErrors, newError } = this.state;
-    const common = { reportError: this.reportError, socket: this.socket };
-
-    return (
-      <Wrapper>
-        <BaseStyles />
-        <Container>
-          <Half top>
-            <Weather type="big" {...common} />
-          </Half>
-          <Half right top>
-            <Time {...common} />
-          </Half>
-          <Whole>
-            <Weather {...common} />
-          </Whole>
-          <Whole stretched last>
-            <Transports {...common} />
-            <VOC {...common} />
-            <Hue {...common} />
-          </Whole>
-        </Container>
-        <ErrorIndicator
-          newError={newError}
-          onClick={() => this.toggleError(true)}
-        >
-          {warning}
-        </ErrorIndicator>
-        {showErrors && (
-          <ErrorsContainer onClick={() => this.toggleError(false)}>
-            <ErrorsContent>
-              {errors.map(err => (
-                <ErrorBox key={err.id} onClick={e => e.stopPropagation()}>
-                  {err.code ? `(${err.code}) ` : ""}
-                  {err.name}: {err.message} [by {err.service} at {err.time}]
-                </ErrorBox>
-              ))}
-            </ErrorsContent>
-          </ErrorsContainer>
-        )}
-      </Wrapper>
-    );
-  }
-}
+  return (
+    <Wrapper>
+      <ErrorBoundary report={e => reportError("catch in Main", e)}>
+        <ReportContext.Provider value={reportError}>
+          <BaseStyles />
+          <Container>
+            <Half top>
+              <Weather type="big" />
+            </Half>
+            <Half right top>
+              <Time />
+            </Half>
+            <Whole>
+              <Weather />
+            </Whole>
+            <Whole stretched last>
+              <Transports />
+              <VOC />
+              <Hue />
+            </Whole>
+          </Container>
+          <ErrorIndicator newError={newError} onClick={() => toggleError(true)}>
+            {warning}
+          </ErrorIndicator>
+          {showErrors && (
+            <ErrorsContainer onClick={() => toggleError(false)}>
+              <ErrorsContent>
+                {errors.map(err => (
+                  <ErrorBox key={err.id} onClick={e => e.stopPropagation()}>
+                    {err.code ? `(${err.code}) ` : ""}
+                    {err.name}: {err.message} [by {err.service} at {err.time}]
+                  </ErrorBox>
+                ))}
+              </ErrorsContent>
+            </ErrorsContainer>
+          )}
+        </ReportContext.Provider>
+      </ErrorBoundary>
+    </Wrapper>
+  );
+};
 
 render(<App />, document.getElementById("app"));

@@ -1,11 +1,23 @@
 import styled, { css } from "styled-components";
+import tinycolor from "tinycolor2";
 
 import { colors } from "../styles";
+import { limiter } from "../utils/helpers";
+
+const activeBorder = (c: string = "#fff") => {
+  const color = tinycolor(c).toHsv();
+
+  return tinycolor({
+    ...color,
+    v: limiter(color.v, 0.5)
+  }).toRgbString();
+};
 
 export const ButtonGrid = styled.div`
   display: grid;
   grid-gap: 18px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-flow: column;
 `;
 
 export const ActionButton = styled.a<{
@@ -18,8 +30,8 @@ export const ActionButton = styled.a<{
   align-items: center;
   border-radius: 8px;
   border: solid 3px
-    ${({ active, color = colors.white }) =>
-      active ? color : colors.superDimmed};
+    ${({ active, color }) =>
+      active ? activeBorder(color) : colors.superDimmed};
   width: 110px;
   height: 100px;
   cursor: pointer;

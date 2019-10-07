@@ -1,9 +1,10 @@
-import * as request from "request";
+import request from "request";
 
-import * as secrets from "../../secrets";
-import * as config from "../../config";
-import { ServiceResponse } from "./index";
-import { min2Ms, sec2Ms } from "../utils/time";
+import * as secrets from "../../../secrets";
+import * as config from "../../../config";
+import { min2Ms, sec2Ms } from "../../utils/time";
+
+export const name = "transports";
 
 const getDelay = () => {
   const time = new Date();

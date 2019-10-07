@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
 import { Omit } from "utility-types";
 
-import { CommonProps } from "../main";
+import { useService } from "../hooks";
 import { colors } from "../styles";
 import { bus as busIcon, train as trainIcon } from "./Icon";
 import { DimmedIconBox as Box } from "./Atoms";
@@ -24,6 +24,8 @@ const TimeWrapper = styled.div<TimeProps>`
   font-size: 60px;
   margin-top: 8px;
   line-height: 1.2;
+  white-space: nowrap;
+  min-width: 200px;
 
   > span {
     font-size: 40px;
@@ -32,7 +34,7 @@ const TimeWrapper = styled.div<TimeProps>`
   ${({ empty }) =>
     empty &&
     css`
-      color: ${colors.superDimmed};
+      color: ${colors.dimmed};
     `};
 `;
 
@@ -41,7 +43,7 @@ type TranportTimeProps = {
 } & TimeProps;
 
 const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
-  if (!data) return null;
+  if (!data) return <TimeWrapper>---</TimeWrapper>;
 
   const time = data.DisplayTime.split("min");
 
@@ -108,41 +110,27 @@ const fill = (x: TransportItems): TransportItems =>
     .fill(undefined)
     .map((_, i) => x[i]);
 
-type State = {
-  buses?: TransportItems;
-  trains?: TransportItems;
-};
+export const Transports: React.FC = () => {
+  const [data] = useService<TransportsServiceData>("transports");
+  const [buses, trains] = useMemo(() => {
+    if (!data) return [undefined, undefined];
 
-export const Transports: React.SFC<CommonProps> = ({ socket, reportError }) => {
-  const [{ buses: b, trains: t }, setState] = useState<State>({});
-  const buses =
-    b && fill(b.filter(b => (!b ? true : b.Destination.includes("Väsby"))));
-  const trains =
-    t &&
-    fill(
-      t.filter(t =>
-        !t
-          ? true
-          : t.JourneyDirection === 1 &&
-            dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
-      )
-    );
+    const b = getTransports("Buses", data);
+    const t = getTransports("Trains", data);
 
-  useEffect(() => {
-    const listener = (res: TransportsServiceData) =>
-      res.data
-        ? setState(() => ({
-            buses: getTransports("Buses", res.data),
-            trains: getTransports("Trains", res.data)
-          }))
-        : reportError(res.service, res.error);
-
-    socket.on("transports", listener);
-
-    return () => {
-      socket.off("transports", listener);
-    };
-  }, []);
+    return [
+      b && fill(b.filter(b => (!b ? true : b.Destination.includes("Väsby")))),
+      t &&
+        fill(
+          t.filter(t =>
+            !t
+              ? true
+              : t.JourneyDirection === 1 &&
+                dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
+          )
+        )
+    ];
+  }, [data]);
 
   return (
     <Container>
