@@ -14,7 +14,10 @@ export const get = (): Promise<HueServiceData> =>
       {
         method: "GET",
         url,
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        headers: {
+          "Cache-Control": "no-cache"
+        }
       },
       (error, _, body?) => {
         const res: HueGroupsResponse | undefined = body
