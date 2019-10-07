@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import tinycolor from "tinycolor2";
 
+import { useService } from "../hooks";
 import { def, percentageOfRange } from "../utils/helpers";
-import { CommonProps } from "../main";
 
-import { bed, chair, child, lamp, pot, sofa } from "./Icon";
-import { ActionButton, ButtonGrid } from "./Atoms";
+import { bed, chair, child, lamp, pot, sofa, hue } from "./Icon";
+import { ActionButton, DimmedIconBox as Box, ButtonGrid } from "./Atoms";
 
 const iconMap: { [key in GroupClass]?: JSX.Element } = {
   "Living room": sofa,
@@ -16,77 +16,71 @@ const iconMap: { [key in GroupClass]?: JSX.Element } = {
   Hallway: lamp
 };
 
-export const Hue: React.SFC<CommonProps> = ({ socket, reportError }) => {
-  const [groups, setGroups] = useState<HueGroups>({});
+export const Hue: React.FC = () => {
+  const [groups, send] = useService<HueServiceData>("hue", {});
 
   const toggle = useCallback((id: string, action: HueEmitPayload) => {
-    socket.emit("hue", { id, ...action });
+    const set = send({ id, ...action });
 
-    setGroups(state => ({
+    set(state => ({
       ...state,
       [id]: {
-        ...state[id],
+        ...state![id],
         ...action
       }
     }));
   }, []);
 
-  useEffect(() => {
-    const listener = (res: HueServiceData) => (
-      console.log(res),
-      res.data ? setGroups(res.data) : reportError(res.service, res.error)
-    );
-
-    socket.on("hue", listener);
-
-    return () => {
-      socket.off("hue", listener);
-    };
-  }, []);
-
   return (
-    <ButtonGrid>
-      {Object.keys(groups)
-        .filter(k => !groups[k].name.includes("Group for"))
-        .map(k => {
-          const { hue, sat, bri, ct, ...group } = groups[k];
-          const icon = iconMap[group.class];
+    <Box>
+      {hue}
+      <ButtonGrid>
+        {Object.keys(groups)
+          .filter(k => !groups[k].name.includes("Group for"))
+          .map(k => {
+            const { hue, sat, bri, ct, ...group } = groups[k];
+            const icon = iconMap[group.class];
 
-          Array.isArray;
-          const color = def(hue, sat, bri)
-            ? tinycolor({
-                // hue in degrees
-                h: (hue! / 65535) * 360,
-                // saturation in percentage
-                s: (sat! / 254) * 100,
-                // lightness (brightness) in percentage
-                l: (bri! / 254) * 100
-              }).toHexString()
-            : def(ct, bri)
-            ? tinycolor({
-                ...tinycolor
-                  .mix(
-                    tinycolor("#ffa500"),
-                    tinycolor("fff"),
-                    percentageOfRange(153, 500)(ct!)
-                  )
-                  .toHsl(),
-                l: (bri! / 254) * 100
-              }).toHexString()
-            : "#ddd";
+            console.log(group.class, icon);
 
-          return (
-            <ActionButton
-              key={group.name}
-              color={color}
-              active={group.on}
-              size={group.name === "Hjalmar" ? "48px" : undefined}
-              onClick={() => toggle(k, { on: !group.on })}
-            >
-              {icon}
-            </ActionButton>
-          );
-        })}
-    </ButtonGrid>
+            if (!icon) return null;
+
+            Array.isArray;
+            const color = def(hue, sat, bri)
+              ? tinycolor({
+                  // hue in degrees
+                  h: (hue! / 65535) * 360,
+                  // saturation in percentage
+                  s: (sat! / 254) * 100,
+                  // lightness (brightness) in percentage
+                  l: (bri! / 254) * 100
+                }).toHexString()
+              : def(ct, bri)
+              ? tinycolor({
+                  ...tinycolor
+                    .mix(
+                      tinycolor("#ffa500"),
+                      tinycolor("fff"),
+                      percentageOfRange(153, 500)(ct!)
+                    )
+                    .toHsl(),
+                  l: (bri! / 254) * 100
+                }).toHexString()
+              : "#ddd";
+
+            return (
+              <ActionButton
+                key={group.name}
+                color={color}
+                active={group.on}
+                size={group.name === "Hjalmar" ? "48px" : undefined}
+                onClick={() => toggle(k, { on: !group.on })}
+              >
+                {icon}
+              </ActionButton>
+            );
+          })}
+      </ButtonGrid>
+    </Box>
   );
 };

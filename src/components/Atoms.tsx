@@ -5,7 +5,8 @@ import { colors } from "../styles";
 export const ButtonGrid = styled.div`
   display: grid;
   grid-gap: 18px;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-flow: column;
 `;
 
 export const ActionButton = styled.a<{

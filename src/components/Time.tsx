@@ -1,13 +1,9 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 
-import { CommonProps } from "../main";
+import { useService } from "../hooks";
 import { colors } from "../styles";
-
-type State = {
-  timestamp: number;
-};
 
 const TimeView = styled.h2`
   font-size: 180px;
@@ -34,50 +30,38 @@ const DateView = styled.h4`
   }
 `;
 
-export class Time extends React.Component<CommonProps, State> {
-  state: State = { timestamp: Math.floor(Date.now() / 1000) };
+export const Time: React.FC = () => {
+  const [data] = useService<TimeServiceData>("time");
+  const [timestamp, setTimestamp] = useState(Math.floor(Date.now() / 1000));
 
-  interval: number = 0;
-
-  tick = () => {
-    this.interval = window.setInterval(
-      () => this.setState(state => ({ timestamp: state.timestamp + 1 })),
+  useEffect(() => {
+    const interval = window.setInterval(
+      () => setTimestamp(state => state + 1),
       1000
     );
-  };
 
-  componentDidMount() {
-    clearInterval(this.interval);
+    return () => clearInterval(interval);
+  }, []);
 
-    this.tick();
-    this.props.socket.on("time", (res: TimeServiceData) =>
-      res.data
-        ? this.setState({ timestamp: res.data.timestamp - res.data.gmtOffset })
-        : this.props.reportError(res.service, res.error)
-    );
-  }
+  useEffect(() => data && setTimestamp(data.timestamp - data.gmtOffset), [
+    data
+  ]);
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
+  const ts = (dayjs as any).unix(timestamp);
+  const time = ts.format("HH:mm");
+  const seconds = ts.format("ss");
+  const date = ts.format("dddd DD MMMM");
+  const year = ts.format("YYYY");
 
-  render() {
-    const ts = (dayjs as any).unix(this.state.timestamp);
-    const time = ts.format("HH:mm");
-    const seconds = ts.format("ss");
-    const date = ts.format("dddd DD MMMM");
-    const year = ts.format("YYYY");
-
-    return (
-      <div>
-        <TimeView>
-          {time}
-          <span>:{seconds}</span>
-        </TimeView>
-        <DateView>
-          {date} <span>{year}</span>
-        </DateView>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <TimeView>
+        {time}
+        <span>:{seconds}</span>
+      </TimeView>
+      <DateView>
+        {date} <span>{year}</span>
+      </DateView>
+    </div>
+  );
+};

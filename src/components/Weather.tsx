@@ -1,9 +1,9 @@
-import * as React from "react";
+import React from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 import tinycolor from "tinycolor2";
 
-import { CommonProps } from "../main";
+import { useService } from "../hooks";
 import { colors } from "../styles";
 import { percentageOfRange } from "../utils/helpers";
 import { WeatherIcon } from "./WeatherIcon";
@@ -204,49 +204,30 @@ export const SmallWeather: React.SFC<{ data: TimeSerie[]; sun?: SunData }> = ({
 
 export type Props = {
   type?: "big" | "small";
-} & CommonProps;
-
-type State = {
-  data?: Forecast;
 };
 
-export class Weather extends React.Component<Props, State> {
-  state: State = {};
+export const Weather: React.FC<Props> = ({ type = "small" }) => {
+  const [data] = useService<WeatherServiceData>("weather", res =>
+    Boolean(res.data && res.data.timeSeries)
+  );
 
-  componentDidMount() {
-    this.props.socket.on("weather", (res: WeatherServiceData) =>
-      res.data && res.data.timeSeries
-        ? this.setState({ data: res.data })
-        : this.props.reportError(res.service, res.error)
-    );
-  }
+  if (!data) return <div>Väntar på väderdata...</div>;
 
-  render() {
-    const { type = "small" } = this.props;
-    const { data } = this.state;
-    let currentWeather, forecast;
+  const [currentWeather, ...forecast] = data.timeSeries;
+  const sunrise = data.sun && dayjs(data.sun.results.sunrise);
+  const sunset = data.sun && dayjs(data.sun.results.sunset);
 
-    if (data) {
-      [currentWeather, ...forecast] = data.timeSeries!;
-    } else {
-      return <div>Väntar på väderdata...</div>;
-    }
+  const sun = sunrise &&
+    sunset && {
+      sunrise,
+      sunriseMinutes: minutes(sunrise),
+      sunset,
+      sunsetMinutes: minutes(sunset)
+    };
 
-    const sunrise = data.sun && dayjs(data.sun.results.sunrise);
-    const sunset = data.sun && dayjs(data.sun.results.sunset);
-
-    const sun = sunrise &&
-      sunset && {
-        sunrise,
-        sunriseMinutes: minutes(sunrise),
-        sunset,
-        sunsetMinutes: minutes(sunset)
-      };
-
-    return type === "small" ? (
-      <SmallWeather data={forecast} sun={sun} />
-    ) : (
-      <BigWeather data={currentWeather} sun={sun} />
-    );
-  }
-}
+  return type === "small" ? (
+    <SmallWeather data={forecast} sun={sun} />
+  ) : (
+    <BigWeather data={currentWeather} sun={sun} />
+  );
+};
