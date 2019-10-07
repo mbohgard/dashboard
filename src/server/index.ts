@@ -1,8 +1,9 @@
-import * as Bundler from "parcel-bundler";
-import * as express from "express";
-import * as path from "path";
-import * as http from "http";
-import * as ws from "socket.io";
+import Bundler from "parcel-bundler";
+import express from "express";
+import path from "path";
+import http from "http";
+import fs from "fs";
+import ws from "socket.io";
 
 import * as subscribers from "./subscribers";
 import services, { ServiceName } from "./services";
@@ -18,24 +19,44 @@ const io = ws(server);
 const timers: { [key in ServiceName]?: number } = {};
 const cache: { [key in ServiceName]?: ServiceData } = {};
 const poll = !process.argv.includes("no-poll");
+const rootDir = path.join(__dirname, "..", "..");
+
+const emit = (data: ServiceData) => {
+  io.emit(data.service, data);
+
+  if (data.error) {
+    const output = `${Date()}\n${data.service.toUpperCase()}: ${
+      data.error instanceof Error
+        ? data.error.message
+        : JSON.stringify(data.error)
+    }\n\n`;
+
+    fs.appendFileSync(path.join(rootDir, "dashboard.log"), output);
+  }
+};
 
 const fetcher = (service: Service) =>
   service
     .get()
-    .then((res: ServiceData) => {
-      io.emit(res.service, res);
+    .then((data: ServiceData) => {
+      emit(data);
 
-      cache[res.service as ServiceName] = res;
+      cache[data.service as ServiceName] = data;
       if (poll)
-        timers[res.service as ServiceName] = setTimeout(
+        timers[data.service as ServiceName] = setTimeout(
           () => fetcher(service),
           service.delay()
         );
     })
-    .catch(e => io.emit(service.name, e));
+    .catch(error => {
+      emit({
+        service: service.name,
+        error
+      });
+    });
 
 const subscribe = (id: string, s: ServiceName) => {
-  if (cache[s]) io.emit(s, cache[s]);
+  if (cache[s]) emit(cache[s]!);
 
   const u = subscribers.add(id, s);
 
@@ -44,10 +65,10 @@ const subscribe = (id: string, s: ServiceName) => {
 
     if (service) fetcher(service);
     else {
-      const error = `Service ${s} has the wrong format or doesn't exist`;
-
-      console.error(error);
-      io.emit(s, error);
+      emit({
+        service: s,
+        error: Error(`Service ${s} has the wrong format or doesn't exist`)
+      });
     }
   }
 };
@@ -87,7 +108,7 @@ io.on("connection", socket => {
 });
 
 if (prod) {
-  app.use("/", express.static(path.join(__dirname, "..", "..", "dist")));
+  app.use("/", express.static(path.join(rootDir, "dist")));
 } else {
   const bundler = new Bundler(__dirname + "/../index.html");
 

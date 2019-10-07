@@ -1,4 +1,4 @@
-import * as request from "request";
+import request from "request";
 
 import * as config from "../../../config";
 import { min2Ms } from "../../utils/time";

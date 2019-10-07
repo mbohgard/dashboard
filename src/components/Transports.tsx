@@ -42,7 +42,7 @@ type TranportTimeProps = {
 } & TimeProps;
 
 const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
-  if (!data) return null;
+  if (!data) return <TimeWrapper>---</TimeWrapper>;
 
   const time = data.DisplayTime.split("min");
 
@@ -110,8 +110,10 @@ const fill = (x: TransportItems): TransportItems =>
     .map((_, i) => x[i]);
 
 export const Transports: React.FC = () => {
-  const [data] = useService<TransportsServiceData>("transports", []);
+  const [data] = useService<TransportsServiceData>("transports");
   const [buses, trains] = useMemo(() => {
+    if (!data) return [undefined, undefined];
+
     const b = getTransports("Buses", data);
     const t = getTransports("Trains", data);
 
