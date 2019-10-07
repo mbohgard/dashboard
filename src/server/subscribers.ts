@@ -1,48 +1,57 @@
-type Services = { [service: string]: string[] };
+import { ServiceName } from "./services";
 
-const services: Services = {};
+type Subscribers = { [key in ServiceName]?: string[] };
+
+const subscribers: Subscribers = {};
 
 interface Remove {
-  (id: string): Services;
-  (id: string, s: string): string[];
+  (id: string): Subscribers;
+  (id: string, s: ServiceName): string[];
 }
 
-export const add = (id: string, s: string) => {
-  services[s] = [...new Set([...(services[s] || []), id])];
+export const add = (id: string, s: ServiceName) => {
+  const service = subscribers[s];
 
-  return services[s];
+  if (service && service.includes(id)) return service;
+  else subscribers[s] = [...new Set([...(service || []), id])];
+
+  return subscribers[s]!;
 };
 
-export const remove: Remove = (id: any, s?: any): any => {
+export const remove: Remove = (id: any, s?: ServiceName): any => {
   if (s) {
-    services[s] = (services[s] || []).reduce<string[]>(
+    subscribers[s] = (subscribers[s] || []).reduce<string[]>(
       (acc, presentId: string) =>
         id === presentId ? acc : [...acc, presentId],
       []
     );
 
-    return services[s];
+    return subscribers[s];
   } else {
-    Object.keys(services).forEach(service => remove(id, service));
+    Object.keys(subscribers).forEach(service =>
+      remove(id, service as ServiceName)
+    );
 
-    return services;
+    return subscribers;
   }
 };
 
-export const get = (s?: string) =>
+export const get = (s?: ServiceName) =>
   s
-    ? services[s] || []
-    : Object.keys(services).reduce<string[]>(
-        (acc, key) => [...new Set([...acc, ...services[key]])],
+    ? subscribers[s] || []
+    : Object.keys(subscribers).reduce<string[]>(
+        (acc, key) => [
+          ...new Set([...acc, ...subscribers[key as ServiceName]])
+        ],
         []
       );
 
-export const getServices = (id?: string) => {
-  const keys = Object.keys(services);
+export const getSubsriptions = (id?: string) => {
+  const keys = Object.keys(subscribers) as ServiceName[];
 
   return id
-    ? keys.reduce<string[]>(
-        (acc, key) => (services[key].includes(id) ? [...acc, key] : acc),
+    ? keys.reduce<ServiceName[]>(
+        (acc, key) => (subscribers[key]!.includes(id) ? [...acc, key] : acc),
         []
       )
     : keys;

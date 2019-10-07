@@ -5,6 +5,7 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "ts-node --files ./src/server/index.ts",
+    "dev-no-poll": "ts-node --files ./src/server/index.ts no-poll",
     "tsc": "tsc --noEmit --noUnusedLocals",
     "build": "yarn install && parcel build ./src/index.html",
     "serve": "NODE_ENV=production TS_NODE_FILES=true ts-node ./src/server/index.ts",

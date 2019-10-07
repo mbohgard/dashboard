@@ -5,7 +5,7 @@ import * as http from "http";
 import * as ws from "socket.io";
 
 import * as subscribers from "./subscribers";
-import * as services from "./services";
+import services, { ServiceName } from "./services";
 
 const prod = process.env.NODE_ENV === "production";
 const port = 8081;
@@ -15,26 +15,26 @@ const app = express();
 const server = http.createServer(app);
 const io = ws(server);
 
-const timers: { [service: string]: number } = {};
-const cache: { [service: string]: any } = {};
+const timers: { [key in ServiceName]?: number } = {};
+const cache: { [key in ServiceName]?: ServiceData } = {};
 const poll = !process.argv.includes("no-poll");
 
 const fetcher = (service: Service) =>
   service
     .get()
-    .then(res => {
+    .then((res: ServiceData) => {
       io.emit(res.service, res);
 
-      cache[res.service] = res;
+      cache[res.service as ServiceName] = res;
       if (poll)
-        timers[res.service] = setTimeout(
+        timers[res.service as ServiceName] = setTimeout(
           () => fetcher(service),
           service.delay()
         );
     })
     .catch(e => io.emit(service.name, e));
 
-const subscribe = (id: string, s: keyof typeof services) => {
+const subscribe = (id: string, s: ServiceName) => {
   if (cache[s]) io.emit(s, cache[s]);
 
   const u = subscribers.add(id, s);
@@ -52,13 +52,13 @@ const subscribe = (id: string, s: keyof typeof services) => {
   }
 };
 
-const unsubscribe = (id: string, s?: string) => {
+const unsubscribe = (id: string, s?: ServiceName) => {
   const u = s ? subscribers.remove(id, s) : subscribers.remove(id);
 
-  if (s && u.length === 0) clearTimeout(timers[s]);
+  if (s && u instanceof Array && u.length === 0) clearTimeout(timers[s]);
   else if (!s) {
     subscribers
-      .getServices(id)
+      .getSubsriptions(id)
       .forEach(
         service =>
           subscribers.get(service).length === 1 && clearTimeout(timers[service])
