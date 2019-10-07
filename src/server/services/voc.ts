@@ -1,8 +1,8 @@
-import * as request from "request";
+import request from "request";
 
-import * as secrets from "../../secrets";
-import * as config from "../../config";
-import { sec2Ms, min2Ms } from "../utils/time";
+import * as secrets from "../../../secrets";
+import * as config from "../../../config";
+import { sec2Ms, min2Ms } from "../../utils/time";
 
 const {
   voc: { region }
@@ -10,6 +10,8 @@ const {
 const url = `https://vocapi${
   region ? `${region}-` : ""
 }.wirelesscar.net/customerapi/rest/v3.0/vehicles/${secrets.voc.vin}`;
+
+export const name = "voc";
 
 export const get = (): Promise<VOCServiceData> =>
   new Promise(resolve =>
