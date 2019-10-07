@@ -213,7 +213,7 @@ export const Weather: React.FC<Props> = ({ type = "small" }) => {
 
   if (!data) return <div>Väntar på väderdata...</div>;
 
-  const [currentWeather, ...forecast] = data.timeSeries;
+  const [currentWeather, ...forecast] = data.timeSeries!;
   const sunrise = data.sun && dayjs(data.sun.results.sunrise);
   const sunset = data.sun && dayjs(data.sun.results.sunset);
 
