@@ -9,7 +9,7 @@ const activeBorder = (c: string = "#fff") => {
 
   return tinycolor({
     ...color,
-    v: limiter(color.v, 0.5)
+    v: limiter(color.v, 0.7)
   }).toRgbString();
 };
 
