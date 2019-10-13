@@ -42,13 +42,20 @@ const callers = config.transports.map(t => (delay: number): ServiceResponse<
   new Promise(resolve =>
     setTimeout(
       () =>
-        request(getTransportUrl(t.types, t.siteId), (error, _, body) =>
-          resolve({
-            service: "transports",
-            error,
-            data: body ? JSON.parse(body) : undefined
-          })
-        ),
+        request(getTransportUrl(t.types, t.siteId), (error, _, body) => {
+          try {
+            resolve({
+              service: "transports",
+              error,
+              data: body ? JSON.parse(body) : undefined
+            });
+          } catch (error) {
+            resolve({
+              service: "transports",
+              error
+            });
+          }
+        }),
       delay
     )
   )

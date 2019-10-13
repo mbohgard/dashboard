@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import tinycolor from "tinycolor2";
 
 import { useService } from "../hooks";
@@ -18,19 +18,20 @@ const iconMap: { [key in GroupClass]?: JSX.Element } = {
 };
 
 export const Hue: React.FC = () => {
-  const [groups, send] = useService<HueServiceData>("hue", {});
+  const [groups, emit] = useService<HueServiceData>("hue", {});
 
-  const toggle = useCallback((id: string, action: HueEmitPayload) => {
-    const set = send({ id, ...action });
+  const toggle = (id: string, action: HueEmitPayload) => {
+    const set = emit({ id, ...action });
 
-    set(state => ({
-      ...state,
-      [id]: {
-        ...state![id],
-        ...action
-      }
-    }));
-  }, []);
+    if (set)
+      set(state => ({
+        ...state,
+        [id]: {
+          ...state![id],
+          ...action
+        }
+      }));
+  };
 
   return (
     <Box>

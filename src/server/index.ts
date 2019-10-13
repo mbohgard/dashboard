@@ -57,10 +57,10 @@ const fetcher = (service: Service) =>
       saveToCache(data.service, data);
       startPoll(service);
     })
-    .catch(error => {
+    .catch(e => {
       emit({
         service: service.name,
-        error
+        error: e instanceof Error ? { message: e.message, name: e.name } : e
       });
     });
 
@@ -94,7 +94,7 @@ const unsubscribe = (id: string, s?: ServiceName) => {
 };
 
 io.on("connection", socket => {
-  console.log("user connected");
+  console.log("user connected", socket.id);
 
   socket.on("subscribe", service => subscribe(socket.id, service));
   socket.on("unsubscribe", service => unsubscribe(socket.id, service));

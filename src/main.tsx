@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { render } from "react-dom";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import "dayjs/locale/sv";
 
 import { BaseStyles, colors } from "./styles";
+import { useSocket } from "./hooks";
+import { parse } from "./utils/helpers";
 
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
@@ -128,15 +130,17 @@ type ServiceError = {
 
 let errI = 0;
 
-export const ReportContext = React.createContext<ReportError>(() => {});
+export let reportError: ReportError | undefined;
+export const ConnectionContext = React.createContext<boolean>(false);
 
 const App: React.FC = () => {
+  const connected = useSocket();
   const [errors, setSerrors] = useState<ServiceError[]>([]);
   const [showErrors, setShowErrors] = useState(false);
   const [newError, setNewError] = useState(false);
 
-  const reportError: ReportError = (service, err) => {
-    console.log(err);
+  const report: ReportError = useCallback((service, e) => {
+    const err = parse(e);
     const isObj = typeof err === "object";
     const code = isObj ? err.statusCode || err.status : 0;
     const message = isObj
@@ -154,7 +158,11 @@ const App: React.FC = () => {
 
     setSerrors(s => [error, ...s.slice(0, 9)]);
     setNewError(true);
-  };
+  }, []);
+
+  useEffect(() => {
+    reportError = report;
+  }, []);
 
   const toggleError = (showErrors: boolean) => {
     setShowErrors(showErrors);
@@ -163,8 +171,8 @@ const App: React.FC = () => {
 
   return (
     <Wrapper>
-      <ErrorBoundary report={e => reportError("catch in Main", e)}>
-        <ReportContext.Provider value={reportError}>
+      <ErrorBoundary report={e => report("catch in Main", e)}>
+        <ConnectionContext.Provider value={connected}>
           <BaseStyles />
           <Container>
             <Half top>
@@ -197,7 +205,7 @@ const App: React.FC = () => {
               </ErrorsContent>
             </ErrorsContainer>
           )}
-        </ReportContext.Provider>
+        </ConnectionContext.Provider>
       </ErrorBoundary>
     </Wrapper>
   );
