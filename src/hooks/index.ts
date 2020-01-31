@@ -91,3 +91,36 @@ export const useService: UseService = <T extends ServiceData>(
 
   return [data, emit];
 };
+
+import { useRef } from "react";
+
+export const useTouchPress = (cbs: {
+  onPress?(): void;
+  onLongPress?(): void;
+}) => {
+  const timer = useRef<number>();
+  const [active, setActive] = useState(false);
+
+  const on = () => {
+    setActive(true);
+
+    if (cbs.onLongPress)
+      timer.current = setTimeout(() => {
+        cbs.onLongPress?.();
+
+        setActive(false);
+      }, 650);
+  };
+
+  const off = () => {
+    clearTimeout(timer.current);
+
+    if (active) {
+      cbs.onPress?.();
+
+      setActive(false);
+    }
+  };
+
+  return [on, off];
+};
