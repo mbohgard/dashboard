@@ -75,6 +75,7 @@ const ErrorsContainer = styled.div`
   height: 100%;
   border: solid 10px ${colors.red};
   background: rgba(0, 0, 0, 0.4);
+  z-index: 99;
 `;
 
 const ErrorsContent = styled.div`
@@ -210,5 +211,7 @@ const App: React.FC = () => {
     </Wrapper>
   );
 };
+
+if (window) window.oncontextmenu = () => false;
 
 render(<App />, document.getElementById("app"));
