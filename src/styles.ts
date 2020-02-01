@@ -26,7 +26,9 @@ export const BaseStyles = createGlobalStyle`
   
   *, *:before, *:after {
     box-sizing: inherit;
+    user-select:none;
     font: inherit;
+    -webkit-tap-highlight-color:  transparent; 
   }
 
   body {

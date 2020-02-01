@@ -35,7 +35,7 @@ const saveToCache = (s: string, data: ServiceData) =>
   (cache[s as ServiceName] = data);
 const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
 
-const emit = (data: ServiceData) => {
+export const emit = (data: ServiceData) => {
   io.emit(data.service, data);
 
   if (data.error) {
