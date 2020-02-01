@@ -48,16 +48,14 @@ export const Time: React.FC = () => {
   ]);
 
   const ts = (dayjs as any).unix(timestamp);
-  const time = ts.format("HH:mm");
-  const seconds = ts.format("ss");
-  const date = ts.format("dddd DD MMMM");
-  const year = ts.format("YYYY");
+  const [h, m, s] = ts.format("HH:mm:ss").split(":");
+  const [date, year] = ts.format("dddd DD MMMM:YYYY").split(":");
 
   return (
     <div>
       <TimeView>
-        {time}
-        <span>:{seconds}</span>
+        {h}:{m}
+        <span>:{s}</span>
       </TimeView>
       <DateView>
         {date} <span>{year}</span>

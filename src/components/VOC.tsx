@@ -3,7 +3,8 @@ import React from "react";
 import { useService } from "../hooks";
 
 import { car, locked, unlocked, power } from "./Icon";
-import { ActionButton, DimmedIconBox as Box, ButtonGrid } from "./Atoms";
+import { DimmedIconBox as Box, ButtonGrid } from "./Atoms";
+import { ActionButton } from "./Molecules";
 
 export const VOC: React.FC = () => {
   const [data] = useService<VOCServiceData>("voc");
