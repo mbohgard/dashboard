@@ -7,7 +7,9 @@ import {
   percentageOfRange,
   limiter,
   memo,
-  debounce
+  throttle,
+  roundedPercentageOf,
+  roundedValueFromPercentage
 } from "../utils/helpers";
 
 import { bed, chair, child, computer, lamp, pot, sofa, hue } from "./Icon";
@@ -53,47 +55,46 @@ export const Hue: React.FC = () => {
     [string, string] | []
   >([]);
 
-  const toggle = (id: string, action: HueEmitPayload) => {
-    const set = emit({ id, ...action });
+  const send = (id: string, payload: HueEmitPayload) => {
+    const set = emit({ id, ...payload });
 
     if (set)
       set(state => ({
         ...state,
         [id]: {
           ...state![id],
-          ...action
+          ...payload
         }
       }));
   };
 
   const adjust = useCallback(
-    debounce((value: number) => {
-      console.log(value);
-    }),
-    []
+    throttle((value: number) => {
+      const bri = roundedValueFromPercentage(value, 254);
+
+      if (adjustId && groups[adjustId].bri !== bri)
+        send(adjustId, { bri, on: Boolean(bri) });
+    }, 1000),
+    [adjustId, groups]
   );
 
   return (
     <Box>
       {hue}
       {adjustId && (
-        <Overlay closeOnPress close={() => setAdjustId([])}>
-          <Range color={adjustColor} onChange={adjust} initialValue={0} />
+        <Overlay closeOnPress close={() => setAdjustId([])} autoClose={5000}>
+          <Range
+            color={adjustColor}
+            onChange={adjust}
+            initialValue={roundedPercentageOf(groups[adjustId].bri, 254)}
+          />
         </Overlay>
       )}
       <ButtonGrid>
-        <ActionButton
-          key="hej"
-          color="white"
-          active={false}
-          onLongPress={() => setAdjustId(["hej", "white"])}
-        >
-          {iconMap.Kitchen}
-        </ActionButton>
         {Object.keys(groups)
-          .filter(k => Object.keys(iconMap).includes(groups[k].class))
-          .map(k => {
-            const { hue, sat, bri, ct, ...group } = groups[k];
+          .filter(id => Object.keys(iconMap).includes(groups[id].class))
+          .map(id => {
+            const { hue, sat, bri, ct, ...group } = groups[id];
             const icon = iconMap[group.class];
 
             Array.isArray;
@@ -105,8 +106,8 @@ export const Hue: React.FC = () => {
                 color={color}
                 active={group.on}
                 size={group.name === "Hjalmar" ? "48px" : undefined}
-                onPress={() => toggle(k, { on: !group.on })}
-                onLongPress={() => setAdjustId([k, color])}
+                onPress={() => send(id, { on: !group.on })}
+                onLongPress={() => setAdjustId([id, color])}
               >
                 {icon}
               </ActionButton>
