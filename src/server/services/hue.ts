@@ -3,6 +3,7 @@ import request from "request";
 import * as secrets from "../../../secrets";
 import * as config from "../../../config";
 import { sec2Ms } from "../../utils/time";
+import { emit } from "../";
 
 const url = `https://${config.hue.ip}/api/${secrets.hue}/groups`;
 
@@ -65,12 +66,22 @@ export const listener = ({ id, ...payload }: HueEmitPayload) => {
       rejectUnauthorized: false,
       json: true
     },
-    (error?, _?, body?: HueActionReponse) => {
-      const err = body && body.find(item => item.error !== undefined);
+    (error, { statusCode }, body?: HueActionReponse) => {
+      try {
+        if (error) throw error;
 
-      if (error)
-        console.error("Something went wrong with the Hue action", error);
-      if (err) console.error(err.error);
+        const err =
+          statusCode === 200 && body?.find(item => item.error !== undefined);
+
+        if (err) throw err;
+      } catch (e) {
+        console.error("Something went wrong with the Hue action", e);
+
+        emit({
+          service: "hue",
+          error: e instanceof Error ? { message: e.message, name: e.name } : e
+        });
+      }
     }
   );
 };

@@ -1,5 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import styled from "styled-components";
+
+import { activeColor } from "./Molecules";
+import { roundedPercentageOf } from "../utils/helpers";
 
 type Color = {
   color: string;
@@ -53,7 +56,7 @@ const Slider: React.FC<{
 
     if (pos > elHeight) return 100;
 
-    return Math.round((pos / elHeight) * 100);
+    return roundedPercentageOf(pos, elHeight);
   };
 
   const change = (e: React.TouchEvent) =>
@@ -77,11 +80,13 @@ type Props = {
 } & Partial<Color>;
 
 export const Range: React.FC<Props> = ({
-  color = "white",
+  color: clr = "white",
   initialValue = 0,
   onChange
 }) => {
   const [value, setValue] = useState(initialValue);
+
+  const color = useMemo(() => activeColor(clr), [clr]);
 
   const change = (value: number) => {
     setValue(value);

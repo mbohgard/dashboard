@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import tinycolor from "tinycolor2";
 import styled, { css } from "styled-components";
 
@@ -6,7 +6,7 @@ import { limiter, areEqual } from "../utils/helpers";
 import { useTouchPress } from "../hooks";
 import { colors } from "../styles";
 
-const activeBorder = (c: string = "#fff") => {
+export const activeColor = (c: string = "#fff") => {
   const color = tinycolor(c).toHsv();
 
   return tinycolor({
@@ -29,8 +29,7 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
   align-items: center;
   border-radius: 8px;
   border: solid 3px
-    ${({ active, color }) =>
-      active ? activeBorder(color) : colors.superDimmed};
+    ${({ active, color }) => (active ? activeColor(color) : colors.superDimmed)};
   width: 110px;
   height: 100px;
   cursor: pointer;
@@ -78,17 +77,43 @@ const OverlayContainer = styled.div`
 `;
 
 type OverlayProps = {
+  autoClose?: number;
   closeOnPress?: boolean;
   show?: boolean;
   close?(): void;
 };
 
+const events = ["touchstart", "touchmove", "touchend"] as const;
+
 export const Overlay: React.FC<OverlayProps> = ({
+  autoClose,
   children,
   close,
   closeOnPress
-}) => (
-  <OverlayContainer onClick={(closeOnPress || undefined) && close}>
-    {children}
-  </OverlayContainer>
-);
+}) => {
+  useEffect(() => {
+    if (!autoClose || !close) return;
+
+    let t: number;
+
+    const resetTimer = () => {
+      clearTimeout(t);
+
+      t = setTimeout(close, autoClose);
+    };
+
+    events.forEach(e => document.addEventListener(e, resetTimer));
+
+    return () => {
+      events.forEach(e => document.removeEventListener(e, resetTimer));
+
+      clearTimeout(t);
+    };
+  }, []);
+
+  return (
+    <OverlayContainer onClick={(closeOnPress || undefined) && close}>
+      {children}
+    </OverlayContainer>
+  );
+};
