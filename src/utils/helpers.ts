@@ -10,7 +10,7 @@ export const roundedValueFromPercentage = (
   max: number = 0
 ) => Math.round((percentage / 100) * max);
 
-export const def = (...things: any[]) => !things.some(x => x === undefined);
+export const def = (...things: any[]) => !things.some((x) => x === undefined);
 
 export const limiter = (b: number, limit: number) => (b < limit ? limit : b);
 
@@ -108,3 +108,6 @@ export const throttle = <F extends (...args: any[]) => any>(
       }
     });
 };
+
+export const wait = (delay: number = 100) =>
+  new Promise((resolve) => setTimeout(resolve, delay));

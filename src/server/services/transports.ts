@@ -1,30 +1,11 @@
-import request from "request";
+import axios from "axios";
 
 import * as secrets from "../../../secrets";
 import * as config from "../../../config";
 import { min2Ms, sec2Ms } from "../../utils/time";
+import { wait } from "../../utils/helpers";
 
 export const name = "transports";
-
-const getDelay = () => {
-  const time = new Date();
-  const day = time.getDay();
-  const weekend = day === 0 || day === 6;
-  const hour = time.getHours();
-  const dayTime = (weekend ? hour >= 8 : hour >= 7) && hour <= 21;
-  const peakTime =
-    !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 16));
-
-  if (peakTime) {
-    return sec2Ms(20);
-  }
-
-  if (dayTime) {
-    return sec2Ms(30);
-  }
-
-  return min2Ms(1);
-};
 
 const getTransportUrl = (types: string[], siteId: string) => {
   const q = (t: string) => `&${t}=${String(types.includes(t))}`;
@@ -36,51 +17,40 @@ const getTransportUrl = (types: string[], siteId: string) => {
   )}${q("tram")}`;
 };
 
-const callers = config.transports.map(t => (delay: number): ServiceResponse<
-  Timetable
-> =>
-  new Promise(resolve =>
-    setTimeout(
-      () =>
-        request(getTransportUrl(t.types, t.siteId), (error, _, body) => {
-          try {
-            resolve({
-              service: "transports",
-              error,
-              data: body ? JSON.parse(body) : undefined
-            });
-          } catch (error) {
-            resolve({
-              service: "transports",
-              error
-            });
-          }
-        }),
-      delay
-    )
+const callers = config.transports.map((config) => (delay: number) =>
+  wait(delay).then(() =>
+    axios
+      .get<Timetable>(getTransportUrl(config.types, config.siteId))
+      .then(({ data }) => ({
+        data,
+      }))
   )
 );
 
-const requests = async () => {
-  let results: ServiceData | undefined;
+export const get = () =>
+  Promise.all(callers.map((call, i) => call(sec2Ms(i * 2)))).then((responses) =>
+    responses.reduce<TransportsServiceData>(
+      (acc, r) => {
+        const data = r.data ? [...(acc.data || []), r.data] : r.data;
 
-  for (const call of callers) {
-    const result = await call(results ? sec2Ms(2) : 0);
+        return { ...acc, data };
+      },
+      { service: name }
+    )
+  );
 
-    results = results
-      ? {
-          ...results,
-          data: [
-            ...(Array.isArray(results.data) ? results.data : [results.data]),
-            result.data
-          ]
-        }
-      : result;
-  }
+export const delay = () => {
+  const time = new Date();
+  const day = time.getDay();
+  const weekend = day === 0 || day === 6;
+  const hour = time.getHours();
+  const dayTime = (weekend ? hour >= 8 : hour >= 7) && hour <= 21;
+  const peakTime =
+    !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 16));
 
-  return results as TransportsServiceData;
+  if (peakTime) sec2Ms(20);
+
+  if (dayTime) sec2Ms(30);
+
+  return min2Ms(1);
 };
-
-export const get = () => requests();
-
-export const delay = () => getDelay();

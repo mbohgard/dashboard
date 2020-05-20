@@ -9,7 +9,7 @@ import {
   memo,
   throttle,
   roundedPercentageOf,
-  roundedValueFromPercentage
+  roundedValueFromPercentage,
 } from "../utils/helpers";
 
 import { bed, chair, child, computer, lamp, pot, sofa, hue } from "./Icon";
@@ -24,7 +24,7 @@ const iconMap: { [key in GroupClass]?: JSX.Element } = {
   "Kids bedroom": child,
   Kitchen: pot,
   Hallway: lamp,
-  Computer: computer
+  Computer: computer,
 };
 
 const getColor = memo((hue, sat, bri, ct) =>
@@ -33,7 +33,7 @@ const getColor = memo((hue, sat, bri, ct) =>
         // hue in degrees
         h: (hue! / 65535) * 360,
         s: sat! / 254,
-        v: limiter(bri! / 254, 0.15)
+        v: limiter(bri! / 254, 0.15),
       }).toHexString()
     : def(ct, bri)
     ? tinycolor({
@@ -44,7 +44,7 @@ const getColor = memo((hue, sat, bri, ct) =>
             percentageOfRange(153, 500)(ct!)
           )
           .toHsv(),
-        v: limiter(bri! / 254, 0.15)
+        v: limiter(bri! / 254, 0.15),
       }).toHexString()
     : "#ddd"
 );
@@ -59,12 +59,12 @@ export const Hue: React.FC = () => {
     const set = emit({ id, ...payload });
 
     if (set)
-      set(state => ({
+      set((state) => ({
         ...state,
         [id]: {
           ...state![id],
-          ...payload
-        }
+          ...payload,
+        },
       }));
   };
 
@@ -92,8 +92,8 @@ export const Hue: React.FC = () => {
       )}
       <ButtonGrid>
         {Object.keys(groups)
-          .filter(id => Object.keys(iconMap).includes(groups[id].class))
-          .map(id => {
+          .filter((id) => Object.keys(iconMap).includes(groups[id].class))
+          .map((id) => {
             const { hue, sat, bri, ct, ...group } = groups[id];
             const icon = iconMap[group.class];
 
