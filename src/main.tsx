@@ -154,10 +154,10 @@ const App: React.FC = () => {
       service,
       message,
       name,
-      time: dayjs().format("DD/MM HH:mm")
+      time: dayjs().format("DD/MM HH:mm:ss"),
     };
 
-    setSerrors(s => [error, ...s.slice(0, 9)]);
+    setSerrors((s) => [error, ...s.slice(0, 9)]);
     setNewError(true);
   }, []);
 
@@ -172,7 +172,7 @@ const App: React.FC = () => {
 
   return (
     <Wrapper>
-      <ErrorBoundary report={e => report("catch in Main", e)}>
+      <ErrorBoundary report={(e) => report("catch in Main", e)}>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
           <Container>
@@ -197,8 +197,8 @@ const App: React.FC = () => {
           {showErrors && (
             <ErrorsContainer onClick={() => toggleError(false)}>
               <ErrorsContent>
-                {errors.map(err => (
-                  <ErrorBox key={err.id} onClick={e => e.stopPropagation()}>
+                {errors.map((err) => (
+                  <ErrorBox key={err.id} onClick={(e) => e.stopPropagation()}>
                     {err.code ? `(${err.code}) ` : ""}
                     {err.name}: {err.message} [by {err.service} at {err.time}]
                   </ErrorBox>
