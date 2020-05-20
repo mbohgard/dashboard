@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import io from "socket.io-client";
 
-import { reportError, ReportError, ConnectionContext } from "../main";
+import { reportError, ConnectionContext } from "../main";
 
 const socket = io();
 
@@ -53,34 +53,30 @@ export const useService: UseService = <T extends ServiceData>(
   const condition = short ? arg1 : arg2;
   const [data, setData] = useState<T["data"]>(short ? undefined : arg1);
 
-  const report: ReportError = (service, error) => {
-    if (reportError) reportError(service, error);
-  };
+  useEffect(() => {
+    const listener = (res: T) =>
+      condition(res)
+        ? setData(res.data)
+        : reportError?.(res.service, res.error);
 
-  const listener = (res: T) =>
-    condition(res) ? setData(res.data) : report(res.service, res.error);
+    if (connected) {
+      socket.on(serviceName, listener);
+      socket.emit("subscribe", serviceName);
+    }
 
-  const init = () => {
-    socket.on(serviceName, listener);
-    socket.emit("subscribe", serviceName);
-  };
+    return () => {
+      socket.emit("unsubscribe", serviceName);
+      socket.off(serviceName, listener);
+    };
+  }, [connected]);
 
-  const cleanup = () => {
-    socket.emit("unsubscribe", serviceName);
-    socket.off(serviceName, listener);
-  };
-
-  useEffect(() => (connected ? init() : cleanup()), [connected]);
-
-  useEffect(() => cleanup, []);
-
-  const emit: Emit<T["data"]> = payload => {
+  const emit: Emit<T["data"]> = (payload) => {
     if (connected) {
       socket.emit(serviceName, payload);
 
       return setData;
     } else {
-      report(
+      reportError?.(
         serviceName,
         Error("Can't emit message due to lost server connection.")
       );
