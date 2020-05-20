@@ -35,7 +35,7 @@ const saveToCache = (s: string, data: ServiceData) =>
   (cache[s as ServiceName] = data);
 const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
 
-export const emit = (data: ServiceData) => {
+const emit = (data: ServiceData) => {
   io.emit(data.service, data);
 
   if (data.error) {
@@ -49,18 +49,32 @@ export const emit = (data: ServiceData) => {
   }
 };
 
+const formatError = (e: any) => {
+  if (e === undefined) return e;
+
+  if (e instanceof Error) return { message: e.message, name: e.name };
+  else {
+    try {
+      return JSON.stringify(e);
+    } catch (error) {
+      if ("toString" in e) return e.toString();
+      else return "Unknown error";
+    }
+  }
+};
+
 const fetcher = (service: Service) =>
   service
     .get()
-    .then((data: ServiceData) => {
-      emit(data);
+    .then((data) => {
+      emit({ ...data, error: formatError(data.error) });
       saveToCache(data.service, data);
       startPoll(service);
     })
-    .catch(e => {
+    .catch((e) => {
       emit({
         service: service.name,
-        error: e instanceof Error ? { message: e.message, name: e.name } : e
+        error: formatError(e),
       });
     });
 
@@ -76,7 +90,7 @@ const subscribe = (id: string, s: ServiceName) => {
     else {
       emit({
         service: s,
-        error: Error(`Service ${s} has the wrong format or doesn't exist`)
+        error: Error(`Service ${s} has the wrong format or doesn't exist`),
       });
     }
   }
@@ -89,26 +103,33 @@ const unsubscribe = (id: string, s?: ServiceName) => {
   else {
     subscribers
       .getServices()
-      .forEach(s => subscribers.get(s).length === 0 && stopPoll(s));
+      .forEach((s) => subscribers.get(s).length === 0 && stopPoll(s));
   }
 };
 
-io.on("connection", socket => {
+io.on("connection", (socket) => {
   console.log("user connected", socket.id);
 
-  socket.on("subscribe", service => subscribe(socket.id, service));
-  socket.on("unsubscribe", service => unsubscribe(socket.id, service));
+  socket.on("subscribe", (service) => subscribe(socket.id, service));
+  socket.on("unsubscribe", (service) => unsubscribe(socket.id, service));
 
   socket.on("disconnect", () => {
     unsubscribe(socket.id);
   });
 
   // register listeners
-  Object.keys(services).forEach(key => {
+  Object.keys(services).forEach((key) => {
     const service = services[key as keyof typeof services];
 
     if (service.name && "listener" in service) {
-      socket.on(service.name, service.listener);
+      socket.on(service.name, (payload) => {
+        service.listener(payload).catch((e) => {
+          emit({
+            service: service.name,
+            error: formatError(e),
+          });
+        });
+      });
     }
   });
 });
