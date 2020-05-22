@@ -1,9 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import io from "socket.io-client";
 
+import { socket } from "../utils/socket";
 import { reportError, ConnectionContext } from "../main";
-
-const socket = io();
 
 export const useSocket = () => {
   const [connected, setConnected] = useState(socket.connected);

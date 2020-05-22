@@ -6,6 +6,7 @@ import "dayjs/locale/sv";
 
 import { BaseStyles, colors } from "./styles";
 import { useSocket } from "./hooks";
+import { socket } from "./utils/socket";
 import { parse } from "./utils/helpers";
 
 import { Weather } from "./components/Weather";
@@ -16,6 +17,13 @@ import { VOC } from "./components/VOC";
 import { warning } from "./components/Icon";
 
 dayjs.locale("sv");
+
+let version: string | undefined;
+
+socket.on("server", ({ data }: ServiceData) => {
+  if (version !== undefined && version !== data.version) location.reload();
+  else version = data.version;
+});
 
 const Wrapper = styled.div`
   padding: 30px;
