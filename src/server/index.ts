@@ -5,6 +5,8 @@ import http from "http";
 import fs from "fs";
 import ws from "socket.io";
 
+import { version } from "../../package.json";
+
 import * as subscribers from "./subscribers";
 import services, { ServiceName } from "./services";
 
@@ -132,6 +134,8 @@ io.on("connection", (socket) => {
       });
     }
   });
+
+  emit({ service: "server", data: { version } });
 });
 
 if (prod) {
