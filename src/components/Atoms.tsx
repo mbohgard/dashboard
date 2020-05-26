@@ -9,25 +9,12 @@ export const ButtonGrid = styled.div`
   grid-auto-flow: column;
 `;
 
-export const DimmedIconBox = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin: 0 20px;
-  margin-right: 0;
-  position: relative;
-
-  > svg {
-    height: 140px;
-    width: 140px;
-    margin-top: 10px;
-    margin-right: 10px;
-    position: absolute;
-    top: 12px;
-    left: -34px;
-    z-index: -1;
-
-    path {
-      fill: ${colors.ultraDimmed};
-    }
-  }
+export const Status = styled.div<{ ok: boolean }>`
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background: ${({ ok }) => (ok ? colors.green : colors.red)};
 `;

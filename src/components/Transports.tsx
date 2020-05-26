@@ -1,12 +1,10 @@
 import React, { useMemo } from "react";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
-import { Omit } from "utility-types";
 
 import { useService } from "../hooks";
 import { colors } from "../styles";
-import { bus as busIcon, train as trainIcon } from "./Icon";
-import { DimmedIconBox as Box } from "./Atoms";
+import { ServiceBox } from "./Molecules";
 
 const Container = styled.div`
   display: flex;
@@ -22,7 +20,7 @@ type TimeProps = { empty?: boolean };
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
   font-size: 60px;
-  margin-top: 8px;
+  margin-top: 4px;
   line-height: 1.2;
   white-space: nowrap;
   min-width: 200px;
@@ -66,7 +64,7 @@ const getTransports = (
 ) => {
   const timetable =
     data &&
-    data.find(d => {
+    data.find((d) => {
       const transport = d && d.ResponseData && d.ResponseData[t];
 
       return transport ? transport.length > 0 : false;
@@ -80,18 +78,17 @@ const getTransports = (
 type TransportItems = (TransportItem | undefined)[];
 
 type TransportProps = {
-  icon: JSX.Element;
   items?: TransportItems;
   placeholderText: string;
+  title: string;
 };
 
 const Transport: React.SFC<TransportProps> = ({
-  icon,
   items,
-  placeholderText
+  placeholderText,
+  title,
 }) => (
-  <Box>
-    {icon}
+  <ServiceBox title={title}>
     <div>
       {items ? (
         items.map((b, i) => (
@@ -101,7 +98,7 @@ const Transport: React.SFC<TransportProps> = ({
         <Placeholder>{placeholderText}</Placeholder>
       )}
     </div>
-  </Box>
+  </ServiceBox>
 );
 
 const fill = (x: TransportItems): TransportItems =>
@@ -119,29 +116,29 @@ export const Transports: React.FC = () => {
     const t = getTransports("Trains", data);
 
     return [
-      b && fill(b.filter(b => (!b ? true : b.Destination.includes("Väsby")))),
+      b && fill(b.filter((b) => (!b ? true : b.Destination.includes("Väsby")))),
       t &&
         fill(
-          t.filter(t =>
+          t.filter((t) =>
             !t
               ? true
               : t.JourneyDirection === 1 &&
                 dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
           )
-        )
+        ),
     ];
   }, [data]);
 
   return (
     <Container>
       <Transport
-        icon={busIcon}
         items={buses}
+        title="Buss"
         placeholderText="Väntar på bussdata..."
       />
       <Transport
-        icon={trainIcon}
         items={trains}
+        title="Tåg"
         placeholderText="Väntar på tågdata..."
       />
     </Container>

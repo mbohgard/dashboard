@@ -1,8 +1,8 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 
-import { activeColor } from "./Molecules";
 import { roundedPercentageOf } from "../utils/helpers";
+import { colors } from "../styles";
 
 type Color = {
   color: string;
@@ -22,7 +22,7 @@ const Container = styled.div`
 
 const Value = styled.h3<Color>`
   font-size: 50px;
-  color: ${p => p.color};
+  color: ${(p) => p.color};
   text-align: center;
   margin-bottom: 20px;
 `;
@@ -37,14 +37,16 @@ const SliderContainer = styled.div`
 `;
 
 const SliderFill = styled.div<Color & Value>`
-  background: ${p => p.color};
-  height: ${p => p.value}%;
+  background: ${(p) => p.color};
+  height: ${(p) => p.value}%;
 `;
 
-const Slider: React.FC<{
-  onChange(value: number): void;
-} & Color &
-  Value> = ({ color, onChange, value }) => {
+const Slider: React.FC<
+  {
+    onChange(value: number): void;
+  } & Color &
+    Value
+> = ({ color, onChange, value }) => {
   const el = useRef<HTMLDivElement>(null);
 
   const getPercentage = (y: number) => {
@@ -67,7 +69,7 @@ const Slider: React.FC<{
       ref={el}
       onTouchStart={change}
       onTouchMove={change}
-      onClick={e => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <SliderFill color={color} value={value} />
     </SliderContainer>
@@ -80,13 +82,11 @@ type Props = {
 } & Partial<Color>;
 
 export const Range: React.FC<Props> = ({
-  color: clr = "white",
+  color = colors.lightGray,
   initialValue = 0,
-  onChange
+  onChange,
 }) => {
   const [value, setValue] = useState(initialValue);
-
-  const color = useMemo(() => activeColor(clr), [clr]);
 
   const change = (value: number) => {
     setValue(value);

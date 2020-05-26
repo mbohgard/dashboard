@@ -1,18 +1,28 @@
+export const round = (n: number) =>
+  n > 1 ? Math.round(n) : Number(n.toFixed(2));
+
+export const roundValues = <T extends object>(obj: T) =>
+  Object.entries(obj).reduce(
+    (acc, [k, v]) => ({ ...acc, [k]: round(v) }),
+    {} as T
+  );
+
 export const percentageOfRange = (min: number, max: number) => (
   input: number
-) => ((input - min) * 100) / (max - min);
+) => (max ? ((input - min) * 100) / (max - min) : 0);
 
 export const roundedPercentageOf = (value: number = 0, max: number = 0) =>
-  Math.round((value / max) * 100);
+  round((value / max) * 100);
 
 export const roundedValueFromPercentage = (
   percentage: number = 0,
   max: number = 0
-) => Math.round((percentage / 100) * max);
+) => round((percentage / 100) * max);
 
 export const def = (...things: any[]) => !things.some((x) => x === undefined);
 
 export const limiter = (b: number, limit: number) => (b < limit ? limit : b);
+export const compressor = (b: number, min: number) => (b > min ? b : min);
 
 export const parse = (input: any) => {
   if (typeof input !== "string") return input;
@@ -24,6 +34,21 @@ export const parse = (input: any) => {
   }
 };
 
+export const createMedian = () => {
+  let i = 0;
+  let sum = 0;
+
+  return (value: number) => {
+    i++;
+    sum += value;
+
+    return {
+      sum,
+      median: sum / i,
+    };
+  };
+};
+
 type Obj = { [s: string]: any };
 
 export const areEqual = (a: Obj, b: Obj) => {
@@ -32,6 +57,13 @@ export const areEqual = (a: Obj, b: Obj) => {
   }
 
   return true;
+};
+
+export const pick = <T, K extends keyof T>(obj: T, picked: K[]) => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (picked.includes(key as K)) return { ...acc, [key]: value };
+    else return acc;
+  }, {} as Pick<T, K>);
 };
 
 export const memo = <F extends (...args: any[]) => any>(func: F) => {

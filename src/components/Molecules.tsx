@@ -1,26 +1,78 @@
 import React, { useEffect } from "react";
-import tinycolor from "tinycolor2";
 import styled, { css } from "styled-components";
 
-import { limiter, areEqual } from "../utils/helpers";
 import { useTouchPress } from "../hooks";
 import { colors } from "../styles";
 
-export const activeColor = (c: string = "#fff") => {
-  const color = tinycolor(c).toHsv();
+type ServiceBoxProps = {
+  type?: "normal" | "icons";
+  title?: string;
+};
 
-  return tinycolor({
-    ...color,
-    v: limiter(color.v, 0.7)
-  }).toRgbString();
+const ServiceContainer = styled.div`
+  margin: 0 20px;
+  margin-right: 0;
+`;
+
+const ServiceContent = styled.div<ServiceBoxProps>`
+  display: flex;
+  flex-direction: row;
+  position: relative;
+`;
+
+const ServiceTitle = styled.h3<ServiceBoxProps>`
+  color: ${colors.gray};
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 20px;
+  text-transform: uppercase;
+  width: 100%;
+  margin-bottom: 5px;
+
+  ${({ type }) =>
+    type === "icons" &&
+    css`
+      padding: 0 0 10px 5px;
+    `};
+
+  > span {
+    margin-right: 10px;
+  }
+
+  &:after {
+    content: "";
+    width: 100%;
+    height: 0;
+    border: solid 1px ${colors.superDimmed};
+  }
+`;
+
+export const ServiceBox: React.FC<ServiceBoxProps> = ({
+  children,
+  title,
+  ...props
+}) => {
+  return (
+    <ServiceContainer>
+      {title && (
+        <ServiceTitle {...props}>
+          <span>{title}</span>
+        </ServiceTitle>
+      )}
+      <ServiceContent>{children}</ServiceContent>
+    </ServiceContainer>
+  );
 };
 
 type ActionButtonProps = {
   active: boolean;
   color?: string;
+  background?: string;
+  id: string;
   size?: string;
-  onPress?(): void;
-  onLongPress?(): void;
+  onPress?(id: string, active: boolean): void;
+  onLongPress?(id: string): void;
 };
 
 const ActionButtonLink = styled.a<ActionButtonProps>`
@@ -28,19 +80,25 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
   justify-content: center;
   align-items: center;
   border-radius: 8px;
-  border: solid 3px
-    ${({ active, color }) => (active ? activeColor(color) : colors.superDimmed)};
+  box-shadow: inset 0 0 0 3px
+    ${({ active, background }) =>
+      active
+        ? background
+          ? "transparent"
+          : colors.white
+        : colors.superDimmed};
   width: 110px;
   height: 100px;
   cursor: pointer;
+  background: ${({ active, background }) =>
+    active ? background : "transparent"};
 
   svg {
     ${({ size }) =>
       css`
-        height: ${size || "55px"};
-        width: ${size || "55px"};
+        height: ${size || "50px"};
+        width: ${size || "50px"};
       `}
-
     path {
       fill: ${({ active, color = colors.white }) =>
         active ? color : colors.superDimmed};
@@ -50,16 +108,15 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
 
 export const ActionButton: React.FC<ActionButtonProps> = React.memo(
   ({ onPress, onLongPress, ...props }) => {
-    const [press, release] = useTouchPress({ onPress, onLongPress });
+    const [press, release] = useTouchPress({
+      onPress: () => onPress?.(props.id, props.active),
+      onLongPress: () => onLongPress?.(props.id),
+    });
 
     return (
       <ActionButtonLink {...props} onTouchStart={press} onTouchEnd={release} />
     );
-  },
-  (
-    { onPress: _, onLongPress: __, ...pp },
-    { onPress: ___, onLongPress: ____, ...p }
-  ) => areEqual(pp, p)
+  }
 );
 
 const OverlayContainer = styled.div`
@@ -80,7 +137,7 @@ type OverlayProps = {
   autoClose?: number;
   closeOnPress?: boolean;
   show?: boolean;
-  close?(): void;
+  close?(...args: any[]): void;
 };
 
 const events = ["touchstart", "touchmove", "touchend"] as const;
@@ -89,7 +146,7 @@ export const Overlay: React.FC<OverlayProps> = ({
   autoClose,
   children,
   close,
-  closeOnPress
+  closeOnPress,
 }) => {
   useEffect(() => {
     if (!autoClose || !close) return;
@@ -102,17 +159,17 @@ export const Overlay: React.FC<OverlayProps> = ({
       t = setTimeout(close, autoClose);
     };
 
-    events.forEach(e => document.addEventListener(e, resetTimer));
+    events.forEach((e) => document.addEventListener(e, resetTimer));
 
     return () => {
-      events.forEach(e => document.removeEventListener(e, resetTimer));
+      events.forEach((e) => document.removeEventListener(e, resetTimer));
 
       clearTimeout(t);
     };
   }, []);
 
   return (
-    <OverlayContainer onClick={(closeOnPress || undefined) && close}>
+    <OverlayContainer onClick={() => closeOnPress !== false && close?.()}>
       {children}
     </OverlayContainer>
   );
