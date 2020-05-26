@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 
 import { socket } from "../utils/socket";
 import { reportError, ConnectionContext } from "../main";
@@ -24,24 +24,24 @@ export const useSocket = () => {
   return connected;
 };
 
-type Emit<D> = (
-  payload: any
+type Emit<P, D> = (
+  payload: P
 ) => React.Dispatch<React.SetStateAction<D>> | undefined;
 
 interface UseService {
-  <T extends ServiceData>(
+  <T extends ServiceData, P = any>(
     serviceName: string,
     condition?: (res: T) => boolean
-  ): [T["data"], Emit<T["data"]>];
+  ): [T["data"], Emit<P, T["data"]>];
 
-  <T extends ServiceData>(
+  <T extends ServiceData, P = any>(
     serviceName: string,
     initialData: Required<T>["data"],
     condition?: (res: T) => boolean
-  ): [Required<T>["data"], Emit<Required<T>["data"]>];
+  ): [Required<T>["data"], Emit<P, Required<T>["data"]>];
 }
 
-export const useService: UseService = <T extends ServiceData>(
+export const useService: UseService = <T extends ServiceData, P = any>(
   serviceName: any,
   arg1?: any,
   arg2: any = (res: T) => Boolean(res.data)
@@ -68,20 +68,23 @@ export const useService: UseService = <T extends ServiceData>(
     };
   }, [connected]);
 
-  const emit: Emit<T["data"]> = (payload) => {
-    if (connected) {
-      socket.emit(serviceName, payload);
+  const emit: Emit<P, T["data"]> = useCallback(
+    <P>(payload: P) => {
+      if (connected) {
+        socket.emit(serviceName, payload);
 
-      return setData;
-    } else {
-      reportError?.(
-        serviceName,
-        Error("Can't emit message due to lost server connection.")
-      );
+        return setData;
+      } else {
+        reportError?.(
+          serviceName,
+          Error("Can't emit message due to lost server connection.")
+        );
 
-      return undefined;
-    }
-  };
+        return undefined;
+      }
+    },
+    [connected]
+  );
 
   return [data, emit];
 };

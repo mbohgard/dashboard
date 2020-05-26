@@ -60,21 +60,3 @@ export const delay = () => {
 
   return min2Ms(1);
 };
-
-// export const listener = ({ id, ...payload }: HueEmitPayload) => {
-//   request.put(
-//     {
-//       url: `${url}/${id}/action`,
-//       body: payload,
-//       rejectUnauthorized: false,
-//       json: true
-//     },
-//     (error?, _?, body?: HueActionReponse) => {
-//       const err = body && body.find(item => item.error !== undefined);
-
-//       if (error)
-//         console.error("Something went wrong with the Hue action", error);
-//       if (err) console.error(err.error);
-//     }
-//   );
-// };

@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
-import tinycolor from "tinycolor2";
+import { TinyColor } from "@ctrl/tinycolor";
 
 import { useService } from "../hooks";
 import { colors } from "../styles";
@@ -24,7 +24,7 @@ type SunData = {
 const percentage = percentageOfRange(-15, 30);
 
 const param = (params: Parameter[], name: string) =>
-  params.find(p => p.name === name)!.values[0];
+  params.find((p) => p.name === name)!.values[0];
 
 const minutes = (t: Dayjs) => t.minute() + t.hour() * 60;
 
@@ -77,16 +77,16 @@ type WeatherProps = {
 
 const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => {
   const deg = Math.round(param(data.parameters, "t"));
-  const color = tinycolor
-    .mix(tinycolor(colors.cold), tinycolor(colors.hot), percentage(deg))
+  const color = new TinyColor(colors.cold)
+    .mix(new TinyColor(colors.hot), percentage(deg))
     .toHsv();
-  const boosted = {
+  const boosted = new TinyColor({
     ...color,
-    v: 100
-  };
+    v: 100,
+  }).toString("hex6") as string;
 
   return (
-    <DegreesContainer type={type} color={tinycolor(boosted).toString("hex6")}>
+    <DegreesContainer type={type} color={boosted}>
       <span>{deg}</span>
       {celsius}
     </DegreesContainer>
@@ -168,7 +168,7 @@ const SmallWrapper = styled.div`
   max-width: 100%;
   width: 100%;
   justify-content: space-between;
-  margin-top: 40px;
+  margin-top: 25px;
 `;
 
 const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
@@ -186,17 +186,17 @@ const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
 
 export const SmallWeather: React.SFC<{ data: TimeSerie[]; sun?: SunData }> = ({
   data,
-  sun
+  sun,
 }) => (
   <SmallWrapper>
     {data
-      .filter(x => {
+      .filter((x) => {
         const hour = dayjs(x.validTime).hour();
 
         return hour > 7 && hour < 22;
       })
       .filter((_, ix) => ix < 10)
-      .map(t => (
+      .map((t) => (
         <Small key={t.validTime} data={t} sun={sun} />
       ))}
   </SmallWrapper>
@@ -207,7 +207,7 @@ export type Props = {
 };
 
 export const Weather: React.FC<Props> = ({ type = "small" }) => {
-  const [data] = useService<WeatherServiceData>("weather", res =>
+  const [data] = useService<WeatherServiceData>("weather", (res) =>
     Boolean(res.data && res.data.timeSeries)
   );
 
@@ -222,7 +222,7 @@ export const Weather: React.FC<Props> = ({ type = "small" }) => {
       sunrise,
       sunriseMinutes: minutes(sunrise),
       sunset,
-      sunsetMinutes: minutes(sunset)
+      sunsetMinutes: minutes(sunset),
     };
 
   return type === "small" ? (

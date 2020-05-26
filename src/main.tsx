@@ -9,6 +9,7 @@ import { useSocket } from "./hooks";
 import { socket } from "./utils/socket";
 import { parse } from "./utils/helpers";
 
+import { Status } from "./components/Atoms";
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
@@ -29,6 +30,7 @@ const Wrapper = styled.div`
   padding: 30px;
   max-height: 100%;
   height: 100%;
+  position: relative;
 `;
 
 const Container = styled.div`
@@ -183,6 +185,7 @@ const App: React.FC = () => {
       <ErrorBoundary report={(e) => report("catch in Main", e)}>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
+          <Status ok={connected} />
           <Container>
             <Half top>
               <Weather type="big" />
