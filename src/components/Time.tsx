@@ -6,10 +6,11 @@ import { useService } from "../hooks";
 import { colors } from "../styles";
 
 const TimeView = styled.h2`
-  font-size: 180px;
+  font-size: 190px;
   font-weight: 300;
   text-align: right;
   letter-spacing: -7px;
+  line-height: 0.8;
 
   span {
     font-size: 80px;
@@ -23,7 +24,7 @@ const DateView = styled.h4`
   font-size: 40px;
   font-weight: 300;
   text-align: right;
-  margin-top: 14px;
+  margin-top: 30px;
 
   span {
     color: ${colors.dimmed};

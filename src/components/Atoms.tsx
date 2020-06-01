@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import { colors } from "../styles";
 
@@ -30,5 +30,42 @@ export const Svg = styled.svg.attrs(({ viewBox }: { viewBox?: string }) => ({
 
   path {
     fill: white;
+  }
+`;
+
+const bounce = keyframes`
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+`;
+
+export const Loader = styled.div`
+  width: 40px;
+  height: 40px;
+
+  position: relative;
+  margin: 0;
+
+  &:before,
+  &:after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.5;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    animation: ${bounce} 2s infinite ease-in-out;
+  }
+
+  &:after {
+    animation-delay: -1s;
   }
 `;

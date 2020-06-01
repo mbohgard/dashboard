@@ -6,6 +6,8 @@ import { TinyColor } from "@ctrl/tinycolor";
 import { useService } from "../hooks";
 import { colors } from "../styles";
 import { percentageOfRange } from "../utils/helpers";
+
+import { Loader } from "./Atoms";
 import { WeatherIcon } from "./WeatherIcon";
 import { Icon } from "./Icon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
@@ -168,7 +170,7 @@ const SmallWrapper = styled.div`
   max-width: 100%;
   width: 100%;
   justify-content: space-between;
-  margin-top: 25px;
+  margin: 25px 0;
 `;
 
 const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
@@ -211,7 +213,7 @@ export const Weather: React.FC<Props> = ({ type = "small" }) => {
     Boolean(res.data && res.data.timeSeries)
   );
 
-  if (!data) return <div>Väntar på väderdata...</div>;
+  if (!data) return <Loader />;
 
   const [currentWeather, ...forecast] = data.timeSeries!;
   const sunrise = data.sun && dayjs(data.sun.results.sunrise);
