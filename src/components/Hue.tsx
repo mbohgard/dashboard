@@ -5,20 +5,21 @@ import { colors } from "../styles";
 import { throttle, roundedValueFromPercentage } from "../utils/helpers";
 import { satOrBriPercentage, lights2background } from "../utils/color";
 
-import { bed, chair, child, computer, lamp, pot, sofa } from "./Icon";
+import { Icon } from "./Icon";
 import { ButtonGrid } from "./Atoms";
 import { ServiceBox } from "./Molecules";
 import { ActionButton, Overlay } from "./Molecules";
 import { Range } from "./Range";
 
-const iconMap: { [key in GroupClass]?: JSX.Element } = {
-  "Living room": sofa,
-  Office: chair,
-  Bedroom: bed,
-  "Kids bedroom": child,
-  Kitchen: pot,
-  Hallway: lamp,
-  Computer: computer,
+const iconMap: { [key in HueGroupClass]?: JSX.Element } = {
+  "Living room": <Icon RoomsLiving />,
+  Office: <Icon RoomsOffice />,
+  Bedroom: <Icon RoomsBedroom />,
+  "Kids bedroom": <Icon RoomsKidsbedroom />,
+  Kitchen: <Icon RoomsKitchen />,
+  Hallway: <Icon RoomsHallway />,
+  Computer: <Icon RoomsComputer />,
+  Lounge: <Icon RoomsLounge />,
 };
 
 const getIconColor = (bri: number) =>
@@ -54,37 +55,39 @@ export const Hue: React.FC = () => {
       const bri = roundedValueFromPercentage(value, 254);
 
       if (adjustId) send({ id: adjustId, bri, on: Boolean(bri) });
-    }, 1000),
-    [adjustId, groups]
+    }, 300),
+    [adjustId]
   );
 
-  const buttons = useMemo(() => {
-    return Object.entries(groups)
-      .filter(([, group]) => Object.keys(iconMap).includes(group.class))
-      .map(([id, group]) => {
-        const icon = iconMap[group.class];
-        const { value: bg, bri } = lights2background(
-          group.on,
-          group.lights || undefined
-        );
-        const color = getIconColor(bri);
+  const buttons = useMemo(
+    () =>
+      Object.entries(groups)
+        .filter(([, group]) => Object.keys(iconMap).includes(group.class))
+        .map(([id, group]) => {
+          const icon = iconMap[group.class];
+          const { value: bg, bri } = lights2background(
+            group.on,
+            group.lights || undefined
+          );
+          const color = getIconColor(bri);
 
-        return (
-          <ActionButton
-            key={id}
-            id={id}
-            color={color}
-            background={bg}
-            active={group.on}
-            size={group.name === "Hjalmar" ? "46px" : undefined}
-            onPress={toggle}
-            onLongPress={setAdjustId}
-          >
-            {icon}
-          </ActionButton>
-        );
-      });
-  }, [groups, toggle, setAdjustId]);
+          return (
+            <ActionButton
+              key={id}
+              id={id}
+              color={color}
+              background={bg}
+              active={group.on}
+              onPress={toggle}
+              size="52px"
+              onLongPress={setAdjustId}
+            >
+              {icon}
+            </ActionButton>
+          );
+        }),
+    [groups, toggle, setAdjustId]
+  );
 
   return (
     <ServiceBox title="Hue" type="icons">

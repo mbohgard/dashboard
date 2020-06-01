@@ -15,7 +15,7 @@ import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
 import { VOC } from "./components/VOC";
-import { warning } from "./components/Icon";
+import { Icon } from "./components/Icon";
 
 dayjs.locale("sv");
 
@@ -203,7 +203,7 @@ const App: React.FC = () => {
             </Whole>
           </Container>
           <ErrorIndicator newError={newError} onClick={() => toggleError(true)}>
-            {warning}
+            <Icon Warning />
           </ErrorIndicator>
           {showErrors && (
             <ErrorsContainer onClick={() => toggleError(false)}>

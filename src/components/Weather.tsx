@@ -7,7 +7,7 @@ import { useService } from "../hooks";
 import { colors } from "../styles";
 import { percentageOfRange } from "../utils/helpers";
 import { WeatherIcon } from "./WeatherIcon";
-import { celsius } from "./Icon";
+import { Icon } from "./Icon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
 
 type Type = {
@@ -82,13 +82,13 @@ const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => {
     .toHsv();
   const boosted = new TinyColor({
     ...color,
-    v: 100,
+    v: 1,
   }).toString("hex6") as string;
 
   return (
     <DegreesContainer type={type} color={boosted}>
       <span>{deg}</span>
-      {celsius}
+      <Icon Celsius />
     </DegreesContainer>
   );
 };

@@ -2,7 +2,7 @@ import React from "react";
 
 import { useService } from "../hooks";
 
-import { locked, unlocked, power } from "./Icon";
+import { Icon } from "./Icon";
 import { ButtonGrid } from "./Atoms";
 import { ActionButton, ServiceBox } from "./Molecules";
 
@@ -17,10 +17,10 @@ export const VOC: React.FC = () => {
             id="locked"
             active={data.locked === undefined ? false : !data.locked}
           >
-            {data.locked ? locked : unlocked}
+            {data.locked ? <Icon LockLocked /> : <Icon LockUnlocked />}
           </ActionButton>
           <ActionButton id="running" active={!!data.running}>
-            {power}
+            <Icon Power />
           </ActionButton>
         </ButtonGrid>
       )}

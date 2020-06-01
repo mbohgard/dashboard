@@ -11,3 +11,8 @@ declare type Service = {
   get(): ServiceResponse;
   delay(): number;
 };
+
+declare module "*.svg" {
+  const content: React.FC;
+  export default content;
+}
