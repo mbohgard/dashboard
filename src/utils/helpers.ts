@@ -1,3 +1,12 @@
+export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+export const pascal = (s: string) =>
+  s
+    .split(/\W|_/)
+    .filter((s) => s)
+    .map(capitalize)
+    .join("");
+
 export const round = (n: number) =>
   n > 1 ? Math.round(n) : Number(n.toFixed(2));
 

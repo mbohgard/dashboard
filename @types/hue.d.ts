@@ -1,4 +1,4 @@
-declare type GroupClass =
+declare type HueGroupClass =
   | "Living room"
   | "Kitchen"
   | "Dining"
@@ -105,7 +105,7 @@ declare interface HueApiGroups {
       any_on: boolean;
     };
     recycle: false;
-    class: GroupClass;
+    class: HueGroupClass;
     action: HueApiState;
   };
 }
@@ -128,7 +128,7 @@ declare type HueLights = {
 declare interface HueGroup {
   bri: number;
   name: string;
-  class: GroupClass;
+  class: HueGroupClass;
   on: boolean;
   lights: HueLights | null;
 }

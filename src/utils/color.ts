@@ -5,7 +5,6 @@ import { TinyColor } from "@ctrl/tinycolor";
 import {
   roundValues,
   percentageOfRange,
-  limiter,
   roundedPercentageOf,
   createMedian,
   compressor,
@@ -16,19 +15,20 @@ export const huePercentage = percentageOfRange(0, 65535);
 export const satOrBriPercentage = (value: number) =>
   roundedPercentageOf(value, 254);
 
-export const hue2Hsv = ({ state }: HueApiLight) => {
+export const hue2Hsv = (light: HueApiLight) => {
   let hsv;
+  const { state } = light;
   const v = satOrBriPercentage(state.bri) / 100;
 
   if (!("colormode" in state)) hsv = { h: 0, s: 0, v };
   else if (state.colormode === "ct") {
-    const mix = new TinyColor("#7ad3ff")
-      .mix(new TinyColor("#ffa500"), tempPercentage(state.ct))
+    const mix = new TinyColor("#d9f2ff")
+      .mix(new TinyColor("#ffcd78"), tempPercentage(state.ct))
       .toHsv();
 
     hsv = new TinyColor({
       ...mix,
-      v: limiter(v, 15),
+      v: 1,
     }).toHsv();
   } else if (state.colormode === "xy") {
     const [x, y] = state.xy;
