@@ -12,18 +12,21 @@ type IconsObj = {
   [s: string]: Icon;
 };
 
-const createComp = (C: React.FC) => styled(C)<Props>`
+const createComp = (C: React.FC, initialSize?: number) => styled(C)<Props>`
   ${({ size }) =>
-    size &&
+    (initialSize || size) &&
     css`
-      width: ${size}px !important;
-      height: ${size}px !important;
+      width: ${initialSize || size}px !important;
+      height: ${initialSize || size}px !important;
     `}
 `;
 
-const Fallback = createComp(styled.div`
-  background: red;
-`);
+const Fallback = createComp(
+  styled.span`
+    background: red;
+  `,
+  50
+);
 
 const iconsObj: IconsObj = Object.entries(
   (allIcons as unknown) as Imported

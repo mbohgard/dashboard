@@ -79,7 +79,6 @@ export const Hue: React.FC = () => {
               background={bg}
               active={group.on}
               onPress={toggle}
-              size="52px"
               onLongPress={setAdjustId}
             >
               {icon}

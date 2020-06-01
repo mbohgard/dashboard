@@ -196,7 +196,7 @@ const App: React.FC = () => {
             <Whole>
               <Weather />
             </Whole>
-            <Whole stretched last>
+            <Whole stretched>
               <Transports />
               <VOC />
               <Hue />

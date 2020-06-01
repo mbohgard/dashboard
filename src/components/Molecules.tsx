@@ -4,20 +4,26 @@ import styled, { css } from "styled-components";
 import { useTouchPress } from "../hooks";
 import { colors } from "../styles";
 
+import { Loader } from "./Atoms";
+
 type ServiceBoxProps = {
   type?: "normal" | "icons";
   title?: string;
+  loading?: boolean;
 };
 
 const ServiceContainer = styled.div`
   margin: 0 20px;
   margin-right: 0;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ServiceContent = styled.div<ServiceBoxProps>`
   display: flex;
   flex-direction: row;
   position: relative;
+  flex-grow: 1;
 `;
 
 const ServiceTitle = styled.h3<ServiceBoxProps>`
@@ -48,19 +54,29 @@ const ServiceTitle = styled.h3<ServiceBoxProps>`
   }
 `;
 
+const ServiceBoxLoader = styled(Loader)`
+  margin: 20px auto;
+`;
+
 export const ServiceBox: React.FC<ServiceBoxProps> = ({
   children,
   title,
+  loading,
+  type,
   ...props
 }) => {
   return (
-    <ServiceContainer>
+    <ServiceContainer {...props}>
       {title && (
-        <ServiceTitle {...props}>
+        <ServiceTitle type={type}>
           <span>{title}</span>
         </ServiceTitle>
       )}
-      <ServiceContent>{children}</ServiceContent>
+      {loading ? (
+        <ServiceBoxLoader />
+      ) : (
+        <ServiceContent>{children}</ServiceContent>
+      )}
     </ServiceContainer>
   );
 };
@@ -87,17 +103,18 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
           ? "transparent"
           : colors.white
         : colors.superDimmed};
-  width: 110px;
-  height: 100px;
+  width: 115px;
+  height: 100%;
+  min-height: 100px;
   cursor: pointer;
   background: ${({ active, background }) =>
     active ? background : "transparent"};
 
-  svg {
+  & svg {
     ${({ size }) =>
       css`
-        height: ${size || "50px"};
-        width: ${size || "50px"};
+        height: ${size || "55px"};
+        width: ${size || "55px"};
       `}
     path {
       fill: ${({ active, color = colors.white }) =>

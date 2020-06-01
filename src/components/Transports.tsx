@@ -40,6 +40,10 @@ const TimeWrapper = styled.div<TimeProps>`
     `};
 `;
 
+const Box = styled(ServiceBox)`
+  min-width: 100px;
+`;
+
 type TranportTimeProps = {
   data?: TransportItem;
 } & TimeProps;
@@ -57,10 +61,6 @@ const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
     </TimeWrapper>
   );
 };
-
-const Placeholder = styled.div`
-  font-size: 14px;
-`;
 
 const getTransports = (
   t: keyof Omit<TimetableResponse, "LatestUpdate" | "DataAge">,
@@ -83,26 +83,18 @@ type TransportItems = (TransportItem | undefined)[];
 
 type TransportProps = {
   items?: TransportItems;
-  placeholderText: string;
   title: string;
 };
 
-const Transport: React.SFC<TransportProps> = ({
-  items,
-  placeholderText,
-  title,
-}) => (
-  <ServiceBox title={title}>
+const Transport: React.SFC<TransportProps> = ({ items, title }) => (
+  <Box title={title} loading={!Boolean(items)}>
     <div>
-      {items ? (
+      {items &&
         items.map((b, i) => (
           <TransportTime key={b ? b.JourneyNumber : i} data={b} />
-        ))
-      ) : (
-        <Placeholder>{placeholderText}</Placeholder>
-      )}
+        ))}
     </div>
-  </ServiceBox>
+  </Box>
 );
 
 const fill = (x: TransportItems): TransportItems =>
@@ -135,16 +127,8 @@ export const Transports: React.FC = () => {
 
   return (
     <Container>
-      <Transport
-        items={buses}
-        title="Buss"
-        placeholderText="Väntar på bussdata..."
-      />
-      <Transport
-        items={trains}
-        title="Tåg"
-        placeholderText="Väntar på tågdata..."
-      />
+      <Transport items={buses} title="Buss" />
+      <Transport items={trains} title="Tåg" />
     </Container>
   );
 };
