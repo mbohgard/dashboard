@@ -92,7 +92,9 @@ const subscribe = (id: string, s: ServiceName) => {
     else {
       emit({
         service: s,
-        error: Error(`Service ${s} has the wrong format or doesn't exist`),
+        error: formatError(
+          Error(`Service ${s} has the wrong format or doesn't exist`)
+        ),
       });
     }
   }
@@ -120,9 +122,7 @@ io.on("connection", (socket) => {
   });
 
   // register listeners
-  Object.keys(services).forEach((key) => {
-    const service = services[key as keyof typeof services];
-
+  Object.values(services).forEach((service) => {
     if (service.name && "listener" in service) {
       socket.on(service.name, (payload) => {
         service.listener(payload).catch((e) => {

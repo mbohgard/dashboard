@@ -33,7 +33,7 @@ export const def = (...things: any[]) => !things.some((x) => x === undefined);
 export const limiter = (b: number, limit: number) => (b < limit ? limit : b);
 export const compressor = (b: number, min: number) => (b > min ? b : min);
 
-export const parse = (input: any) => {
+export const parseJSON = (input: any) => {
   if (typeof input !== "string") return input;
 
   try {
