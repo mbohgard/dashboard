@@ -27,6 +27,10 @@ export const useSocket = () => {
   return connected;
 };
 
+export const useConnected = () => {
+  return useContext(ConnectionContext);
+};
+
 type Emit<P, D> = (
   payload: P
 ) => React.Dispatch<React.SetStateAction<D>> | undefined;
@@ -49,7 +53,7 @@ export const useService: UseService = <T extends ServiceData, P = any>(
   arg1?: any,
   arg2: any = (res: T) => Boolean(res.data)
 ): [any, any] => {
-  const connected = useContext(ConnectionContext);
+  const connected = useConnected();
   const short = typeof arg1 === "function";
   const condition = short ? arg1 : arg2;
   const [data, setData] = useState<T["data"]>(short ? undefined : arg1);
