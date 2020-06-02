@@ -1,7 +1,10 @@
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useContext, useEffect, useState, useCallback, useRef } from "react";
 
 import { socket } from "../utils/socket";
-import { reportError, ConnectionContext } from "../main";
+import { reportError } from "../utils/report";
+import { ConnectionContext } from "../main";
+
+export { useErrorsStore } from "../stores";
 
 export const useSocket = () => {
   const [connected, setConnected] = useState(socket.connected);
@@ -89,8 +92,6 @@ export const useService: UseService = <T extends ServiceData, P = any>(
   return [data, emit];
 };
 
-import { useRef } from "react";
-
 export const useTouchPress = (cbs: {
   onPress?(): void;
   onLongPress?(): void;
@@ -120,4 +121,12 @@ export const useTouchPress = (cbs: {
   };
 
   return [on, off];
+};
+
+export const useForceUpdate = () => {
+  const [, updateComponent] = useState({});
+
+  return useCallback(() => {
+    updateComponent({});
+  }, []);
 };
