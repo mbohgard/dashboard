@@ -81,7 +81,7 @@ class ErrorBoundary extends React.Component {
 
 export const ConnectionContext = React.createContext<boolean>(false);
 
-const App: React.FC<{ version?: string }> = ({ version }) => {
+const App: React.FC = (props) => {
   const connected = useSocket();
 
   return (
@@ -90,7 +90,7 @@ const App: React.FC<{ version?: string }> = ({ version }) => {
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
           <Status ok={connected} />
-          <About version={version} />
+          <About {...props} />
           <Container>
             <Half top>
               <Weather type="big" />
@@ -123,6 +123,6 @@ socket.on("server", ({ data }: ServiceData) => {
   else {
     version = data.version;
 
-    render(<App version={version} />, document.getElementById("app"));
+    render(<App {...data} />, document.getElementById("app"));
   }
 });

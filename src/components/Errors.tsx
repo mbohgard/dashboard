@@ -6,20 +6,10 @@ import { useErrorsStore } from "../hooks";
 import { setErrors } from "../stores";
 
 import { Icon } from "./Icon";
+import { Overlay } from "./Molecules";
 
-const ErrorsContainer = styled.div`
-  position: fixed;
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  flex-direction: column;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+const ErrorsContainer = styled(Overlay)`
   border: solid 10px ${colors.red};
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 99;
 `;
 
 const ErrorsContent = styled.div`
@@ -43,9 +33,6 @@ const ErrorIndicator = styled.a<{ newError?: boolean }>`
   opacity: ${({ newError }) => (newError ? 1 : 0)};
 
   & > svg {
-    width: 50px;
-    height: 50px;
-
     & path {
       fill: ${colors.red};
     }
@@ -67,7 +54,7 @@ export const Errors: React.FC = () => {
         <Icon Warning />
       </ErrorIndicator>
       {showErrors && (
-        <ErrorsContainer onClick={() => toggleError(false)}>
+        <ErrorsContainer closeOnPress close={() => toggleError(false)}>
           <ErrorsContent>
             {errors.map((err) => (
               <ErrorBox key={err.id} onClick={(e) => e.stopPropagation()}>

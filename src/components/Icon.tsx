@@ -13,11 +13,14 @@ type IconsObj = {
 };
 
 const createComp = (C: React.FC, initialSize?: number) => styled(C)<Props>`
+  width: 50px;
+  height: 50px;
+
   ${({ size }) =>
     (initialSize || size) &&
     css`
-      width: ${initialSize || size}px !important;
-      height: ${initialSize || size}px !important;
+      width: ${initialSize || size}px;
+      height: ${initialSize || size}px;
     `}
 `;
 

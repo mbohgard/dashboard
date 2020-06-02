@@ -152,8 +152,8 @@ const OverlayContainer = styled.div`
 
 type OverlayProps = {
   autoClose?: number;
+  className?: string;
   closeOnPress?: boolean;
-  show?: boolean;
   close?(...args: any[]): void;
 };
 
@@ -164,6 +164,7 @@ export const Overlay: React.FC<OverlayProps> = ({
   children,
   close,
   closeOnPress,
+  ...props
 }) => {
   useEffect(() => {
     if (!autoClose || !close) return;
@@ -186,7 +187,10 @@ export const Overlay: React.FC<OverlayProps> = ({
   }, []);
 
   return (
-    <OverlayContainer onClick={() => closeOnPress !== false && close?.()}>
+    <OverlayContainer
+      onClick={() => closeOnPress !== false && close?.()}
+      {...props}
+    >
       {children}
     </OverlayContainer>
   );

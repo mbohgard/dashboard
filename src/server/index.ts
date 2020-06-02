@@ -9,6 +9,9 @@ import { version } from "../../package.json";
 
 import * as subscribers from "./subscribers";
 import services, { ServiceName } from "./services";
+import { ms2sec } from "../utils/time";
+
+let launched: number;
 
 const prod = process.env.NODE_ENV === "production";
 const port = 8081;
@@ -135,7 +138,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  emit({ service: "server", data: { version } });
+  emit({ service: "server", data: { version, launched } });
 });
 
 if (prod) {
@@ -150,4 +153,6 @@ if (prod) {
 console.log("Server running on port " + port);
 console.log("i am in", __dirname);
 
-server.listen(port);
+server.listen(port, () => {
+  launched = ms2sec(Date.now());
+});
