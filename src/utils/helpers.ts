@@ -7,6 +7,8 @@ export const pascal = (s: string) =>
     .map(capitalize)
     .join("");
 
+export const isObj = (x: unknown): x is object => typeof x === "object";
+
 export const round = (n: number) =>
   n > 1 ? Math.round(n) : Number(n.toFixed(2));
 
@@ -33,13 +35,28 @@ export const def = (...things: any[]) => !things.some((x) => x === undefined);
 export const limiter = (b: number, limit: number) => (b < limit ? limit : b);
 export const compressor = (b: number, min: number) => (b > min ? b : min);
 
-export const parseJSON = (input: any) => {
+export const count = (arr: (number | undefined)[]) =>
+  arr.reduce((acc, n = 0) => acc! + n, 0) || 0;
+
+export const parseJSON = (input: unknown) => {
   if (typeof input !== "string") return input;
 
   try {
     return JSON.parse(input);
   } catch (error) {
     return input;
+  }
+};
+
+export const stringify = (x: any): string | undefined => {
+  try {
+    return JSON.stringify(x);
+  } catch (e) {}
+
+  try {
+    return x.toString();
+  } catch (e) {
+    return undefined;
   }
 };
 

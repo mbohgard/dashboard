@@ -6,9 +6,9 @@ declare interface ServiceData<T = any> {
 
 declare type ServiceResponse<T = any> = Promise<ServiceData<T>>;
 
-declare type Service = {
-  name: string;
-  get(): ServiceResponse;
+declare type Service<T = any, S = string> = {
+  name: S;
+  get(): ServiceResponse<T>;
   delay(): number;
 };
 

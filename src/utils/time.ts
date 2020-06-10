@@ -1,6 +1,7 @@
 export const min2Ms = (min: number) => min * (1000 * 60);
 export const sec2Ms = (sec: number) => sec * 1000;
-export const ms2sec = (ms: number) => Math.round(ms / 1000);
+export const ms2Sec = (ms: number) => Math.round(ms / 1000);
+export const ms2Hour = (ms: number) => ms2Sec(ms) / 3600;
 
 export const sec2Str = (sec: number) => {
   let s = sec;

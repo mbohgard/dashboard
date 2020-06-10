@@ -11,6 +11,14 @@ module.exports = {
   voc: {
     username: "",
     password: "",
-    vin: ""
-  }
+    vin: "",
+  },
+  // ical (ics) links
+  calendar: [
+    {
+      name: "",
+      url: "",
+      color: "",
+    },
+  ],
 };

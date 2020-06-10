@@ -70,10 +70,16 @@ export const useService: UseService = <T extends ServiceData, P = any>(
     }
 
     return () => {
-      socket.emit("unsubscribe", serviceName);
       socket.off(serviceName, listener);
     };
   }, [connected]);
+
+  useEffect(
+    () => () => {
+      socket.emit("unsubscribe", serviceName);
+    },
+    []
+  );
 
   const emit: Emit<P, T["data"]> = useCallback(
     <P>(payload: P) => {
