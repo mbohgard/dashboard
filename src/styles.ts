@@ -10,12 +10,17 @@ export const colors = {
   dimmed: "#aaa",
   superDimmed: "#666",
   ultraDimmed: "#444",
+  hyperDimmed: "#222",
   yellow: "#ffda47",
   cold: "#00c3f9",
   hot: "#ff3700",
   red: "#bf2f2f",
   green: "#55cb3c",
+  blue: "#2f92d4",
+  purlpe: "#cf449a",
 };
+
+export type Colors = keyof typeof colors;
 
 export const BaseStyles = createGlobalStyle`
   ${reset}

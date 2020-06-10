@@ -2,7 +2,9 @@ import React from "react";
 import { render } from "react-dom";
 import styled from "styled-components";
 import dayjs from "dayjs";
-import "dayjs/locale/sv";
+import calendar from "dayjs/plugin/calendar";
+import updateLocale from "dayjs/plugin/updateLocale";
+import sv from "dayjs/locale/sv";
 
 import { BaseStyles } from "./styles";
 import { useSocket } from "./hooks";
@@ -16,9 +18,24 @@ import { Time } from "./components/Time";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
 import { VOC } from "./components/VOC";
+import { Calendar } from "./components/Calendar";
 import { Errors } from "./components/Errors";
 
-dayjs.locale("sv");
+dayjs.extend(calendar);
+dayjs.extend(updateLocale);
+
+dayjs.locale(sv);
+
+dayjs.updateLocale("sv", {
+  calendar: {
+    lastDay: "[igår] HH:mm",
+    sameDay: "[idag] HH:mm",
+    nextDay: "[imorgon] HH:mm",
+    lastWeek: "[i] dddd[s] HH:mm",
+    nextWeek: "dddd HH:mm",
+    sameElse: "D/M HH:mm",
+  },
+});
 
 const Wrapper = styled.div`
   padding: 25px;
@@ -33,38 +50,19 @@ const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
   overflow: hidden;
+  justify-content: space-between;
 `;
 
-type HalfProps = {
-  right?: boolean;
-  top?: boolean;
+type HorizontalProps = {
+  withMargin?: boolean;
 };
 
-const Half = styled.div<HalfProps>`
-  width: 50%;
-  display: flex;
-  align-items: ${({ top }) => (top ? "flex-start" : "center")};
-  justify-content: ${({ right }) => (right ? "flex-end" : "flex-start")};
-`;
-
-type WholeProps = {
-  left?: boolean;
-  right?: boolean;
-  last?: boolean;
-  stretched?: boolean;
-};
-
-const Whole = styled(Half)<WholeProps>`
+const Horizontal = styled.div<HorizontalProps>`
   width: 100%;
-  justify-content: ${({ left, right, stretched }) =>
-    left
-      ? "flex-start"
-      : right
-      ? "flex-start"
-      : stretched
-      ? "space-between"
-      : "center"};
-  align-items: ${({ last }) => (last ? "flex-end" : "normal")};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: ${({ withMargin }) => (withMargin ? "10px 0" : 0)};
 `;
 
 export type ReportError = (service: string, err: any) => void;
@@ -92,20 +90,17 @@ const App: React.FC = (props) => {
           <Status ok={connected} />
           <About {...props} />
           <Container>
-            <Half top>
-              <Weather type="big" />
-            </Half>
-            <Half right top>
-              <Time />
-            </Half>
-            <Whole>
+            <Weather type="big" />
+            <Time />
+            <Horizontal withMargin>
               <Weather />
-            </Whole>
-            <Whole stretched>
+              <Calendar />
+            </Horizontal>
+            <Horizontal>
               <Transports />
               <VOC />
               <Hue />
-            </Whole>
+            </Horizontal>
           </Container>
           <Errors />
         </ConnectionContext.Provider>

@@ -177,8 +177,22 @@ declare interface VOCData {
   running: boolean;
 }
 
+declare interface CalendarEvent {
+  allDay: boolean;
+  color: import("../src/styles").Colors;
+  end: number;
+  id: string;
+  name: string;
+  now: number;
+  ongoing: boolean;
+  passed: boolean;
+  start: number;
+  summary: string;
+}
+
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type WeatherServiceData = ServiceData<Forecast>;
 declare type TransportsServiceData = ServiceData<Timetable[]>;
 declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
+declare type CalendarServiceData = ServiceData<CalendarEvent[]>;

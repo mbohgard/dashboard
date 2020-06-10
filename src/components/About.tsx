@@ -2,7 +2,7 @@ import React, { useState, useRef, useLayoutEffect } from "react";
 import styled from "styled-components";
 
 import { colors } from "../styles";
-import { ms2sec, sec2Str } from "../utils/time";
+import { ms2Sec, sec2Str } from "../utils/time";
 import { useConnected } from "../hooks";
 
 import { Overlay } from "./Molecules";
@@ -65,15 +65,15 @@ export const About: React.FC<Props> = ({
   version,
   launched: serverStarted,
 }) => {
-  const started = useRef(ms2sec(Date.now()));
+  const started = useRef(ms2Sec(Date.now()));
   const connected = useConnected();
   const [now, setNow] = useState(0);
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
 
   useLayoutEffect(() => {
     if (!show) return;
 
-    let countFrom = ms2sec(Date.now());
+    let countFrom = ms2Sec(Date.now());
 
     setNow(countFrom);
 

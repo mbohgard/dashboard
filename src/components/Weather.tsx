@@ -155,13 +155,13 @@ const SmallContainer = styled.div`
 
   > span {
     font-weight: 300;
-    font-size: 26px;
+    font-size: 28px;
   }
 
   > svg {
-    width: 70px;
-    height: 70px;
-    margin: 10px 0;
+    width: 76px;
+    height: 76px;
+    margin: 18px 0;
   }
 `;
 
@@ -170,7 +170,6 @@ const SmallWrapper = styled.div`
   max-width: 100%;
   width: 100%;
   justify-content: space-between;
-  margin: 25px 0;
 `;
 
 const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {

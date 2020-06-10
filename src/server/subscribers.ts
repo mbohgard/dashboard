@@ -1,58 +1,50 @@
-import { ServiceName } from "./services";
+import { count } from "../utils/helpers";
+import services, { ServiceName } from "./services";
 
-type Subscribers = { [key in ServiceName]?: string[] };
+type Subscriptions = {
+  [id: string]: number | undefined;
+};
 
-const subscribers: Subscribers = {};
+type Subscribers<T = Subscriptions> = { [key in ServiceName]: T };
 
-const clone = (arr?: any[]) => (arr ? [...arr] : []);
+const state = Object.keys(services).reduce(
+  (acc, s) => ({ ...acc, [s]: {} }),
+  {} as Subscribers
+);
 
-interface Remove {
-  (id: string): Subscribers;
-  (id: string, s: ServiceName): string[];
-}
+const getCountByService = () =>
+  Object.entries(state).reduce((acc, [k, v]) => {
+    return {
+      ...acc,
+      [k]: count(Object.values(v)),
+    };
+  }, {} as Subscribers<number>);
 
 export const add = (id: string, s: ServiceName) => {
-  const subs = subscribers[s] || [];
+  state[s][id] = (state[s][id] || 0) + 1;
 
-  if (subs.includes(id)) return false;
-
-  subscribers[s] = Array.from(new Set([...subs, id]));
-
-  return subscribers[s]!.length === 1;
+  return state[s][id] === 1;
 };
 
-export const remove: Remove = (id: any, s?: ServiceName): any => {
+interface Remove {
+  (id: string): Subscribers<number>;
+  (id: string, s: ServiceName): number;
+}
+
+export const remove: Remove = (id: string, s?: ServiceName): any => {
   if (s) {
-    subscribers[s] = (subscribers[s] || []).filter(x => x !== id);
+    const update = (state[s][id] || 1) - 1;
 
-    return clone(subscribers[s]);
+    state[s][id] = update;
+
+    if (update === 0) delete state[s][id];
+
+    return count(Object.values(state[s]));
   } else {
-    Object.keys(subscribers).forEach(service =>
-      remove(id, service as ServiceName)
-    );
+    Object.keys(state).forEach((service) => {
+      delete state[service as ServiceName][id];
+    });
 
-    return subscribers;
+    return getCountByService();
   }
-};
-
-export const get = (s?: ServiceName) =>
-  s
-    ? clone(subscribers[s])
-    : Object.keys(subscribers).reduce<string[]>(
-        (acc, key) =>
-          Array.from(
-            new Set([...acc, ...(subscribers[key as ServiceName] || [])])
-          ),
-        []
-      );
-
-export const getServices = (id?: string) => {
-  const keys = Object.keys(subscribers) as ServiceName[];
-
-  return id
-    ? keys.reduce<ServiceName[]>(
-        (acc, key) => (subscribers[key]!.includes(id) ? [...acc, key] : acc),
-        []
-      )
-    : keys;
 };
