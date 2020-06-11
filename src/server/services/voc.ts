@@ -1,15 +1,17 @@
 import axios from "axios";
 
-import * as secrets from "../../../secrets";
 import * as config from "../../../config";
 import { sec2Ms, min2Ms } from "../../utils/time";
 
 const {
-  voc: { region },
-} = config;
+  settings: { region },
+  vin,
+  username,
+  password,
+} = config.voc;
 const url = `https://vocapi${
   region ? `${region}-` : ""
-}.wirelesscar.net/customerapi/rest/v3.0/vehicles/${secrets.voc.vin}`;
+}.wirelesscar.net/customerapi/rest/v3.0/vehicles/${vin}`;
 
 export const name = "voc";
 
@@ -17,8 +19,8 @@ export const get = (): Promise<VOCServiceData> =>
   axios
     .request<VOCResponse>({
       auth: {
-        username: secrets.voc.username,
-        password: secrets.voc.password,
+        username,
+        password,
       },
       method: "GET",
       url: `${url}/status`,

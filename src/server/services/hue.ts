@@ -1,13 +1,12 @@
 import axios from "axios";
 import https from "https";
 
-import * as secrets from "../../../secrets";
 import * as config from "../../../config";
 import { sec2Ms } from "../../utils/time";
 import { round, pick, createMedian } from "../../utils/helpers";
 import { hue2Hsv } from "../../utils/color";
 
-const url = `https://${config.hue.ip}/api/${secrets.hue}`;
+const url = `https://${config.hue.settings.ip}/api/${config.hue.key}`;
 
 export const name = "hue";
 

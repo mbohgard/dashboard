@@ -11,8 +11,9 @@ const request = <T>(name: string, url: string) =>
 
 export const name = "weather";
 
-const smhiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${config.weather.lon}/lat/${config.weather.lat}/data.json`;
-const sunUrl = `https://api.sunrise-sunset.org/json?lat=${config.weather.lat}&lng=${config.weather.lon}&formatted=0`;
+const { lon, lat } = config.weather.settings;
+const smhiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${lon}/lat/${lat}/data.json`;
+const sunUrl = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&formatted=0`;
 
 export const get = (): Promise<WeatherServiceData> =>
   Promise.all([
