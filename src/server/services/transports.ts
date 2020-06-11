@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import * as secrets from "../../../secrets";
 import * as config from "../../../config";
 import { min2Ms, sec2Ms } from "../../utils/time";
 import { wait } from "../../utils/helpers";
@@ -11,13 +10,13 @@ const getTransportUrl = (types: string[], siteId: string) => {
   const q = (t: string) => `&${t}=${String(types.includes(t))}`;
 
   return `http://api.sl.se/api2/realtimedeparturesV4.json?key=${
-    secrets.transports
+    config.transports.key
   }&siteId=${siteId}&timewindow=60${q("bus")}${q("train")}${q("metro")}${q(
     "ship"
   )}${q("tram")}`;
 };
 
-const callers = config.transports.map((config) => (delay: number) =>
+const callers = config.transports.settings.map((config) => (delay: number) =>
   wait(delay).then(() =>
     axios
       .get<Timetable>(getTransportUrl(config.types, config.siteId))

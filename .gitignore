@@ -74,8 +74,8 @@ typings/
 # parcel cache
 .cache
 
-# secrets
-secrets.js
+# sensitive config
+config.js
 
 # vs code workspace file
 .code-workspace
