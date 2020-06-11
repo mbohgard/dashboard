@@ -84,7 +84,5 @@ export const listener = ({ id, ...payload }: HueGroupEmit) =>
       const error =
         res.status === 200 && res.data.find((item) => item.error !== undefined);
 
-      if (error) console.error(error);
-
       if (error) throw Error("Something went wrong with the Hue action");
     });

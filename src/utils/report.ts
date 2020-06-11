@@ -17,7 +17,6 @@ export type ServiceError = {
 let errI = 0;
 
 export const reportError: ReportError = (service, e) => {
-  console.log(service, e);
   const err = parseJSON(e);
   const isObj = typeof err === "object";
   const code = isObj ? err.statusCode || err.status : 0;
