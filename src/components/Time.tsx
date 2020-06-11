@@ -6,10 +6,11 @@ import { useService } from "../hooks";
 import { colors } from "../styles";
 
 const TimeView = styled.h2`
-  font-size: 180px;
+  font-size: 190px;
   font-weight: 300;
   text-align: right;
   letter-spacing: -7px;
+  line-height: 0.8;
 
   span {
     font-size: 80px;
@@ -23,7 +24,7 @@ const DateView = styled.h4`
   font-size: 40px;
   font-weight: 300;
   text-align: right;
-  margin-top: 20px;
+  margin-top: 30px;
 
   span {
     color: ${colors.dimmed};
@@ -36,7 +37,7 @@ export const Time: React.FC = () => {
 
   useEffect(() => {
     const interval = window.setInterval(
-      () => setTimestamp(state => state + 1),
+      () => setTimestamp((state) => state + 1),
       1000
     );
 
@@ -44,7 +45,7 @@ export const Time: React.FC = () => {
   }, []);
 
   useEffect(() => data && setTimestamp(data.timestamp - data.gmtOffset), [
-    data
+    data,
   ]);
 
   const ts = (dayjs as any).unix(timestamp);

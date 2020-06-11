@@ -1,119 +1,104 @@
-import React, { useState, useCallback } from "react";
-import tinycolor from "tinycolor2";
+import React, { useState, useCallback, useMemo } from "react";
 
 import { useService } from "../hooks";
-import {
-  def,
-  percentageOfRange,
-  limiter,
-  memo,
-  throttle,
-  roundedPercentageOf,
-  roundedValueFromPercentage
-} from "../utils/helpers";
+import { colors } from "../styles";
+import { throttle, roundedValueFromPercentage } from "../utils/helpers";
+import { satOrBriPercentage, lights2background } from "../utils/color";
 
-import { bed, chair, child, computer, lamp, pot, sofa, hue } from "./Icon";
-import { DimmedIconBox as Box, ButtonGrid } from "./Atoms";
+import { Icon } from "./Icon";
+import { ButtonGrid } from "./Atoms";
+import { ServiceBox } from "./Molecules";
 import { ActionButton, Overlay } from "./Molecules";
 import { Range } from "./Range";
 
-const iconMap: { [key in GroupClass]?: JSX.Element } = {
-  "Living room": sofa,
-  Office: chair,
-  Bedroom: bed,
-  "Kids bedroom": child,
-  Kitchen: pot,
-  Hallway: lamp,
-  Computer: computer
+const iconMap: { [key in HueGroupClass]?: JSX.Element } = {
+  "Living room": <Icon RoomsLiving />,
+  Office: <Icon RoomsOffice />,
+  Bedroom: <Icon RoomsBedroom />,
+  "Kids bedroom": <Icon RoomsKidsbedroom />,
+  Kitchen: <Icon RoomsKitchen />,
+  Hallway: <Icon RoomsHallway />,
+  Computer: <Icon RoomsComputer />,
+  Lounge: <Icon RoomsLounge />,
 };
 
-const getColor = memo((hue, sat, bri, ct) =>
-  def(hue, sat, bri)
-    ? tinycolor({
-        // hue in degrees
-        h: (hue! / 65535) * 360,
-        s: sat! / 254,
-        v: limiter(bri! / 254, 0.15)
-      }).toHexString()
-    : def(ct, bri)
-    ? tinycolor({
-        ...tinycolor
-          .mix(
-            tinycolor("#7ad3ff"),
-            tinycolor("#ffa500"),
-            percentageOfRange(153, 500)(ct!)
-          )
-          .toHsv(),
-        v: limiter(bri! / 254, 0.15)
-      }).toHexString()
-    : "#ddd"
-);
+const getIconColor = (bri: number) =>
+  satOrBriPercentage(bri) > 50 ? colors.black : colors.white;
 
 export const Hue: React.FC = () => {
-  const [groups, emit] = useService<HueServiceData>("hue", {});
-  const [[adjustId, adjustColor], setAdjustId] = useState<
-    [string, string] | []
-  >([]);
+  const [groups, emit] = useService<HueServiceData, HueGroupEmit>("hue", {});
+  const [adjustId, setAdjustId] = useState<string | void>();
 
-  const send = (id: string, payload: HueEmitPayload) => {
-    const set = emit({ id, ...payload });
+  const send = useCallback(
+    ({ id, ...payload }: HueGroupEmit) => {
+      const set = emit({ id, ...payload });
 
-    if (set)
-      set(state => ({
-        ...state,
-        [id]: {
-          ...state![id],
-          ...payload
-        }
-      }));
-  };
+      if (set)
+        set((state) => ({
+          ...state,
+          [id]: {
+            ...state![id],
+            ...payload,
+          },
+        }));
+    },
+    [emit]
+  );
+
+  const toggle = useCallback(
+    (id: string, currentState: boolean) => send({ id, on: !currentState }),
+    [send]
+  );
 
   const adjust = useCallback(
     throttle((value: number) => {
       const bri = roundedValueFromPercentage(value, 254);
 
-      if (adjustId && groups[adjustId].bri !== bri)
-        send(adjustId, { bri, on: Boolean(bri) });
-    }, 1000),
-    [adjustId, groups]
+      if (adjustId) send({ id: adjustId, bri, on: Boolean(bri) });
+    }, 300),
+    [adjustId]
+  );
+
+  const buttons = useMemo(
+    () =>
+      Object.entries(groups)
+        .filter(([, group]) => Object.keys(iconMap).includes(group.class))
+        .map(([id, group]) => {
+          const icon = iconMap[group.class];
+          const { value: bg, bri } = lights2background(
+            group.on,
+            group.lights || undefined
+          );
+          const color = getIconColor(bri);
+
+          return (
+            <ActionButton
+              key={id}
+              id={id}
+              color={color}
+              background={bg}
+              active={group.on}
+              onPress={toggle}
+              onLongPress={setAdjustId}
+            >
+              {icon}
+            </ActionButton>
+          );
+        }),
+    [groups, toggle, setAdjustId]
   );
 
   return (
-    <Box>
-      {hue}
+    <ServiceBox title="Hue" type="icons">
       {adjustId && (
-        <Overlay closeOnPress close={() => setAdjustId([])} autoClose={5000}>
+        <Overlay closeOnPress close={setAdjustId} autoClose={5000}>
           <Range
-            color={adjustColor}
             onChange={adjust}
-            initialValue={roundedPercentageOf(groups[adjustId].bri, 254)}
+            initialValue={satOrBriPercentage(groups[adjustId].bri)}
           />
         </Overlay>
       )}
-      <ButtonGrid>
-        {Object.keys(groups)
-          .filter(id => Object.keys(iconMap).includes(groups[id].class))
-          .map(id => {
-            const { hue, sat, bri, ct, ...group } = groups[id];
-            const icon = iconMap[group.class];
-
-            Array.isArray;
-            const color = getColor(hue, sat, bri, ct);
-
-            return (
-              <ActionButton
-                key={group.name}
-                color={color}
-                active={group.on}
-                size={group.name === "Hjalmar" ? "48px" : undefined}
-                onPress={() => send(id, { on: !group.on })}
-                onLongPress={() => setAdjustId([id, color])}
-              >
-                {icon}
-              </ActionButton>
-            );
-          })}
-      </ButtonGrid>
-    </Box>
+      <ButtonGrid>{buttons}</ButtonGrid>
+    </ServiceBox>
   );
 };

@@ -3,16 +3,24 @@ import reset from "styled-reset";
 
 export const colors = {
   white: "#fff",
+  black: "#000",
   gray: "#aaa",
+  lightGray: "#eee",
   orange: "#ff9647",
   dimmed: "#aaa",
   superDimmed: "#666",
   ultraDimmed: "#444",
+  hyperDimmed: "#222",
   yellow: "#ffda47",
   cold: "#00c3f9",
   hot: "#ff3700",
-  red: "#bf2f2f"
+  red: "#bf2f2f",
+  green: "#55cb3c",
+  blue: "#2f92d4",
+  purlpe: "#cf449a",
 };
+
+export type Colors = keyof typeof colors;
 
 export const BaseStyles = createGlobalStyle`
   ${reset}

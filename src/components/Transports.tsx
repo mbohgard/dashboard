@@ -1,16 +1,18 @@
 import React, { useMemo } from "react";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
-import { Omit } from "utility-types";
 
 import { useService } from "../hooks";
 import { colors } from "../styles";
-import { bus as busIcon, train as trainIcon } from "./Icon";
-import { DimmedIconBox as Box } from "./Atoms";
+import { ServiceBox } from "./Molecules";
 
 const Container = styled.div`
   display: flex;
   min-height: 180px;
+
+  > div:first-child {
+    margin-left: 0;
+  }
 `;
 
 const LineNumber = styled.span`
@@ -22,7 +24,7 @@ type TimeProps = { empty?: boolean };
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
   font-size: 60px;
-  margin-top: 8px;
+  margin-top: 4px;
   line-height: 1.2;
   white-space: nowrap;
   min-width: 200px;
@@ -36,6 +38,10 @@ const TimeWrapper = styled.div<TimeProps>`
     css`
       color: ${colors.dimmed};
     `};
+`;
+
+const Box = styled(ServiceBox)`
+  min-width: 100px;
 `;
 
 type TranportTimeProps = {
@@ -56,17 +62,13 @@ const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
   );
 };
 
-const Placeholder = styled.div`
-  font-size: 14px;
-`;
-
 const getTransports = (
   t: keyof Omit<TimetableResponse, "LatestUpdate" | "DataAge">,
   data?: Timetable[]
 ) => {
   const timetable =
     data &&
-    data.find(d => {
+    data.find((d) => {
       const transport = d && d.ResponseData && d.ResponseData[t];
 
       return transport ? transport.length > 0 : false;
@@ -80,26 +82,17 @@ const getTransports = (
 type TransportItems = (TransportItem | undefined)[];
 
 type TransportProps = {
-  icon: JSX.Element;
   items?: TransportItems;
-  placeholderText: string;
+  title: string;
 };
 
-const Transport: React.SFC<TransportProps> = ({
-  icon,
-  items,
-  placeholderText
-}) => (
-  <Box>
-    {icon}
+const Transport: React.SFC<TransportProps> = ({ items, title }) => (
+  <Box title={title} loading={!Boolean(items)}>
     <div>
-      {items ? (
+      {items &&
         items.map((b, i) => (
           <TransportTime key={b ? b.JourneyNumber : i} data={b} />
-        ))
-      ) : (
-        <Placeholder>{placeholderText}</Placeholder>
-      )}
+        ))}
     </div>
   </Box>
 );
@@ -119,31 +112,23 @@ export const Transports: React.FC = () => {
     const t = getTransports("Trains", data);
 
     return [
-      b && fill(b.filter(b => (!b ? true : b.Destination.includes("Väsby")))),
+      b && fill(b.filter((b) => (!b ? true : b.Destination.includes("Väsby")))),
       t &&
         fill(
-          t.filter(t =>
+          t.filter((t) =>
             !t
               ? true
               : t.JourneyDirection === 1 &&
                 dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
           )
-        )
+        ),
     ];
   }, [data]);
 
   return (
     <Container>
-      <Transport
-        icon={busIcon}
-        items={buses}
-        placeholderText="Väntar på bussdata..."
-      />
-      <Transport
-        icon={trainIcon}
-        items={trains}
-        placeholderText="Väntar på tågdata..."
-      />
+      <Transport items={buses} title="Buss" />
+      <Transport items={trains} title="Tåg" />
     </Container>
   );
 };

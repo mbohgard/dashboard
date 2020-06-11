@@ -1,9 +1,10 @@
-import { useContext, useEffect, useState } from "react";
-import io from "socket.io-client";
+import { useContext, useEffect, useState, useCallback, useRef } from "react";
 
-import { reportError, ReportError, ConnectionContext } from "../main";
+import { socket } from "../utils/socket";
+import { reportError } from "../utils/report";
+import { ConnectionContext } from "../main";
 
-const socket = io();
+export { useErrorsStore } from "../stores";
 
 export const useSocket = () => {
   const [connected, setConnected] = useState(socket.connected);
@@ -26,73 +27,80 @@ export const useSocket = () => {
   return connected;
 };
 
-type Emit<D> = (
-  payload: any
+export const useConnected = () => {
+  return useContext(ConnectionContext);
+};
+
+type Emit<P, D> = (
+  payload: P
 ) => React.Dispatch<React.SetStateAction<D>> | undefined;
 
 interface UseService {
-  <T extends ServiceData>(
+  <T extends ServiceData, P = any>(
     serviceName: string,
     condition?: (res: T) => boolean
-  ): [T["data"], Emit<T["data"]>];
+  ): [T["data"], Emit<P, T["data"]>];
 
-  <T extends ServiceData>(
+  <T extends ServiceData, P = any>(
     serviceName: string,
     initialData: Required<T>["data"],
     condition?: (res: T) => boolean
-  ): [Required<T>["data"], Emit<Required<T>["data"]>];
+  ): [Required<T>["data"], Emit<P, Required<T>["data"]>];
 }
 
-export const useService: UseService = <T extends ServiceData>(
+export const useService: UseService = <T extends ServiceData, P = any>(
   serviceName: any,
   arg1?: any,
   arg2: any = (res: T) => Boolean(res.data)
 ): [any, any] => {
-  const connected = useContext(ConnectionContext);
+  const connected = useConnected();
   const short = typeof arg1 === "function";
   const condition = short ? arg1 : arg2;
   const [data, setData] = useState<T["data"]>(short ? undefined : arg1);
 
-  const report: ReportError = (service, error) => {
-    if (reportError) reportError(service, error);
-  };
+  useEffect(() => {
+    const listener = (res: T) =>
+      condition(res)
+        ? setData(res.data)
+        : reportError?.(res.service, res.error);
 
-  const listener = (res: T) =>
-    condition(res) ? setData(res.data) : report(res.service, res.error);
-
-  const init = () => {
-    socket.on(serviceName, listener);
-    socket.emit("subscribe", serviceName);
-  };
-
-  const cleanup = () => {
-    socket.emit("unsubscribe", serviceName);
-    socket.off(serviceName, listener);
-  };
-
-  useEffect(() => (connected ? init() : cleanup()), [connected]);
-
-  useEffect(() => cleanup, []);
-
-  const emit: Emit<T["data"]> = payload => {
     if (connected) {
-      socket.emit(serviceName, payload);
-
-      return setData;
-    } else {
-      report(
-        serviceName,
-        Error("Can't emit message due to lost server connection.")
-      );
-
-      return undefined;
+      socket.on(serviceName, listener);
+      socket.emit("subscribe", serviceName);
     }
-  };
+
+    return () => {
+      socket.off(serviceName, listener);
+    };
+  }, [connected]);
+
+  useEffect(
+    () => () => {
+      socket.emit("unsubscribe", serviceName);
+    },
+    []
+  );
+
+  const emit: Emit<P, T["data"]> = useCallback(
+    <P>(payload: P) => {
+      if (connected) {
+        socket.emit(serviceName, payload);
+
+        return setData;
+      } else {
+        reportError?.(
+          serviceName,
+          Error("Can't emit message due to lost server connection.")
+        );
+
+        return undefined;
+      }
+    },
+    [connected]
+  );
 
   return [data, emit];
 };
-
-import { useRef } from "react";
 
 export const useTouchPress = (cbs: {
   onPress?(): void;
@@ -123,4 +131,12 @@ export const useTouchPress = (cbs: {
   };
 
   return [on, off];
+};
+
+export const useForceUpdate = () => {
+  const [, updateComponent] = useState({});
+
+  return useCallback(() => {
+    updateComponent({});
+  }, []);
 };

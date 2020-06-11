@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import { colors } from "../styles";
 
@@ -9,25 +9,63 @@ export const ButtonGrid = styled.div`
   grid-auto-flow: column;
 `;
 
-export const DimmedIconBox = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin: 0 20px;
-  margin-right: 0;
+export const Status = styled.div<{ ok: boolean }>`
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background: ${({ ok }) => (ok ? colors.green : colors.red)};
+`;
+
+export const Svg = styled.svg.attrs(({ viewBox }: { viewBox?: string }) => ({
+  version: "1.1",
+  x: "0px",
+  y: "0px",
+  viewBox: viewBox || "0 0 56.69 56.69",
+}))`
+  width: 40px;
+  height: 40px;
+
+  path {
+    fill: white;
+  }
+`;
+
+const bounce = keyframes`
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+`;
+
+export const Loader = styled.div`
+  width: 40px;
+  height: 40px;
+
   position: relative;
+  margin: 0;
 
-  > svg {
-    height: 140px;
-    width: 140px;
-    margin-top: 10px;
-    margin-right: 10px;
+  &:before,
+  &:after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.5;
     position: absolute;
-    top: 12px;
-    left: -34px;
-    z-index: -1;
+    top: 0;
+    left: 0;
 
-    path {
-      fill: ${colors.ultraDimmed};
-    }
+    animation: ${bounce} 2s infinite ease-in-out;
+  }
+
+  &:after {
+    animation-delay: -1s;
   }
 `;

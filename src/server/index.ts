@@ -5,8 +5,14 @@ import http from "http";
 import fs from "fs";
 import ws from "socket.io";
 
+import { version } from "../../package.json";
+
 import * as subscribers from "./subscribers";
 import services, { ServiceName } from "./services";
+import { ms2Sec } from "../utils/time";
+import { stringify } from "../utils/helpers";
+
+let launched: number;
 
 const prod = process.env.NODE_ENV === "production";
 const port = 8081;
@@ -21,21 +27,21 @@ const cache: { [key in ServiceName]?: ServiceData } = {};
 const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
 
-const startPoll = (s: Service) => {
-  const name = s.name as ServiceName;
-  stopPoll(name);
+const stopService = (s: ServiceName) => clearTimeout(timers[s]);
+
+const startPoll = (s: Service<any, ServiceName>) => {
+  stopService(s.name);
 
   if (poll) {
-    timers[name] = setTimeout(() => fetcher(s), s.delay());
+    timers[s.name] = setTimeout(() => fetcher(s), s.delay());
   }
 };
-const stopPoll = (s: ServiceName) => clearTimeout(timers[s]);
 
 const saveToCache = (s: string, data: ServiceData) =>
   (cache[s as ServiceName] = data);
 const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
 
-export const emit = (data: ServiceData) => {
+const emit = (data: ServiceData) => {
   io.emit(data.service, data);
 
   if (data.error) {
@@ -49,68 +55,81 @@ export const emit = (data: ServiceData) => {
   }
 };
 
-const fetcher = (service: Service) =>
+const formatError = (e: unknown) => {
+  if (e === undefined) return e;
+  if (e instanceof Error) return { message: e.message, name: e.name };
+  return stringify(e) || "Unknown error";
+};
+
+const fetcher = (service: Service<any, ServiceName>) =>
   service
     .get()
-    .then((data: ServiceData) => {
-      emit(data);
+    .then((data) => {
+      emit({ ...data, error: formatError(data.error) });
       saveToCache(data.service, data);
       startPoll(service);
     })
-    .catch(e => {
+    .catch((e) => {
       emit({
         service: service.name,
-        error: e instanceof Error ? { message: e.message, name: e.name } : e
+        error: formatError(e),
       });
     });
 
 const subscribe = (id: string, s: ServiceName) => {
   sendCached(s);
 
-  const init = subscribers.add(id, s);
-
-  if (init) {
+  if (subscribers.add(id, s)) {
     const service = services[s];
 
     if (service) fetcher(service);
     else {
       emit({
         service: s,
-        error: Error(`Service ${s} has the wrong format or doesn't exist`)
+        error: formatError(
+          Error(`Service ${s} has the wrong format or doesn't exist`)
+        ),
       });
     }
   }
 };
 
 const unsubscribe = (id: string, s?: ServiceName) => {
-  const u = s ? subscribers.remove(id, s) : subscribers.remove(id);
-
-  if (s && u instanceof Array && u.length === 0) stopPoll(s);
-  else {
-    subscribers
-      .getServices()
-      .forEach(s => subscribers.get(s).length === 0 && stopPoll(s));
+  if (s && !subscribers.remove(id, s)) stopService(s);
+  else if (!s) {
+    Object.entries(subscribers.remove(id)).forEach(([k, n]) => {
+      if (!n) stopService(k as ServiceName);
+    });
   }
 };
 
-io.on("connection", socket => {
-  console.log("user connected", socket.id);
-
-  socket.on("subscribe", service => subscribe(socket.id, service));
-  socket.on("unsubscribe", service => unsubscribe(socket.id, service));
+io.on("connection", (socket) => {
+  socket.on("subscribe", (service) => subscribe(socket.id, service));
+  socket.on("unsubscribe", (service) => unsubscribe(socket.id, service));
 
   socket.on("disconnect", () => {
     unsubscribe(socket.id);
   });
 
   // register listeners
-  Object.keys(services).forEach(key => {
-    const service = services[key as keyof typeof services];
-
+  Object.values(services).forEach((service) => {
     if (service.name && "listener" in service) {
-      socket.on(service.name, service.listener);
+      socket.on(service.name, (payload) => {
+        service.listener(payload).catch((e) => {
+          emit({
+            service: service.name,
+            error: formatError(e),
+          });
+        });
+      });
     }
   });
+
+  emit({ service: "server", data: { version, launched } });
+});
+
+app.get("/hehe", (_, res) => {
+  services.calendar.get().then(({ data }) => res.send(data));
 });
 
 if (prod) {
@@ -122,7 +141,6 @@ if (prod) {
   app.use(bundler.middleware());
 }
 
-console.log("Server running on port " + port);
-console.log("i am in", __dirname);
-
-server.listen(port);
+server.listen(port, () => {
+  launched = ms2Sec(Date.now());
+});

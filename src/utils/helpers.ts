@@ -1,20 +1,44 @@
+export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+export const pascal = (s: string) =>
+  s
+    .split(/\W|_/)
+    .filter((s) => s)
+    .map(capitalize)
+    .join("");
+
+export const isObj = (x: unknown): x is object => typeof x === "object";
+
+export const round = (n: number) =>
+  n > 1 ? Math.round(n) : Number(n.toFixed(2));
+
+export const roundValues = <T extends object>(obj: T) =>
+  Object.entries(obj).reduce(
+    (acc, [k, v]) => ({ ...acc, [k]: round(v) }),
+    {} as T
+  );
+
 export const percentageOfRange = (min: number, max: number) => (
   input: number
-) => ((input - min) * 100) / (max - min);
+) => (max ? ((input - min) * 100) / (max - min) : 0);
 
 export const roundedPercentageOf = (value: number = 0, max: number = 0) =>
-  Math.round((value / max) * 100);
+  round((value / max) * 100);
 
 export const roundedValueFromPercentage = (
   percentage: number = 0,
   max: number = 0
-) => Math.round((percentage / 100) * max);
+) => round((percentage / 100) * max);
 
-export const def = (...things: any[]) => !things.some(x => x === undefined);
+export const def = (...things: any[]) => !things.some((x) => x === undefined);
 
 export const limiter = (b: number, limit: number) => (b < limit ? limit : b);
+export const compressor = (b: number, min: number) => (b > min ? b : min);
 
-export const parse = (input: any) => {
+export const count = (arr: (number | undefined)[]) =>
+  arr.reduce((acc, n = 0) => acc! + n, 0) || 0;
+
+export const parseJSON = (input: unknown) => {
   if (typeof input !== "string") return input;
 
   try {
@@ -22,6 +46,33 @@ export const parse = (input: any) => {
   } catch (error) {
     return input;
   }
+};
+
+export const stringify = (x: any): string | undefined => {
+  try {
+    return JSON.stringify(x);
+  } catch (e) {}
+
+  try {
+    return x.toString();
+  } catch (e) {
+    return undefined;
+  }
+};
+
+export const createMedian = () => {
+  let i = 0;
+  let sum = 0;
+
+  return (value: number) => {
+    i++;
+    sum += value;
+
+    return {
+      sum,
+      median: sum / i,
+    };
+  };
 };
 
 type Obj = { [s: string]: any };
@@ -32,6 +83,13 @@ export const areEqual = (a: Obj, b: Obj) => {
   }
 
   return true;
+};
+
+export const pick = <T, K extends keyof T>(obj: T, picked: K[]) => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (picked.includes(key as K)) return { ...acc, [key]: value };
+    else return acc;
+  }, {} as Pick<T, K>);
 };
 
 export const memo = <F extends (...args: any[]) => any>(func: F) => {
@@ -108,3 +166,6 @@ export const throttle = <F extends (...args: any[]) => any>(
       }
     });
 };
+
+export const wait = (delay: number = 100) =>
+  new Promise((resolve) => setTimeout(resolve, delay));

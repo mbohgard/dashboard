@@ -87,104 +87,6 @@ declare interface Timetable {
   StopPointDeviations: any[];
 }
 
-declare type GroupClass =
-  | "Living room"
-  | "Kitchen"
-  | "Dining"
-  | "Bedroom"
-  | "Kids bedroom"
-  | "Bathroom"
-  | "Nursery"
-  | "Recreation"
-  | "Office"
-  | "Gym"
-  | "Hallway"
-  | "Toilet"
-  | "Front door"
-  | "Garage"
-  | "Terrace"
-  | "Garden"
-  | "Driveway"
-  | "Carport"
-  | "Other"
-  | "Home"
-  | "Downstairs"
-  | "Upstairs"
-  | "Top floor"
-  | "Attic"
-  | "Guest room"
-  | "Staircase"
-  | "Lounge"
-  | "Man cave"
-  | "Computer"
-  | "Studio"
-  | "Music"
-  | "TV"
-  | "Reading"
-  | "Closet"
-  | "Storage"
-  | "Laundry room"
-  | "Balcony"
-  | "Porch"
-  | "Barbecue"
-  | "Pool";
-
-declare interface HueGroupsResponse {
-  [id: string]: {
-    name: string;
-    lights: string[];
-    sensors: any[];
-    type: string;
-    state: {
-      all_on: boolean;
-      any_on: boolean;
-    };
-    recycle: false;
-    class: GroupClass;
-    action: {
-      on: boolean;
-      bri: number;
-      hue?: number;
-      sat?: number;
-      ct?: number;
-      effect: string;
-      xy: number[];
-      ct: number;
-      alert: string;
-      colormode: string;
-    };
-  };
-}
-
-declare interface HueGroup {
-  name: string;
-  class: GroupClass;
-  on: boolean;
-  bri?: number;
-  hue?: number;
-  sat?: number;
-  ct?: number;
-}
-
-declare interface HueGroups {
-  [id: string]: HueGroup;
-}
-
-declare interface HueEmitPayload {
-  [s: string]: any;
-}
-
-declare interface HueActionReponseItem {
-  error?: {
-    description: string;
-  };
-  success?: {
-    [s: string]: any;
-  };
-}
-
-declare type HueActionReponse = HueActionReponseItem[];
-
 declare interface VOCResults {
   ERS: {
     status: string;
@@ -275,8 +177,22 @@ declare interface VOCData {
   running: boolean;
 }
 
+declare interface CalendarEvent {
+  allDay: boolean;
+  color: import("../src/styles").Colors;
+  end: number;
+  id: string;
+  name: string;
+  now: number;
+  ongoing: boolean;
+  passed: boolean;
+  start: number;
+  summary: string;
+}
+
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type WeatherServiceData = ServiceData<Forecast>;
 declare type TransportsServiceData = ServiceData<Timetable[]>;
 declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
+declare type CalendarServiceData = ServiceData<CalendarEvent[]>;
