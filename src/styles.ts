@@ -17,7 +17,7 @@ export const colors = {
   red: "#bf2f2f",
   green: "#55cb3c",
   blue: "#2f92d4",
-  purlpe: "#cf449a",
+  purple: "#cf449a",
 };
 
 export type Colors = keyof typeof colors;

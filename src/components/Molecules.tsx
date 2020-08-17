@@ -110,6 +110,10 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
   background: ${({ active, background }) =>
     active ? background : "transparent"};
 
+  & * {
+    pointer-events: none;
+  }
+
   & svg {
     ${({ size }) =>
       css`
@@ -125,14 +129,12 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
 
 export const ActionButton: React.FC<ActionButtonProps> = React.memo(
   ({ onPress, onLongPress, ...props }) => {
-    const [press, release] = useTouchPress({
+    const touchEvents = useTouchPress({
       onPress: () => onPress?.(props.id, props.active),
       onLongPress: () => onLongPress?.(props.id),
     });
 
-    return (
-      <ActionButtonLink {...props} onTouchStart={press} onTouchEnd={release} />
-    );
+    return <ActionButtonLink {...props} {...touchEvents} />;
   }
 );
 

@@ -65,19 +65,12 @@ const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
 const getTransports = (
   t: keyof Omit<TimetableResponse, "LatestUpdate" | "DataAge">,
   data?: Timetable[]
-) => {
-  const timetable =
-    data &&
-    data.find((d) => {
-      const transport = d && d.ResponseData && d.ResponseData[t];
+) =>
+  data?.find((d) => {
+    const transport = d && d.ResponseData && d.ResponseData[t];
 
-      return transport ? transport.length > 0 : false;
-    });
-
-  return (
-    (timetable && timetable.ResponseData && timetable.ResponseData[t]) || []
-  );
-};
+    return transport ? transport.length > 0 : false;
+  })?.ResponseData?.[t] || [];
 
 type TransportItems = (TransportItem | undefined)[];
 
@@ -89,16 +82,14 @@ type TransportProps = {
 const Transport: React.SFC<TransportProps> = ({ items, title }) => (
   <Box title={title} loading={!Boolean(items)}>
     <div>
-      {items &&
-        items.map((b, i) => (
-          <TransportTime key={b ? b.JourneyNumber : i} data={b} />
-        ))}
+      {items?.map((b, i) => (
+        <TransportTime key={i} data={b} />
+      ))}
     </div>
   </Box>
 );
 
 const fill = (x: TransportItems): TransportItems =>
-  x &&
   Array(3)
     .fill(undefined)
     .map((_, i) => x[i]);
@@ -108,20 +99,20 @@ export const Transports: React.FC = () => {
   const [buses, trains] = useMemo(() => {
     if (!data) return [undefined, undefined];
 
-    const b = getTransports("Buses", data);
-    const t = getTransports("Trains", data);
-
     return [
-      b && fill(b.filter((b) => (!b ? true : b.Destination.includes("Väsby")))),
-      t &&
-        fill(
-          t.filter((t) =>
-            !t
-              ? true
-              : t.JourneyDirection === 1 &&
-                dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
-          )
-        ),
+      fill(
+        getTransports("Buses", data).filter((b) =>
+          !b ? true : b.Destination.includes("Väsby")
+        )
+      ),
+      fill(
+        getTransports("Trains", data).filter((t) =>
+          !t
+            ? true
+            : t.JourneyDirection === 1 &&
+              dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
+        )
+      ),
     ];
   }, [data]);
 

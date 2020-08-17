@@ -83,4 +83,4 @@ export const get = () => {
   }));
 };
 
-export const delay = () => sec2Ms(15);
+export const delay = () => sec2Ms(45);
