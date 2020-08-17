@@ -29,19 +29,10 @@ const rootDir = path.join(__dirname, "..", "..");
 
 const stopService = (s: ServiceName) => clearTimeout(timers[s]);
 
-const startPoll = (s: Service<any, ServiceName>) => {
-  stopService(s.name);
-
-  if (poll) {
-    timers[s.name] = setTimeout(() => fetcher(s), s.delay());
-  }
-};
-
-const saveToCache = (s: string, data: ServiceData) =>
-  (cache[s as ServiceName] = data);
+const saveToCache = (s: ServiceName, data: ServiceData) => (cache[s] = data);
 const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
 
-const emit = (data: ServiceData) => {
+const emit = (data: Omit<ServiceData, "service"> & { service: string }) => {
   io.emit(data.service, data);
 
   if (data.error) {
@@ -61,26 +52,32 @@ const formatError = (e: unknown) => {
   return stringify(e) || "Unknown error";
 };
 
-const fetcher = (service: Service<any, ServiceName>) =>
+const fetcher = (service: Service) =>
   service
     .get()
     .then((data) => {
       emit({ ...data, error: formatError(data.error) });
       saveToCache(data.service, data);
-      startPoll(service);
     })
     .catch((e) => {
       emit({
         service: service.name,
         error: formatError(e),
       });
+    })
+    .finally(() => {
+      if (poll)
+        timers[service.name] = setTimeout(
+          () => fetcher(service),
+          service.delay()
+        );
     });
 
 const subscribe = (id: string, s: ServiceName) => {
   sendCached(s);
 
   if (subscribers.add(id, s)) {
-    const service = services[s];
+    const service = services[s] as Service;
 
     if (service) fetcher(service);
     else {
@@ -128,16 +125,11 @@ io.on("connection", (socket) => {
   emit({ service: "server", data: { version, launched } });
 });
 
-app.get("/hehe", (_, res) => {
-  services.calendar.get().then(({ data }) => res.send(data));
-});
-
 if (prod) {
   app.use("/", express.static(path.join(rootDir, "dist")));
 } else {
   const bundler = new Bundler(__dirname + "/../index.html");
 
-  // @ts-ignore
   app.use(bundler.middleware());
 }
 
