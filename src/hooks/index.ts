@@ -102,6 +102,16 @@ export const useService: UseService = <T extends ServiceData, P = any>(
   return [data, emit];
 };
 
+const isOutside = (
+  { left, top, width, height }: DOMRect,
+  { clientX: x, clientY: y }: React.Touch
+) => {
+  if (x < left || x > left + width) return true;
+  if (y < top || y > top + height) return true;
+
+  return false;
+};
+
 export const useTouchPress = (cbs: {
   onPress?(): void;
   onLongPress?(): void;
@@ -109,7 +119,7 @@ export const useTouchPress = (cbs: {
   const timer = useRef<number>();
   const [active, setActive] = useState(false);
 
-  const on = () => {
+  const onTouchStart = () => {
     setActive(true);
 
     if (cbs.onLongPress)
@@ -120,7 +130,7 @@ export const useTouchPress = (cbs: {
       }, 650);
   };
 
-  const off = () => {
+  const onTouchEnd = () => {
     clearTimeout(timer.current);
 
     if (active) {
@@ -130,7 +140,17 @@ export const useTouchPress = (cbs: {
     }
   };
 
-  return [on, off];
+  const onTouchMove = (e: React.TouchEvent) => {
+    const t = e.target as HTMLElement;
+    const out = isOutside(t.getBoundingClientRect(), e.touches[0]);
+
+    if (out && active) {
+      clearTimeout(timer.current);
+      setActive(false);
+    }
+  };
+
+  return { onTouchStart, onTouchEnd, onTouchMove };
 };
 
 export const useForceUpdate = () => {
