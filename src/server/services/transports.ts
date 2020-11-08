@@ -2,6 +2,7 @@ import axios from "axios";
 
 import * as config from "../../../config";
 import { min2Ms, sec2Ms } from "../../utils/time";
+import { retry } from "../../utils/retry";
 import { wait } from "../../utils/helpers";
 
 export const name = "transports";
@@ -18,11 +19,13 @@ const getTransportUrl = (types: string[], siteId: string) => {
 
 const callers = config.transports.settings.map((config) => (delay: number) =>
   wait(delay).then(() =>
-    axios
-      .get<Timetable>(getTransportUrl(config.types, config.siteId))
-      .then(({ data }) => ({
-        data,
-      }))
+    retry(
+      axios
+        .get<Timetable>(getTransportUrl(config.types, config.siteId))
+        .then(({ data }) => ({
+          data,
+        }))
+    )
   )
 );
 

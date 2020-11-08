@@ -2,6 +2,7 @@ import axios from "axios";
 
 import * as config from "../../../config";
 import { min2Ms } from "../../utils/time";
+import { retry } from "../../utils/retry";
 
 const request = <T>(name: string, url: string) =>
   axios.get<T>(url).then(({ data }) => ({
@@ -17,8 +18,8 @@ const sunUrl = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&format
 
 export const get = (): Promise<WeatherServiceData> =>
   Promise.all([
-    request<Forecast>("smhi", smhiUrl),
-    request<Sun>("sun", sunUrl),
+    retry(request<Forecast>("smhi", smhiUrl)),
+    retry(request<Sun>("sun", sunUrl)),
   ]).then(([smhi, sun]) => ({
     service: name,
     data: {

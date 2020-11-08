@@ -3,6 +3,7 @@ import https from "https";
 
 import * as config from "../../../config";
 import { sec2Ms } from "../../utils/time";
+import { retry } from "../../utils/retry";
 import { round, pick, createMedian } from "../../utils/helpers";
 import { hue2Hsv } from "../../utils/color";
 
@@ -36,38 +37,40 @@ const getLights = (l: HueApiLights) => {
 };
 
 export const get = (): Promise<HueServiceData> =>
-  axios
-    .get<HueApiResponse>(url, {
-      headers: {
-        "Cache-Control": "no-cache",
-      },
-      httpsAgent,
-    })
-    .then(({ data: { lights: allLights, groups } }) => {
-      const data = Object.entries(groups).reduce<HueGroups>(
-        (acc, [id, { action, state, ...group }]) => {
-          const on = state.any_on || state.all_on;
-          const [bri, lights] = getLights(pick(allLights, group.lights));
-
-          return {
-            ...acc,
-            [id]: {
-              bri,
-              name: group.name,
-              class: group.class,
-              on,
-              lights: Object.keys(lights).length ? lights : null,
-            },
-          };
+  retry(
+    axios
+      .get<HueApiResponse>(url, {
+        headers: {
+          "Cache-Control": "no-cache",
         },
-        {}
-      );
+        httpsAgent,
+      })
+      .then(({ data: { lights: allLights, groups } }) => {
+        const data = Object.entries(groups).reduce<HueGroups>(
+          (acc, [id, { action, state, ...group }]) => {
+            const on = state.any_on || state.all_on;
+            const [bri, lights] = getLights(pick(allLights, group.lights));
 
-      return {
-        service: name,
-        data,
-      };
-    });
+            return {
+              ...acc,
+              [id]: {
+                bri,
+                name: group.name,
+                class: group.class,
+                on,
+                lights: Object.keys(lights).length ? lights : null,
+              },
+            };
+          },
+          {}
+        );
+
+        return {
+          service: name,
+          data,
+        };
+      })
+  );
 
 export const delay = () => sec2Ms(5);
 
