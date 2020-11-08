@@ -2,6 +2,7 @@ import axios from "axios";
 
 import * as config from "../../../config";
 import { sec2Ms, min2Ms } from "../../utils/time";
+import { retry } from "../../utils/retry";
 
 const {
   settings: { region },
@@ -16,39 +17,42 @@ const url = `https://vocapi${
 export const name = "voc";
 
 export const get = (): Promise<VOCServiceData> =>
-  axios
-    .request<VOCResponse>({
-      auth: {
-        username,
-        password,
-      },
-      method: "GET",
-      url: `${url}/status`,
-      headers: {
-        "cache-control": "no-cache",
-        "content-type": "application/json",
-        "x-device-id": "Device",
-        "x-originator-type": "App",
-        "x-os-type": "Android",
-        "x-os-version": "22",
-      },
-    })
-    .then(({ data: res }) => {
-      const data =
-        res && "ERS" in res
-          ? {
-              locked: res.carLocked,
-              running: res.engineRunning || res.ERS.status === "onByDirectCtrl",
-            }
-          : undefined;
-      const error = res && "errorLabel" in res ? res : undefined;
+  retry(
+    axios
+      .request<VOCResponse>({
+        auth: {
+          username,
+          password,
+        },
+        method: "GET",
+        url: `${url}/status`,
+        headers: {
+          "cache-control": "no-cache",
+          "content-type": "application/json",
+          "x-device-id": "Device",
+          "x-originator-type": "App",
+          "x-os-type": "Android",
+          "x-os-version": "22",
+        },
+      })
+      .then(({ data: res }) => {
+        const data =
+          res && "ERS" in res
+            ? {
+                locked: res.carLocked,
+                running:
+                  res.engineRunning || res.ERS.status === "onByDirectCtrl",
+              }
+            : undefined;
+        const error = res && "errorLabel" in res ? res : undefined;
 
-      return {
-        service: name,
-        data,
-        error,
-      };
-    });
+        return {
+          service: name,
+          data,
+          error,
+        };
+      })
+  );
 
 export const delay = () => {
   const d = new Date();
