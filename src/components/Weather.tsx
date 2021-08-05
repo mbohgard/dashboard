@@ -26,7 +26,7 @@ type SunData = {
 const percentage = percentageOfRange(-15, 30);
 
 const param = (params: Parameter[], name: string) =>
-  params.find((p) => p.name === name)!.values[0];
+  params.find((p) => p.name === name)!.values[0]!;
 
 const minutes = (t: Dayjs) => t.minute() + t.hour() * 60;
 
@@ -77,7 +77,7 @@ type WeatherProps = {
   data: TimeSerie;
 };
 
-const Degrees: React.SFC<WeatherProps & Type> = ({ data, type = "normal" }) => {
+const Degrees: React.FC<WeatherProps & Type> = ({ data, type = "normal" }) => {
   const deg = Math.round(param(data.parameters, "t"));
   const color = new TinyColor(colors.cold)
     .mix(new TinyColor(colors.hot), percentage(deg))
@@ -126,7 +126,7 @@ const SunTime = styled.p`
 
 type SingleWeatherProps = WeatherProps & { sun?: SunData };
 
-export const BigWeather: React.SFC<SingleWeatherProps> = ({ data, sun }) => (
+export const BigWeather: React.FC<SingleWeatherProps> = ({ data, sun }) => (
   <BigContainer>
     <WeatherIcon
       code={param(data.parameters, "Wsymb2")}
@@ -172,7 +172,7 @@ const SmallWrapper = styled.div`
   justify-content: space-between;
 `;
 
-const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
+const Small: React.FC<SingleWeatherProps> = ({ data, sun }) => {
   return (
     <SmallContainer>
       <span>{dayjs(data.validTime).format("HH:mm")}</span>
@@ -185,7 +185,7 @@ const Small: React.SFC<SingleWeatherProps> = ({ data, sun }) => {
   );
 };
 
-export const SmallWeather: React.SFC<{ data: TimeSerie[]; sun?: SunData }> = ({
+export const SmallWeather: React.FC<{ data: TimeSerie[]; sun?: SunData }> = ({
   data,
   sun,
 }) => (
@@ -229,6 +229,6 @@ export const Weather: React.FC<Props> = ({ type = "small" }) => {
   return type === "small" ? (
     <SmallWeather data={forecast} sun={sun} />
   ) : (
-    <BigWeather data={currentWeather} sun={sun} />
+    <BigWeather data={currentWeather!} sun={sun} />
   );
 };

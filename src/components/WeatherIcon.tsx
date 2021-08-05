@@ -385,7 +385,7 @@ export const variableNight = (
   </Svg>
 );
 
-export const WeatherIcon: React.SFC<{ code: number; night: boolean }> = ({
+export const WeatherIcon: React.FC<{ code: number; night: boolean }> = ({
   code,
   night,
 }) => {

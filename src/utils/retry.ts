@@ -8,7 +8,7 @@ export const retry = <T>(
   prom: Promise<T>,
   { predicate = () => true, retries = 2, delay = 2000 }: Options<T> = {}
 ) => {
-  let timer: number;
+  let timer: ReturnType<typeof setTimeout>;
 
   const attempt = (n: number) =>
     new Promise<T>((resolve, reject) => {

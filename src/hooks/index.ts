@@ -123,7 +123,7 @@ export const useTouchPress = (cbs: {
     setActive(true);
 
     if (cbs.onLongPress)
-      timer.current = setTimeout(() => {
+      timer.current = window.setTimeout(() => {
         cbs.onLongPress?.();
 
         setActive(false);
@@ -142,7 +142,7 @@ export const useTouchPress = (cbs: {
 
   const onTouchMove = (e: React.TouchEvent) => {
     const t = e.target as HTMLElement;
-    const out = isOutside(t.getBoundingClientRect(), e.touches[0]);
+    const out = isOutside(t.getBoundingClientRect(), e.touches[0]!);
 
     if (out && active) {
       clearTimeout(timer.current);
