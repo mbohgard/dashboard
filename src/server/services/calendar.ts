@@ -1,8 +1,9 @@
-import axios from "axios";
 import dayjs, { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 // @ts-ignore
 import Ical from "ical-expander";
+
+import { axios } from "./index";
 
 import * as config from "../../../config";
 import { sec2Ms, ms2Hour } from "../../utils/time";

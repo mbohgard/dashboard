@@ -1,3 +1,7 @@
+import _axios, { AxiosRequestConfig } from "axios";
+
+import * as config from "../../../config";
+
 import * as Hue from "./hue";
 import * as Time from "./time";
 import * as Transports from "./transports";
@@ -16,5 +20,9 @@ const services = { hue, time, transports, voc, weather, calendar };
 
 export type Services = typeof services;
 export type ServiceName = keyof Services;
+
+export const axios = config.axiosConfig
+  ? _axios.create(config.axiosConfig as AxiosRequestConfig)
+  : _axios;
 
 export default services;

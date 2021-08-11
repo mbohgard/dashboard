@@ -1,6 +1,7 @@
 // save this file as config.js and your details
 
 module.exports = {
+  axiosConfig: undefined, // optional base config for Axios
   transports: {
     // key for sl.se realtimedeparturesV4 service
     key: "",
