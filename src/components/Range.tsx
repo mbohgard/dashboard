@@ -62,7 +62,7 @@ const Slider: React.FC<
   };
 
   const change = (e: React.TouchEvent) =>
-    onChange(getPercentage(e.touches[0].pageY));
+    onChange(getPercentage(e.touches[0]!.pageY));
 
   return (
     <SliderContainer

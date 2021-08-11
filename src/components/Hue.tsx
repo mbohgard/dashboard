@@ -37,7 +37,7 @@ export const Hue: React.FC = () => {
         set((state) => ({
           ...state,
           [id]: {
-            ...state![id],
+            ...state![id]!,
             ...payload,
           },
         }));
@@ -94,7 +94,7 @@ export const Hue: React.FC = () => {
         <Overlay closeOnPress close={setAdjustId} autoClose={5000}>
           <Range
             onChange={adjust}
-            initialValue={satOrBriPercentage(groups[adjustId].bri)}
+            initialValue={satOrBriPercentage(groups[adjustId]!.bri)}
           />
         </Overlay>
       )}

@@ -18,9 +18,9 @@ export const roundValues = <T extends object>(obj: T) =>
     {} as T
   );
 
-export const percentageOfRange = (min: number, max: number) => (
-  input: number
-) => (max ? ((input - min) * 100) / (max - min) : 0);
+export const percentageOfRange =
+  (min: number, max: number) => (input: number) =>
+    max ? ((input - min) * 100) / (max - min) : 0;
 
 export const roundedPercentageOf = (value: number = 0, max: number = 0) =>
   round((value / max) * 100);
@@ -116,7 +116,7 @@ export const debounce = <F extends (...args: any[]) => any>(
   f: F,
   wait = 300
 ) => {
-  let t: number;
+  let t: ReturnType<typeof setTimeout>;
 
   return (...args: Parameters<F>): Promise<ReturnType<F>> =>
     new Promise((resolve, reject) => {
@@ -137,7 +137,7 @@ export const throttle = <F extends (...args: any[]) => any>(
   interval = 500
 ) => {
   let last: number;
-  let t: number;
+  let t: ReturnType<typeof setTimeout>;
 
   return (...args: Parameters<F>): Promise<ReturnType<F>> =>
     new Promise((resolve, reject) => {

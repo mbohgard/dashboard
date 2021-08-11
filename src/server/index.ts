@@ -20,14 +20,14 @@ const port = 8081;
 const app = express();
 
 const server = http.createServer(app);
-const io = ws(server);
+const io = new ws.Server(server);
 
-const timers: { [key in ServiceName]?: number } = {};
+const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
 const cache: { [key in ServiceName]?: ServiceData } = {};
 const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
 
-const stopService = (s: ServiceName) => clearTimeout(timers[s]);
+const stopService = (s: ServiceName) => global.clearTimeout(timers[s]!);
 
 const saveToCache = (s: ServiceName, data: ServiceData) => (cache[s] = data);
 const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);

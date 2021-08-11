@@ -1,7 +1,8 @@
-import axios from "axios";
 import https from "https";
 
 import * as config from "../../../config";
+import { axios } from "./index";
+
 import { sec2Ms } from "../../utils/time";
 import { retry } from "../../utils/retry";
 import { round, pick, createMedian } from "../../utils/helpers";

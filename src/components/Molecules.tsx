@@ -176,7 +176,7 @@ export const Overlay: React.FC<OverlayProps> = ({
     const resetTimer = () => {
       clearTimeout(t);
 
-      t = setTimeout(close, autoClose);
+      t = window.setTimeout(close, autoClose);
     };
 
     events.forEach((e) => document.addEventListener(e, resetTimer));

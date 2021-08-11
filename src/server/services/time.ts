@@ -1,6 +1,6 @@
-import axios from "axios";
-
 import * as config from "../../../config";
+import { axios } from "./index";
+
 import { min2Ms } from "../../utils/time";
 import { retry } from "../../utils/retry";
 

@@ -67,7 +67,7 @@ export const lights2background = (
   const add = createMedian();
 
   return values.length === 1
-    ? getColor(values[0])
+    ? getColor(values[0]!)
     : values
         .sort((a, b) => (a.h > b.h ? 1 : -1))
         .reduce(({ value }, hsv, i, arr) => {
