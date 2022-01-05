@@ -18,13 +18,16 @@ const getTransportUrl = (types: string[], siteId: string) => {
 };
 
 const callers = config.transports.settings.map(
-  (config) => (delay: number) =>
+  ({ types, siteId }) => (delay: number) =>
     wait(delay).then(() =>
       retry(
         axios
-          .get<Timetable>(getTransportUrl(config.types, config.siteId))
+          .get<Timetable>(getTransportUrl(types, siteId))
           .then(({ data }) => ({
-            data,
+            data: {
+              ...data,
+              siteId,
+            },
           }))
       )
     )
@@ -38,7 +41,12 @@ export const get = () =>
 
         return { ...acc, data };
       },
-      { service: name }
+      {
+        service: name,
+        meta: {
+          sites: config.transports.settings,
+        },
+      }
     )
   );
 

@@ -10,7 +10,7 @@ export const VOC: React.FC = () => {
   const [data] = useService<VOCServiceData>("voc");
 
   return (
-    <ServiceBox title="Volvo" type="icons">
+    <ServiceBox title={data?.label} type="icons">
       {data && (
         <ButtonGrid>
           <ActionButton

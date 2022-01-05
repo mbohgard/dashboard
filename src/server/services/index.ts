@@ -21,8 +21,14 @@ const services = { hue, time, transports, voc, weather, calendar };
 export type Services = typeof services;
 export type ServiceName = keyof Services;
 
-export const axios = config.axiosConfig
-  ? _axios.create(config.axiosConfig as AxiosRequestConfig)
+type Config = typeof config & {
+  axiosConfig?: AxiosRequestConfig;
+};
+
+const conf = config as Config;
+
+export const axios = conf.axiosConfig
+  ? _axios.create(conf.axiosConfig)
   : _axios;
 
 export default services;

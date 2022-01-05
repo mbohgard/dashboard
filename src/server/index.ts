@@ -1,4 +1,3 @@
-import Bundler from "parcel-bundler";
 import express from "express";
 import path from "path";
 import http from "http";
@@ -20,7 +19,11 @@ const port = 8081;
 const app = express();
 
 const server = http.createServer(app);
-const io = new ws.Server(server);
+const io = new ws.Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
 const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
 const cache: { [key in ServiceName]?: ServiceData } = {};
@@ -125,14 +128,9 @@ io.on("connection", (socket) => {
   emit({ service: "server", data: { version, launched } });
 });
 
-if (prod) {
-  app.use("/", express.static(path.join(rootDir, "dist")));
-} else {
-  const bundler = new Bundler(__dirname + "/../index.html");
-
-  app.use(bundler.middleware());
-}
+if (prod) app.use("/", express.static(path.join(rootDir, "dist")));
 
 server.listen(port, () => {
   launched = ms2Sec(Date.now());
+  console.log("Server listening on port", port);
 });

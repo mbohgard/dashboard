@@ -40,6 +40,7 @@ module.exports = {
     vin: "",
     settings: {
       region: "",
+      name: "",
     },
   },
   // ical (ics) links

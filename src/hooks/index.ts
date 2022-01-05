@@ -39,30 +39,34 @@ interface UseService {
   <T extends ServiceData, P = any>(
     serviceName: string,
     condition?: (res: T) => boolean
-  ): [T["data"], Emit<P, T["data"]>];
+  ): [T["data"], Emit<P, T["data"]>, T["meta"]];
 
   <T extends ServiceData, P = any>(
     serviceName: string,
     initialData: Required<T>["data"],
     condition?: (res: T) => boolean
-  ): [Required<T>["data"], Emit<P, Required<T>["data"]>];
+  ): [Required<T>["data"], Emit<P, Required<T>["data"]>, T["meta"]];
 }
 
 export const useService: UseService = <T extends ServiceData, P = any>(
   serviceName: any,
   arg1?: any,
   arg2: any = (res: T) => Boolean(res.data)
-): [any, any] => {
-  const connected = useConnected();
+): [any, any, any] => {
   const short = typeof arg1 === "function";
   const condition = short ? arg1 : arg2;
+
+  const connected = useConnected();
+  const meta = useRef<T["meta"]>(undefined);
   const [data, setData] = useState<T["data"]>(short ? undefined : arg1);
 
   useEffect(() => {
-    const listener = (res: T) =>
-      condition(res)
-        ? setData(res.data)
-        : reportError?.(res.service, res.error);
+    const listener = (res: T) => {
+      if (condition(res)) setData(res.data);
+      else reportError?.(res.service, res.error);
+
+      if (res.meta) meta.current = res.meta;
+    };
 
     if (connected) {
       socket.on(serviceName, listener);
@@ -99,7 +103,7 @@ export const useService: UseService = <T extends ServiceData, P = any>(
     [connected]
   );
 
-  return [data, emit];
+  return [data, emit, meta.current];
 };
 
 const isOutside = (

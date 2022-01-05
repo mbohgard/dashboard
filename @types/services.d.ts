@@ -87,6 +87,10 @@ declare interface Timetable {
   StopPointDeviations: any[];
 }
 
+declare interface Transport extends Timetable {
+  siteId: string;
+}
+
 declare interface VOCResults {
   ERS: {
     status: string;
@@ -175,6 +179,7 @@ declare type VOCResponse =
 declare interface VOCData {
   locked: boolean;
   running: boolean;
+  label: string;
 }
 
 declare interface CalendarEvent {
@@ -192,7 +197,16 @@ declare interface CalendarEvent {
 
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type WeatherServiceData = ServiceData<Forecast>;
-declare type TransportsServiceData = ServiceData<Timetable[]>;
+declare type TransportsServiceData = ServiceData<
+  Transport[],
+  {
+    sites: {
+      label: string;
+      siteId: string;
+      types: string[];
+    }[];
+  }
+>;
 declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
 declare type CalendarServiceData = ServiceData<CalendarEvent[]>;

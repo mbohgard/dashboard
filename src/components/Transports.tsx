@@ -48,7 +48,7 @@ type TranportTimeProps = {
   data?: TransportItem;
 } & TimeProps;
 
-const TransportTime: React.SFC<TranportTimeProps> = ({ data }) => {
+const TransportTime: React.FC<TranportTimeProps> = ({ data }) => {
   if (!data) return <TimeWrapper>---</TimeWrapper>;
 
   const time = data.DisplayTime.split("min");
@@ -74,52 +74,54 @@ const getTransports = (
 
 type TransportItems = (TransportItem | undefined)[];
 
-type TransportProps = {
-  items?: TransportItems;
-  title: string;
-};
-
-const Transport: React.SFC<TransportProps> = ({ items, title }) => (
-  <Box title={title} loading={!Boolean(items)}>
-    <div>
-      {items?.map((b, i) => (
-        <TransportTime key={i} data={b} />
-      ))}
-    </div>
-  </Box>
-);
-
 const fill = (x: TransportItems): TransportItems =>
   Array(3)
     .fill(undefined)
     .map((_, i) => x[i]);
 
 export const Transports: React.FC = () => {
-  const [data] = useService<TransportsServiceData>("transports");
-  const [buses, trains] = useMemo(() => {
-    if (!data) return [undefined, undefined];
+  const [data, _, meta] = useService<TransportsServiceData>("transports");
 
-    return [
-      fill(
-        getTransports("Buses", data).filter((b) =>
-          !b ? true : b.Destination.includes("Väsby")
-        )
-      ),
-      fill(
-        getTransports("Trains", data).filter((t) =>
-          !t
-            ? true
-            : t.JourneyDirection === 1 &&
-              dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
-        )
-      ),
-    ];
-  }, [data]);
+  const transports = useMemo(
+    () =>
+      data?.map((transport) => {
+        const label = meta?.sites.find(
+          ({ siteId }) => transport.siteId === siteId
+        )?.label;
+        const type = label === "Tåg" ? "Trains" : "Buses";
+
+        return {
+          items: fill(
+            getTransports(type, data).filter(
+              (t) =>
+                !t ||
+                (type === "Trains"
+                  ? t.JourneyDirection === 1 &&
+                    dayjs(t.ExpectedDateTime).unix() - dayjs().unix() > 60 * 5
+                  : t.Destination.includes("Väsby"))
+            )
+          ),
+          label,
+        };
+      }),
+    [data, meta]
+  );
 
   return (
     <Container>
-      <Transport items={buses} title="Buss" />
-      <Transport items={trains} title="Tåg" />
+      {transports ? (
+        transports.map(({ items, label }, i) => (
+          <Box key={label ?? i} title={label} loading={!Boolean(items)}>
+            <div>
+              {items.map((b, i) => (
+                <TransportTime key={b?.JourneyNumber ?? i} data={b} />
+              ))}
+            </div>
+          </Box>
+        ))
+      ) : (
+        <Box title="Transports..." loading={true} />
+      )}
     </Container>
   );
 };

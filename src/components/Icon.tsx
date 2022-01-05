@@ -33,21 +33,36 @@ const Fallback = createComp(
 
 const iconsObj: IconsObj = Object.entries(
   (allIcons as unknown) as Imported
-).reduce(
+).reduce<IconsObj>(
   (acc, [key, { default: C }]) => ({
     ...acc,
     [pascal(key)]: createComp(C),
   }),
-  {} as IconsObj
+  {}
 );
 
-type IconProps = { [name: string]: any } & { name?: string } & Props;
+const iconNameFromHueClass = (hueClass: HueGroupClass) =>
+  Object.keys(iconsObj).reduce(
+    (acc, key) =>
+      acc ||
+      (hueClass.replace(" ", "") === key.replace("Rooms", "") ? key : ""),
+    ""
+  );
 
-export const Icon = React.memo(({ size, name, ...p }: IconProps) => {
+type IconProps = { [name: string]: any } & { name?: string } & {
+  hueClass?: HueGroupClass;
+} & Props;
+
+export const Icon = React.memo(({ size, name, hueClass, ...p }: IconProps) => {
   const Comp =
     iconsObj[
       name ||
-        Object.entries(p).reduce((acc, [k, v]) => (v === true ? k : acc), "")
+        (hueClass
+          ? iconNameFromHueClass(hueClass)
+          : Object.entries(p).reduce(
+              (acc, [k, v]) => (v === true ? k : acc),
+              ""
+            ))
     ] || Fallback;
 
   return <Comp size={size} />;
