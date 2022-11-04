@@ -5,7 +5,7 @@ import { sec2Ms, min2Ms } from "../../utils/time";
 import { retry } from "../../utils/retry";
 
 const {
-  settings: { region },
+  settings: { region, label },
   vin,
   username,
   password,
@@ -42,6 +42,7 @@ export const get = (): Promise<VOCServiceData> =>
                 locked: res.carLocked,
                 running:
                   res.engineRunning || res.ERS.status === "onByDirectCtrl",
+                label: label ?? "Volvo",
               }
             : undefined;
         const error = res && "errorLabel" in res ? res : undefined;

@@ -1,9 +1,10 @@
 type ServiceName = import("../src/server/services").ServiceName;
 
-declare interface ServiceData<T = any> {
+declare interface ServiceData<T = any, Meta = any> {
   data?: T;
   error?: any;
   service: ServiceName;
+  meta?: Meta;
 }
 
 declare type ServiceResponse<T = any> = Promise<ServiceData<T>>;

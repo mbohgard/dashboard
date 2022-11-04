@@ -109,7 +109,7 @@ const App: React.FC = (props) => {
   );
 };
 
-if (window) window.oncontextmenu = () => false;
+if (typeof window !== "undefined") window.oncontextmenu = () => false;
 
 let version: string | undefined;
 
