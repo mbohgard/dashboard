@@ -81,9 +81,14 @@ export const get = () => {
     )
   );
 
-  return Promise.all(requests).then((events) => ({
+  return Promise.allSettled(requests).then((events) => ({
     service: name,
-    data: events.reduce((acc, es) => [...acc, ...es], []).sort(sortEvents),
+    data: events
+      .reduce<CalendarEvent[]>(
+        (acc, es) => (es.status === "fulfilled" ? [...acc, ...es.value] : acc),
+        []
+      )
+      .sort(sortEvents),
   }));
 };
 

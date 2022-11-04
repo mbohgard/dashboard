@@ -62,10 +62,10 @@ export const useService: UseService = <T extends ServiceData, P = any>(
 
   useEffect(() => {
     const listener = (res: T) => {
+      meta.current = res.meta;
+
       if (condition(res)) setData(res.data);
       else reportError?.(res.service, res.error);
-
-      if (res.meta) meta.current = res.meta;
     };
 
     if (connected) {

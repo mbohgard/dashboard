@@ -49,7 +49,7 @@ export const get = (): Promise<HueServiceData> =>
       .then(({ data: { lights: allLights, groups } }) => {
         const data = Object.entries(groups).reduce<HueGroups>(
           (acc, [id, { action, state, type, ...group }]) => {
-            if (type !== "Room") return acc;
+            if (type !== "Room" || group.name === "Inaktiva") return acc;
 
             const on = state.any_on || state.all_on;
             const [bri, lights] = getLights(pick(allLights, group.lights));

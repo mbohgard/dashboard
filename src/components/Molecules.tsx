@@ -35,6 +35,7 @@ const ServiceTitle = styled.h3<ServiceBoxProps>`
   text-transform: uppercase;
   width: 100%;
   margin-bottom: 5px;
+  white-space: nowrap;
 
   ${({ type }) =>
     type === "icons" &&

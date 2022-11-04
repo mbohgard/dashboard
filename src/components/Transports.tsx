@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
 
@@ -80,15 +80,21 @@ const fill = (x: TransportItems): TransportItems =>
     .map((_, i) => x[i]);
 
 export const Transports: React.FC = () => {
+  const labels = useRef<Record<string, string>>({});
   const [data, _, meta] = useService<TransportsServiceData>("transports");
 
   const transports = useMemo(
     () =>
-      data?.map((transport) => {
+      data?.map((transport, i) => {
+        const siteId = transport.siteId;
         const label = meta?.sites.find(
-          ({ siteId }) => transport.siteId === siteId
+          ({ siteId: id }) => siteId === id
         )?.label;
         const type = label === "Tåg" ? "Trains" : "Buses";
+        const currentLabel = labels.current[siteId];
+
+        if (!currentLabel || currentLabel?.startsWith("(Transport"))
+          labels.current[siteId] = label ?? `(Transport ${i + 1})`;
 
         return {
           items: fill(
@@ -101,7 +107,7 @@ export const Transports: React.FC = () => {
                   : t.Destination.includes("Väsby"))
             )
           ),
-          label,
+          siteId,
         };
       }),
     [data, meta]
@@ -110,8 +116,12 @@ export const Transports: React.FC = () => {
   return (
     <Container>
       {transports ? (
-        transports.map(({ items, label }, i) => (
-          <Box key={label ?? i} title={label} loading={!Boolean(items)}>
+        transports.map(({ items, siteId }) => (
+          <Box
+            key={labels.current[siteId]}
+            title={labels.current[siteId]}
+            loading={!Boolean(items)}
+          >
             <div>
               {items.map((b, i) => (
                 <TransportTime key={b?.JourneyNumber ?? i} data={b} />
