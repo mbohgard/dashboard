@@ -1,3 +1,4 @@
 import io from "socket.io-client";
 
-export const socket = io("http://localhost:8081");
+export const socket =
+  process.env.NODE_ENV === "production" ? io() : io("http://localhost:8081");
