@@ -9,8 +9,8 @@ import { Loader } from "./Atoms";
 
 const Container = styled.ul`
   list-style: none;
-  margin-left: 20px;
   font-size: 21px;
+  margin-top: 5px;
 `;
 
 const pebble = css`
@@ -34,7 +34,6 @@ const Item = styled.li<ItemProps>`
   display: block;
   white-space: nowrap;
   line-height: 160%;
-  max-width: 320px;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: ${({ valid }) => (valid ? 1 : 0.5)};
@@ -106,23 +105,16 @@ export const Calendar: React.FC = () => {
   const list = useMemo(() => {
     if (!data) return undefined;
 
-    return data
-      .filter((_, i) => i < 6)
-      .map((e) => {
-        const [time, valid] = getTime(e);
+    return data.map((e) => {
+      const [time, valid] = getTime(e);
 
-        return (
-          <Item
-            key={e.id}
-            label={e.name.charAt(0)}
-            color={e.color}
-            valid={valid}
-          >
-            <Time>{time}</Time>
-            <Summary valid={valid}>{e.summary}</Summary>
-          </Item>
-        );
-      });
+      return (
+        <Item key={e.id} label={e.name.charAt(0)} color={e.color} valid={valid}>
+          <Time>{time}</Time>
+          <Summary valid={valid}>{e.summary}</Summary>
+        </Item>
+      );
+    });
   }, [data]);
 
   if (!data) return <Loader />;

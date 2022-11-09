@@ -22,6 +22,9 @@ export const VOC: React.FC = () => {
           <ActionButton id="running" active={!!data.running}>
             <Icon Power />
           </ActionButton>
+          <ActionButton id="battery" active={data.charging}>
+            <span>{data.batteryLevel}%</span>
+          </ActionButton>
         </ButtonGrid>
       )}
     </ServiceBox>

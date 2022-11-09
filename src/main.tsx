@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "react-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import updateLocale from "dayjs/plugin/updateLocale";
@@ -37,32 +37,54 @@ dayjs.updateLocale("sv", {
   },
 });
 
-const Wrapper = styled.div`
-  padding: 25px;
-  max-height: 100%;
+type AreaProps = {
+  colStart?: number;
+  colEnd?: number;
+  rowStart?: number;
+  rowEnd?: number;
+  align?: "start" | "end" | "center" | "stretch";
+  justify?: "start" | "end" | "center" | "stretch";
+  flex?: boolean;
+};
+
+export const Area = styled.div<AreaProps>(
+  (p) => css`
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    grid-column-start: ${p.colStart ?? "auto"};
+    grid-column-end: ${p.colEnd ?? "auto"};
+    grid-row-start: ${p.rowStart ?? "auto"};
+    grid-row-end: ${p.rowEnd ?? "auto"};
+    align-self: ${p.align ?? "auto"};
+    justify-self: ${p.justify ?? "auto"};
+    display: ${p.flex ? "flex" : "block"};
+  `
+);
+
+type GridWrapperProps = {
+  padding?: number;
+  columns: string;
+  rows?: string;
+};
+
+const GridWrapper = styled(Area)<GridWrapperProps>`
+  padding: ${(p) => p.padding ?? 0}px;
+  display: grid;
+  grid-template-columns: ${(p) => p.columns};
+  grid-template-rows: ${(p) => p.rows ?? "none"};
+  grid-gap: 20px;
   height: 100%;
   position: relative;
 `;
 
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  overflow: hidden;
-  justify-content: space-between;
+const BottomContainer = styled(Area)`
+  gap: 25px;
 `;
 
-type HorizontalProps = {
-  withMargin?: boolean;
-};
-
-const Horizontal = styled.div<HorizontalProps>`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: ${({ withMargin }) => (withMargin ? "10px 0" : 0)};
+const Fill = styled.div`
+  flex-grow: 1;
 `;
 
 export type ReportError = (service: string, err: any) => void;
@@ -83,29 +105,35 @@ const App: React.FC = (props) => {
   const connected = useSocket();
 
   return (
-    <Wrapper>
+    <GridWrapper columns="repeat(24, 1fr)" rows="31% auto 36%" padding={25}>
       <ErrorBoundary>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
           <Status ok={connected} />
           <About {...props} />
-          <Container>
+          <Area colStart={1} colEnd={13}>
             <Weather type="big" />
+          </Area>
+          <Area colStart={13} colEnd={25}>
             <Time />
-            <Horizontal withMargin>
-              <Weather />
-              <Calendar />
-            </Horizontal>
-            <Horizontal>
-              <Transports />
-              <VOC />
+          </Area>
+          <Area colStart={1} colEnd={18} align="center">
+            <Weather />
+          </Area>
+          <Area colStart={18} colEnd={25} rowStart={2} rowEnd={4}>
+            <Calendar />
+          </Area>
+          <BottomContainer colStart={1} colEnd={18} flex>
+            <Transports />
+            <VOC />
+            <Fill>
               <Hue />
-            </Horizontal>
-          </Container>
+            </Fill>
+          </BottomContainer>
           <Errors />
         </ConnectionContext.Provider>
       </ErrorBoundary>
-    </Wrapper>
+    </GridWrapper>
   );
 };
 

@@ -39,10 +39,12 @@ export const get = (): Promise<VOCServiceData> =>
         const data =
           res && "ERS" in res
             ? {
+                batteryLevel: res.hvBattery.hvBatteryLevel,
                 locked: res.carLocked,
                 running:
                   res.engineRunning || res.ERS.status === "onByDirectCtrl",
                 label: label ?? "Volvo",
+                charging: res.hvBattery.hvBatteryChargeStatus === "Started",
               }
             : undefined;
         const error = res && "errorLabel" in res ? res : undefined;

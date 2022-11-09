@@ -13,10 +13,9 @@ type ServiceBoxProps = {
 };
 
 const ServiceContainer = styled.div`
-  margin: 0 20px;
-  margin-right: 0;
   display: flex;
   flex-direction: column;
+  height: 100%;
 `;
 
 const ServiceContent = styled.div<ServiceBoxProps>`
@@ -84,6 +83,7 @@ export const ServiceBox: React.FC<ServiceBoxProps> = ({
 
 type ActionButtonProps = {
   active: boolean;
+  badge?: string;
   color?: string;
   background?: string;
   id: string;
@@ -96,6 +96,7 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
   border-radius: 8px;
   box-shadow: inset 0 0 0 3px
     ${({ active, background }) =>
@@ -104,10 +105,12 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
           ? "transparent"
           : colors.white
         : colors.superDimmed};
-  width: 115px;
+  width: 84px;
   height: 100%;
-  min-height: 100px;
+  min-height: 70px;
   cursor: pointer;
+  color: ${({ active, color = colors.white }) =>
+    active ? color : colors.superDimmed};
   background: ${({ active, background }) =>
     active ? background : "transparent"};
 
@@ -115,16 +118,38 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
     pointer-events: none;
   }
 
-  & svg {
+  > svg {
     ${({ size }) =>
       css`
-        height: ${size || "55px"};
-        width: ${size || "55px"};
+        height: ${size || "45px"};
+        width: ${size || "45px"};
       `}
     path {
-      fill: ${({ active, color = colors.white }) =>
-        active ? color : colors.superDimmed};
+      fill: currentColor;
     }
+  }
+
+  > span {
+    font-size: 32px;
+    font-weight: bold;
+    transform: scaleX(0.7);
+  }
+
+  &:after {
+    content: ${(p) => p.badge && `"${p.badge}"`};
+    position: absolute;
+    display: flex;
+    justify-content: flex-end;
+    line-height: 10px;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    border-bottom-left-radius: 5px;
+    background: ${colors.black};
+    color: ${colors.dimmed};
+    font-size: 14px;
   }
 `;
 

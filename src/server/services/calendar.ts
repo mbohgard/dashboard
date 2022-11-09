@@ -51,7 +51,7 @@ const sortEvents = <T extends CalendarEvent>(a: T, b: T) => {
 
 export const get = () => {
   const from = dayjs().startOf("day").toDate();
-  const to = dayjs().add(14, "day").startOf("day").toDate();
+  const to = dayjs().add(30, "day").startOf("day").toDate();
   const nowDate = dayjs();
   const now = nowDate.valueOf();
 
@@ -88,7 +88,8 @@ export const get = () => {
         (acc, es) => (es.status === "fulfilled" ? [...acc, ...es.value] : acc),
         []
       )
-      .sort(sortEvents),
+      .sort(sortEvents)
+      .filter((_, i) => i < 14),
   }));
 };
 
