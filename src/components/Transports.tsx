@@ -9,10 +9,6 @@ import { ServiceBox } from "./Molecules";
 const Container = styled.div`
   display: flex;
   min-height: 180px;
-
-  > div:first-child {
-    margin-left: 0;
-  }
 `;
 
 const LineNumber = styled.span`

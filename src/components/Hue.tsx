@@ -63,6 +63,7 @@ export const Hue: React.FC = () => {
             id={id}
             color={color}
             background={bg}
+            badge={group.name.charAt(0).toUpperCase()}
             active={group.on}
             onPress={toggle}
             onLongPress={setAdjustId}

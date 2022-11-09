@@ -4,8 +4,8 @@ import { colors } from "../styles";
 
 export const ButtonGrid = styled.div`
   display: grid;
-  grid-gap: 18px;
-  grid-template-rows: repeat(2, 1fr);
+  grid-gap: 12px;
+  grid-template-rows: repeat(3, 1fr);
   grid-auto-flow: column;
 `;
 

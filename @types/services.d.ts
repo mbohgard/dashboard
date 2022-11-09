@@ -136,6 +136,22 @@ declare interface VOCResults {
     status: string;
     timestamp: string;
   };
+  hvBattery: {
+    hvBatteryChargeStatusDerived: string;
+    hvBatteryChargeStatusDerivedTimestamp: string;
+    hvBatteryChargeModeStatus: null;
+    hvBatteryChargeModeStatusTimestamp: null;
+    hvBatteryChargeStatus: string;
+    hvBatteryChargeStatusTimestamp: string;
+    hvBatteryLevel: number;
+    hvBatteryLevelTimestamp: string;
+    distanceToHVBatteryEmpty: null;
+    distanceToHVBatteryEmptyTimestamp: string;
+    hvBatteryChargeWarning: string;
+    hvBatteryChargeWarningTimestamp: string;
+    timeToHVBatteryFullyCharged: number;
+    timeToHVBatteryFullyChargedTimestamp: string;
+  };
   odometer: number;
   odometerTimestamp: string;
   privacyPolicyEnabled: boolean;
@@ -180,6 +196,8 @@ declare interface VOCData {
   locked: boolean;
   running: boolean;
   label: string;
+  batteryLevel: number;
+  charging: boolean;
 }
 
 declare interface CalendarEvent {
