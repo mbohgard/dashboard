@@ -15,6 +15,7 @@ import { Status } from "./components/Atoms";
 import { About } from "./components/About";
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
+import { Energy } from "./components/Energy";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
 import { VOC } from "./components/VOC";
@@ -114,7 +115,10 @@ const App: React.FC = (props) => {
           <Area colStart={1} colEnd={13}>
             <Weather type="big" />
           </Area>
-          <Area colStart={13} colEnd={25}>
+          <Area colStart={13} colEnd={15}>
+            <Energy />
+          </Area>
+          <Area colStart={15} colEnd={25}>
             <Time />
           </Area>
           <Area colStart={1} colEnd={18} align="center">
