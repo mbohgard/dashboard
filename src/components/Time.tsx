@@ -15,47 +15,51 @@ const dots = keyframes`
 
 const seconds = keyframes`
   from {
-    transform: scaleX(0);
+    clip-path: inset(99% 0 0 0);
   } to {
-    transform: scaleX(1);
+    clip-path: inset(7% 0 0 0);
   }
 `;
 
 const TimeView = styled.h2`
+  position: relative;
   font-size: 190px;
   font-weight: 300;
   text-align: right;
   letter-spacing: -7px;
   line-height: 0.8;
-
-  i {
-    animation: ${dots} 0.5s infinite alternate ease-in;
-  }
+  color: ${colors.dimmed};
 `;
 
 const DateView = styled.h4`
   font-size: 38px;
   font-weight: 300;
   text-align: right;
+  margin-top: 30px;
 
   span {
     color: ${colors.dimmed};
   }
 `;
 
-const Seconds = styled.div`
-  height: 4px;
-  background: ${colors.hyperDimmed};
-  width: 4ch;
-  margin: 20px 0 10px auto;
+const Dots = styled.i`
+  animation: ${dots} 0.5s infinite alternate ease-in;
+  color: ${colors.white};
+  font-weight: 300;
+`;
 
-  div {
-    animation: ${seconds} 60s linear;
-    transform-origin: left;
-    background: ${colors.superDimmed};
-    width: 100%;
-    height: 100%;
-  }
+const TimeBlind = styled.span`
+  position: absolute;
+  display: block;
+  background: ${colors.black};
+  clip-path: inset(99% 0 0 0);
+  font-weight: 400;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: ${colors.white};
+  animation: ${seconds} 60s linear;
 `;
 
 type Time = [string, string, Dayjs];
@@ -103,13 +107,15 @@ export const Time: React.FC = () => {
 
   return (
     <div>
-      <TimeView>
+      <TimeView key={m}>
         {h}
-        <i>:</i>
+        <Dots>:</Dots>
         {m}
-        <Seconds key={m}>
-          <div />
-        </Seconds>
+        <TimeBlind>
+          {h}
+          <Dots>:</Dots>
+          {m}
+        </TimeBlind>
       </TimeView>
       <DateView>
         {date} <span>{year}</span>
