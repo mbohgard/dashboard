@@ -61,10 +61,7 @@ type Props = {
   launched?: number;
 };
 
-export const About: React.FC<Props> = ({
-  version,
-  launched: serverStarted,
-}) => {
+export const About = ({ version, launched: serverStarted }: Props) => {
   const started = useRef(ms2Sec(Date.now()));
   const connected = useConnected();
   const [now, setNow] = useState(0);

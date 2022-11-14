@@ -7,6 +7,7 @@ import { colors } from "../styles";
 import { Loader } from "./Atoms";
 
 type ServiceBoxProps = {
+  children?: React.ReactNode | React.ReactNode[];
   type?: "normal" | "icons";
   title?: string;
   loading?: boolean;
@@ -58,13 +59,13 @@ const ServiceBoxLoader = styled(Loader)`
   margin: 20px auto;
 `;
 
-export const ServiceBox: React.FC<ServiceBoxProps> = ({
+export const ServiceBox = ({
   children,
   title,
   loading,
   type,
   ...props
-}) => {
+}: ServiceBoxProps) => {
   return (
     <ServiceContainer {...props}>
       {title && (
@@ -165,8 +166,12 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
     infinite 0.5s linear;
 `;
 
-export const ActionButton: React.FC<ActionButtonProps> = React.memo(
-  ({ onPress, onLongPress, ...props }) => {
+export const ActionButton = React.memo(
+  ({
+    onPress,
+    onLongPress,
+    ...props
+  }: React.PropsWithChildren<ActionButtonProps>) => {
     const touchEvents = useTouchPress({
       onPress: () => onPress?.(props.id, props.active),
       onLongPress: () => onLongPress?.(props.id),
@@ -199,13 +204,13 @@ type OverlayProps = {
 
 const events = ["touchstart", "touchmove", "touchend"] as const;
 
-export const Overlay: React.FC<OverlayProps> = ({
+export const Overlay = ({
   autoClose,
   children,
   close,
   closeOnPress,
   ...props
-}) => {
+}: React.PropsWithChildren<OverlayProps>) => {
   useEffect(() => {
     if (!autoClose || !close) return;
 
