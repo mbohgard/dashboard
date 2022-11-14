@@ -77,7 +77,7 @@ const ArrowWrapper = styled.div<Props>`
 
 type Props = { down?: boolean; color: string };
 
-const Icon: React.SFC<Props> = (props) => (
+const Icon = (props: Props) => (
   <Wrapper>
     <SunWrapper {...props}>{sunrise}</SunWrapper>
     <ArrowWrapper {...props}>{arrow}</ArrowWrapper>

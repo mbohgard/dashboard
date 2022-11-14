@@ -16,7 +16,7 @@ const getIconColor = (bri: number) =>
 
 export const Hue: React.FC = () => {
   const [groups, emit] = useService<HueServiceData, HueGroupEmit>("hue", {});
-  const [adjustId, setAdjustId] = useState<string | void>();
+  const [adjustId, setAdjustId] = useState<string>();
 
   const send = useCallback(
     ({ id, ...payload }: HueGroupEmit) => {
