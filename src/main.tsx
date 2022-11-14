@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import styled, { css } from "styled-components";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
@@ -90,7 +90,7 @@ const Fill = styled.div`
 
 export type ReportError = (service: string, err: any) => void;
 
-class ErrorBoundary extends React.Component {
+class ErrorBoundary extends React.Component<React.PropsWithChildren> {
   componentDidCatch(err: any) {
     reportError("catch in Main", err);
   }
@@ -150,6 +150,9 @@ socket.on("server", ({ data }: ServiceData) => {
   else {
     version = data.version;
 
-    render(<App {...data} />, document.getElementById("app"));
+    const container = document.getElementById("app");
+    const root = createRoot(container!);
+
+    root.render(<App {...data} />);
   }
 });

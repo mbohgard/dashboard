@@ -85,12 +85,15 @@ export const areEqual = (a: Obj, b: Obj) => {
   return true;
 };
 
-export const pick = <T, K extends keyof T>(obj: T, picked: K[]) => {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    if (picked.includes(key as K)) return { ...acc, [key]: value };
-    else return acc;
-  }, {} as Pick<T, K>);
-};
+export const pick = <T extends object, K extends keyof T>(
+  obj: T,
+  picked: K[]
+) =>
+  Object.entries(obj).reduce(
+    (acc, [key, value]) =>
+      picked.includes(key as K) ? { ...acc, [key]: value } : acc,
+    {} as Pick<T, K>
+  );
 
 export const memo = <F extends (...args: any[]) => any>(func: F) => {
   const cache = new Map();
