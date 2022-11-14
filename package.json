@@ -21,6 +21,7 @@
   "dependencies": {
     "@ctrl/tinycolor": "^3.4.0",
     "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.12",
     "cie-rgb-color-converter": "^1.0.6",
     "dayjs": "^1.10.7",
     "express": "^4.17.2",

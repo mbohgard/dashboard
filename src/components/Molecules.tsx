@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 import { useTouchPress } from "../hooks";
 import { colors } from "../styles";
@@ -81,10 +81,17 @@ export const ServiceBox: React.FC<ServiceBoxProps> = ({
   );
 };
 
+const pulseAnimation = keyframes`
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+`;
+
 type ActionButtonProps = {
   active: boolean;
   badge?: string;
   color?: string;
+  coloredBorder?: boolean;
+  pulse?: boolean;
   background?: string;
   id: string;
   size?: string;
@@ -99,10 +106,12 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
   position: relative;
   border-radius: 8px;
   box-shadow: inset 0 0 0 3px
-    ${({ active, background }) =>
+    ${({ active, background, color, coloredBorder }) =>
       active
         ? background
           ? "transparent"
+          : coloredBorder
+          ? color
           : colors.white
         : colors.superDimmed};
   width: 84px;
@@ -151,6 +160,9 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
     color: ${colors.dimmed};
     font-size: 14px;
   }
+
+  animation: ${({ pulse }) => (pulse ? pulseAnimation : "none")} alternate
+    infinite 0.5s linear;
 `;
 
 export const ActionButton: React.FC<ActionButtonProps> = React.memo(

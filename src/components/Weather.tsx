@@ -97,6 +97,7 @@ const Degrees: React.FC<WeatherProps & Type> = ({ data, type = "normal" }) => {
 
 const BigContainer = styled.div`
   display: flex;
+  margin-right: 20px;
 
   > svg {
     width: 220px;
@@ -120,7 +121,7 @@ const SunTime = styled.p`
   font-weight: 300;
   color: ${colors.dimmed};
   text-align: center;
-  font-size: 40px;
+  font-size: 30px;
   margin-top: 10px;
 `;
 

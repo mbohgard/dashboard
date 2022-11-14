@@ -15,6 +15,7 @@ import { Status } from "./components/Atoms";
 import { About } from "./components/About";
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
+import { Energy } from "./components/Energy";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
 import { VOC } from "./components/VOC";
@@ -105,16 +106,19 @@ const App: React.FC = (props) => {
   const connected = useSocket();
 
   return (
-    <GridWrapper columns="repeat(24, 1fr)" rows="31% auto 36%" padding={25}>
+    <GridWrapper columns="repeat(24, 1fr)" rows="30% auto 36%" padding={25}>
       <ErrorBoundary>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
           <Status ok={connected} />
           <About {...props} />
-          <Area colStart={1} colEnd={13}>
+          <Area colStart={1} colEnd={11}>
             <Weather type="big" />
           </Area>
-          <Area colStart={13} colEnd={25}>
+          <Area colStart={11} colEnd={16}>
+            <Energy />
+          </Area>
+          <Area colStart={16} colEnd={25} flex>
             <Time />
           </Area>
           <Area colStart={1} colEnd={18} align="center">

@@ -56,6 +56,18 @@ declare interface TimeZone {
   zoneStart: number;
 }
 
+declare interface EnergyMetric {
+  value: string;
+  time: string;
+}
+
+declare interface Energy {
+  now: EnergyMetric;
+  high: EnergyMetric;
+  low: EnergyMetric;
+  average: EnergyMetric;
+}
+
 declare interface TransportItem {
   Destination: string;
   Deviations: any;
@@ -214,6 +226,7 @@ declare interface CalendarEvent {
 }
 
 declare type TimeServiceData = ServiceData<TimeZone>;
+declare type EnergyServiceData = ServiceData<Energy>;
 declare type WeatherServiceData = ServiceData<Forecast>;
 declare type TransportsServiceData = ServiceData<
   Transport[],

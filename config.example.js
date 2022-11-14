@@ -12,6 +12,9 @@ module.exports = {
       },
     ],
   },
+  energy: {
+    zone: "SE3",
+  },
   weather: {
     settings: {
       lon: "",
