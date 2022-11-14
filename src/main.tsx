@@ -145,13 +145,13 @@ if (typeof window !== "undefined") window.oncontextmenu = () => false;
 
 let version: string | undefined;
 
+const container = document.getElementById("app");
+const root = createRoot(container!);
+
 socket.on("server", ({ data }: ServiceData) => {
   if (version !== undefined && version !== data.version) location.reload();
   else {
     version = data.version;
-
-    const container = document.getElementById("app");
-    const root = createRoot(container!);
 
     root.render(<App {...data} />);
   }
