@@ -21,9 +21,16 @@ const seconds = keyframes`
   }
 `;
 
+const Container = styled.div`
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+`;
+
 const TimeView = styled.h2`
   position: relative;
-  font-size: 190px;
+  font-size: 180px;
   font-weight: 300;
   text-align: right;
   letter-spacing: -7px;
@@ -32,10 +39,11 @@ const TimeView = styled.h2`
 `;
 
 const DateView = styled.h4`
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 300;
   text-align: right;
   margin-top: 30px;
+  white-space: nowrap;
 
   span {
     color: ${colors.dimmed};
@@ -106,7 +114,7 @@ export const Time: React.FC = () => {
   const [date, year] = getDate(time);
 
   return (
-    <div>
+    <Container>
       <TimeView key={m}>
         {h}
         <Dots>:</Dots>
@@ -120,6 +128,6 @@ export const Time: React.FC = () => {
       <DateView>
         {date} <span>{year}</span>
       </DateView>
-    </div>
+    </Container>
   );
 };

@@ -32,7 +32,7 @@ const Fallback = createComp(
 );
 
 const iconsObj: IconsObj = Object.entries(
-  (allIcons as unknown) as Imported
+  allIcons as unknown as Imported
 ).reduce<IconsObj>(
   (acc, [key, { default: C }]) => ({
     ...acc,

@@ -29,23 +29,26 @@ export const get = (): Promise<EnergyServiceData> =>
     axios.get<string>(getUrl(config.energy.zone)).then(({ data: src }) => {
       const $ = cheerio.load(src);
 
-      console.log("data from cheerio");
-
       const data: Energy = {
-        now: "N/A",
-        high: "N/A",
-        low: "N/A",
-        average: "N/A",
+        now: { value: "N/A", time: "N/A" },
+        high: { value: "N/A", time: "N/A" },
+        low: { value: "N/A", time: "N/A" },
+        average: { value: "N/A", time: "N/A" },
       };
 
       $(".info-box-text").each((_, el) => {
         const text = $(el).text() as keyof typeof catMap;
         const cat = catMap[text];
 
-        if (cat) data[cat] = $(el).siblings(".info-box-number").text();
+        if (cat)
+          data[cat] = {
+            value: $(el).siblings(".info-box-number").text(),
+            time: $(el)
+              .siblings(".progress-description")
+              .text()
+              .replace("Timpris kl. ", ""),
+          };
       });
-
-      console.log("after each", data);
 
       return {
         service: name,

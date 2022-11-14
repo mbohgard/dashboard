@@ -56,11 +56,16 @@ declare interface TimeZone {
   zoneStart: number;
 }
 
+declare interface EnergyMetric {
+  value: string;
+  time: string;
+}
+
 declare interface Energy {
-  now: string;
-  high: string;
-  low: string;
-  average: string;
+  now: EnergyMetric;
+  high: EnergyMetric;
+  low: EnergyMetric;
+  average: EnergyMetric;
 }
 
 declare interface TransportItem {
