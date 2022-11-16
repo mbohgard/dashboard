@@ -116,8 +116,6 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
           : colors.white
         : colors.superDimmed};
   width: 84px;
-  height: 100%;
-  min-height: 70px;
   cursor: pointer;
   color: ${({ active, color = colors.white }) =>
     active ? color : colors.superDimmed};
