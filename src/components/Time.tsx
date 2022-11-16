@@ -51,7 +51,7 @@ const DateView = styled.h4`
 `;
 
 const Dots = styled.i`
-  animation: ${dots} 0.5s infinite alternate ease-in;
+  animation: ${dots} 1s steps(2, end) infinite;
   color: ${colors.white};
   font-weight: 300;
 `;

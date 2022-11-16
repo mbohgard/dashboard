@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from "react";
 
 import { useService } from "../hooks";
 import { colors } from "../styles";
-import { throttle, roundedValueFromPercentage } from "../utils/helpers";
+import { debounce, roundedValueFromPercentage } from "../utils/helpers";
 import { satOrBriPercentage, lights2background } from "../utils/color";
 
 import { Icon } from "./Icon";
@@ -40,7 +40,7 @@ export const Hue: React.FC = () => {
   );
 
   const adjust = useCallback(
-    throttle((value: number) => {
+    debounce((value: number) => {
       const bri = roundedValueFromPercentage(value, 254);
 
       if (adjustId) send({ id: adjustId, bri, on: Boolean(bri) });

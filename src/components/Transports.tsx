@@ -8,22 +8,16 @@ import { ServiceBox } from "./Molecules";
 
 const Container = styled.div`
   display: flex;
-  min-height: 180px;
-`;
-
-const LineNumber = styled.span`
-  color: ${colors.superDimmed};
 `;
 
 type TimeProps = { empty?: boolean };
 
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
-  font-size: 60px;
-  margin-top: 4px;
+  font-size: 53px;
+  margin-top: 3px;
   line-height: 1.2;
   white-space: nowrap;
-  min-width: 200px;
 
   > span {
     font-size: 40px;
@@ -37,7 +31,7 @@ const TimeWrapper = styled.div<TimeProps>`
 `;
 
 const Box = styled(ServiceBox)`
-  min-width: 100px;
+  min-width: 150px;
 `;
 
 type TranportTimeProps = {
@@ -53,7 +47,6 @@ const TransportTime: React.FC<TranportTimeProps> = ({ data }) => {
     <TimeWrapper>
       {time[0]}
       {time.length > 1 && <span>min</span>}{" "}
-      <LineNumber>({data.LineNumber})</LineNumber>
     </TimeWrapper>
   );
 };
@@ -71,7 +64,7 @@ const getTransports = (
 type TransportItems = (TransportItem | undefined)[];
 
 const fill = (x: TransportItems): TransportItems =>
-  Array(3)
+  Array(4)
     .fill(undefined)
     .map((_, i) => x[i]);
 
@@ -112,7 +105,7 @@ export const Transports: React.FC = () => {
   return (
     <Container>
       {transports ? (
-        transports.map(({ items, siteId }) => (
+        transports?.map(({ items, siteId }) => (
           <Box
             key={labels.current[siteId]}
             title={labels.current[siteId]}

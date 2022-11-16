@@ -85,7 +85,7 @@ const getTime = ({
   if (allDay) {
     return [
       ongoing
-        ? "pågår"
+        ? "nu"
         : valid
         ? getCalTime(start)
         : getCalTime(end.subtract(1, "second")), // make whole day events end att 23:59:59 instead of 00:00:00 the next day
@@ -93,10 +93,7 @@ const getTime = ({
     ];
   }
 
-  return [
-    ongoing ? `pågår t. ${end.format("HH:mm")}` : getCalTime(start),
-    valid,
-  ];
+  return [ongoing ? `nu t. ${end.format("HH:mm")}` : getCalTime(start), valid];
 };
 
 export const Calendar: React.FC = () => {

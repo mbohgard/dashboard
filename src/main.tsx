@@ -31,9 +31,9 @@ dayjs.updateLocale("sv", {
   calendar: {
     lastDay: "[igår] HH:mm",
     sameDay: "[idag] HH:mm",
-    nextDay: "[imorgon] HH:mm",
-    lastWeek: "[i] dddd[s] HH:mm",
-    nextWeek: "dddd HH:mm",
+    nextDay: "[imorrn] HH:mm",
+    lastWeek: "[i] ddd[s] HH:mm",
+    nextWeek: "ddd HH:mm",
     sameElse: "D/M HH:mm",
   },
 });
@@ -106,7 +106,7 @@ const App: React.FC = (props) => {
   const connected = useSocket();
 
   return (
-    <GridWrapper columns="repeat(24, 1fr)" rows="30% auto 36%" padding={25}>
+    <GridWrapper columns="repeat(24, 1fr)" rows="30% auto 38%" padding={25}>
       <ErrorBoundary>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />

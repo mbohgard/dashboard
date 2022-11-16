@@ -50,13 +50,13 @@ export const parseJSON = (input: unknown) => {
 
 export const stringify = (x: any): string | undefined => {
   try {
-    return JSON.stringify(x);
-  } catch (e) {}
-
-  try {
     return x.toString();
   } catch (e) {
-    return undefined;
+    try {
+      return JSON.stringify(x);
+    } catch (e) {
+      return "Could not stringify error";
+    }
   }
 };
 

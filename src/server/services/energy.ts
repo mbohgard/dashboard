@@ -1,8 +1,9 @@
 import * as config from "../../../config";
 import { axios } from "./index";
 import * as cheerio from "cheerio";
+import dayjs from "dayjs";
 
-import { min2Ms } from "../../utils/time";
+import { min2Ms, sec2Ms } from "../../utils/time";
 import { retry } from "../../utils/retry";
 
 export const name = "energy";
@@ -57,4 +58,15 @@ export const get = (): Promise<EnergyServiceData> =>
     })
   );
 
-export const delay = () => min2Ms(5);
+export const delay = () => {
+  const now = dayjs();
+  const nextHour = now.endOf("hour").add(2, "second");
+  const diff = nextHour.valueOf() - now.valueOf();
+  const tenSec = sec2Ms(10);
+  const fiveMin = min2Ms(5);
+
+  if (diff < tenSec) return tenSec;
+  if (diff > fiveMin) return fiveMin;
+
+  return diff;
+};
