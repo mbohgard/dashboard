@@ -19,7 +19,7 @@ const getUrl = (zone: string) =>
   `https://www.elbruk.se/timpriser-${url[zone as keyof typeof url]}`;
 
 const catMap = {
-  "Aktuellt timpris": "now",
+  "Aktuellt pris": "now",
   Dagspris: "average",
   "Lägsta timpris": "low",
   "Högsta timpris": "high",
