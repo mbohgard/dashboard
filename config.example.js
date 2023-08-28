@@ -43,7 +43,7 @@ module.exports = {
     vin: "",
     settings: {
       region: "",
-      name: "",
+      label: "",
     },
   },
   // ical (ics) links
@@ -55,5 +55,9 @@ module.exports = {
         color: "",
       },
     ],
+  },
+  schoolFood: {
+    station: 0,
+    label: "",
   },
 };

@@ -225,20 +225,42 @@ declare interface CalendarEvent {
   summary: string;
 }
 
+declare interface FoodDay {
+  meals: Array<{
+    value: string;
+  }>;
+  month: number;
+  day: number;
+  year: number;
+}
+
+declare interface FoodWeek {
+  days: FoodDay[];
+  weekOfYear: number;
+  year: number;
+}
+
+declare interface FoodResponse {
+  menu: {
+    weeks: FoodWeek[];
+  };
+}
+
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type EnergyServiceData = ServiceData<Energy>;
 declare type WeatherServiceData = ServiceData<Forecast>;
 declare type TransportsServiceData = ServiceData<
   Transport[],
   {
-    sites: {
+    sites: Array<{
       label: string;
       siteId: string;
       types: string[];
-    }[];
+    }>;
   }
 >;
 declare type TempServiceData = ServiceData<HueThermometers>;
 declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
 declare type CalendarServiceData = ServiceData<CalendarEvent[]>;
+declare type FoodServiceData = ServiceData<FoodWeek[]>;
