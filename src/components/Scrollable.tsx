@@ -47,7 +47,7 @@ export const Scrollable: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     let timer: number;
-    const listener = (e: Event) => {
+    const listener = () => {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         inner.current?.scrollTo({

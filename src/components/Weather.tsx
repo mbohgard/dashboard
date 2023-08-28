@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -159,11 +159,11 @@ const SmallContainer = styled.div`
 
 const DayOffset = styled.i<{ day: string }>`
   position: absolute;
-  top: -20px;
+  top: -22px;
   left: 50%;
   translate: -50%;
-  font-size: 14px;
-  color: ${colors.superDimmed};
+  font-size: 16px;
+  color: ${colors.dimmed};
 `;
 
 const SmallWrapper = styled.div`
