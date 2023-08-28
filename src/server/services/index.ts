@@ -10,6 +10,7 @@ import * as Voc from "./voc";
 import * as Weather from "./weather";
 import * as Calendar from "./calendar";
 import * as Temp from "./temp";
+import * as Food from "./food";
 
 export const hue = Hue;
 export const time = Time;
@@ -19,6 +20,7 @@ export const voc = Voc;
 export const weather = Weather;
 export const calendar = Calendar;
 export const temp = Temp;
+export const food = Food;
 
 const services = {
   hue,
@@ -29,6 +31,7 @@ const services = {
   weather,
   calendar,
   temp,
+  food,
 };
 
 export type Services = typeof services;
