@@ -9,6 +9,7 @@ import * as Transports from "./transports";
 import * as Voc from "./voc";
 import * as Weather from "./weather";
 import * as Calendar from "./calendar";
+import * as Temp from "./temp";
 
 export const hue = Hue;
 export const time = Time;
@@ -17,8 +18,18 @@ export const transports = Transports;
 export const voc = Voc;
 export const weather = Weather;
 export const calendar = Calendar;
+export const temp = Temp;
 
-const services = { hue, time, energy, transports, voc, weather, calendar };
+const services = {
+  hue,
+  time,
+  energy,
+  transports,
+  voc,
+  weather,
+  calendar,
+  temp,
+};
 
 export type Services = typeof services;
 export type ServiceName = keyof Services;

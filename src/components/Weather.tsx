@@ -1,16 +1,14 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
-import { TinyColor } from "@ctrl/tinycolor";
 
 import { useService } from "../hooks";
 import { colors } from "../styles";
-import { percentageOfRange } from "../utils/helpers";
 
 import { Loader } from "./Atoms";
 import { WeatherIcon } from "./WeatherIcon";
-import { Icon } from "./Icon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
+import { getTempColor } from "../utils/color";
 
 type Type = {
   type?: "normal" | "big";
@@ -22,8 +20,6 @@ type SunData = {
   sunset: Dayjs;
   sunsetMinutes: number;
 };
-
-const percentage = percentageOfRange(-15, 30);
 
 const param = (params: Parameter[], name: string) =>
   params.find((p) => p.name === name)!.values[0]!;
@@ -79,25 +75,18 @@ type WeatherProps = {
 
 const Degrees: React.FC<WeatherProps & Type> = ({ data, type = "normal" }) => {
   const deg = Math.round(param(data.parameters, "t"));
-  const color = new TinyColor(colors.cold)
-    .mix(new TinyColor(colors.hot), percentage(deg))
-    .toHsv();
-  const boosted = new TinyColor({
-    ...color,
-    v: 1,
-  }).toString("hex6") as string;
+  const color = getTempColor(deg);
 
   return (
-    <DegreesContainer type={type} color={boosted}>
+    <DegreesContainer type={type} color={color}>
       <span>{deg}</span>
-      <Icon Celsius />
+      {/* <Icon Celsius /> */}
     </DegreesContainer>
   );
 };
 
 const BigContainer = styled.div`
   display: flex;
-  margin-right: 20px;
 
   > svg {
     width: 220px;
@@ -153,38 +142,57 @@ const SmallContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 5px;
 
   > span {
     font-weight: 300;
     font-size: 28px;
+    position: relative;
   }
 
   > svg {
-    width: 76px;
-    height: 76px;
-    margin: 18px 0;
+    width: 68px;
+    height: 68px;
+    margin: 14px 0;
   }
+`;
+
+const DayOffset = styled.i<{ day: string }>`
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  translate: -50%;
+  font-size: 14px;
+  color: ${colors.superDimmed};
 `;
 
 const SmallWrapper = styled.div`
   display: flex;
   max-width: 100%;
   width: 100%;
+  height: 100%;
   justify-content: space-between;
+  align-items: center;
+  gap: 3px;
 `;
 
-const Small: React.FC<SingleWeatherProps> = ({ data, sun }) => {
-  return (
-    <SmallContainer>
-      <span>{dayjs(data.validTime).format("HH:mm")}</span>
-      <WeatherIcon
-        code={param(data.parameters, "Wsymb2")}
-        night={sun ? isNight(data.validTime, sun) : false}
-      />
-      <Degrees data={data} />
-    </SmallContainer>
-  );
-};
+const Small: React.FC<SingleWeatherProps & { day?: string }> = ({
+  data,
+  day,
+  sun,
+}) => (
+  <SmallContainer>
+    <span>
+      {dayjs(data.validTime).format("HH")}
+      {day && <DayOffset day={day}>{day}</DayOffset>}
+    </span>
+    <WeatherIcon
+      code={param(data.parameters, "Wsymb2")}
+      night={sun ? isNight(data.validTime, sun) : false}
+    />
+    <Degrees data={data} />
+  </SmallContainer>
+);
 
 export const SmallWeather: React.FC<{ data: TimeSerie[]; sun?: SunData }> = ({
   data,
@@ -192,15 +200,23 @@ export const SmallWeather: React.FC<{ data: TimeSerie[]; sun?: SunData }> = ({
 }) => (
   <SmallWrapper>
     {data
-      .filter((x) => {
-        const hour = dayjs(x.validTime).hour();
+      .filter((t) => {
+        const hour = dayjs(t.validTime).hour();
 
         return hour > 7 && hour < 22;
       })
-      .filter((_, ix) => ix < 10)
-      .map((t) => (
-        <Small key={t.validTime} data={t} sun={sun} />
-      ))}
+      .map((t) => {
+        const date = dayjs(t.validTime);
+
+        return (
+          <Small
+            key={t.validTime}
+            data={t}
+            sun={sun}
+            day={date.isToday() ? undefined : date.format("ddd")}
+          />
+        );
+      })}
   </SmallWrapper>
 );
 

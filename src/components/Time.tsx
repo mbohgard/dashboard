@@ -30,7 +30,7 @@ const Container = styled.div`
 
 const TimeView = styled.h2`
   position: relative;
-  font-size: 180px;
+  font-size: 185px;
   font-weight: 300;
   text-align: right;
   letter-spacing: -7px;

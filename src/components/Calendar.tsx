@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -10,7 +10,7 @@ import { Loader } from "./Atoms";
 const Container = styled.ul`
   list-style: none;
   font-size: 21px;
-  margin-top: 5px;
+  margin-top: 20px;
 `;
 
 const pebble = css`
@@ -99,22 +99,25 @@ const getTime = ({
 export const Calendar: React.FC = () => {
   const [data] = useService<CalendarServiceData>("calendar");
 
-  const list = useMemo(() => {
-    if (!data) return undefined;
-
-    return data.map((e) => {
-      const [time, valid] = getTime(e);
-
-      return (
-        <Item key={e.id} label={e.name.charAt(0)} color={e.color} valid={valid}>
-          <Time>{time}</Time>
-          <Summary valid={valid}>{e.summary}</Summary>
-        </Item>
-      );
-    });
-  }, [data]);
-
   if (!data) return <Loader />;
 
-  return <Container>{list}</Container>;
+  return (
+    <Container>
+      {data.map((e) => {
+        const [time, valid] = getTime(e);
+
+        return (
+          <Item
+            key={e.id}
+            label={e.name.charAt(0)}
+            color={e.color}
+            valid={valid}
+          >
+            <Time>{time}</Time>
+            <Summary valid={valid}>{e.summary}</Summary>
+          </Item>
+        );
+      })}
+    </Container>
+  );
 };

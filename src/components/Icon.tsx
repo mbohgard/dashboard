@@ -1,5 +1,5 @@
 import React from "react";
-import styled, { css, StyledComponent } from "styled-components";
+import styled, { css, type IStyledComponent } from "styled-components";
 
 import { pascal } from "../utils/helpers";
 
@@ -7,7 +7,7 @@ import allIcons from "../assets/icons/*.svg";
 
 type Props = { size?: number };
 type Imported = { [s: string]: { default: React.FC } };
-type Icon = StyledComponent<React.FC<{}>, any, Props, never>;
+type Icon = IStyledComponent<"web", Props>;
 type IconsObj = {
   [s: string]: Icon;
 };

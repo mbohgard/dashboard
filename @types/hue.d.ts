@@ -110,6 +110,19 @@ declare interface HueApiGroups {
   };
 }
 
+declare interface HueApiSensorsResponse {
+  [id: string]: {
+    state: {
+      [key: string]: boolean | number | string;
+    };
+    name: string;
+    type: string;
+    modelid: string;
+    productname?: string;
+    uniqueid: string;
+  };
+}
+
 declare interface HueApiResponse {
   lights: HueApiLights;
   groups: HueApiGroups;
@@ -141,6 +154,15 @@ declare interface HueGroupEmit {
   id: string;
   on?: boolean;
   bri?: number;
+}
+
+declare interface HueThermometer {
+  name: string;
+  value: number;
+}
+
+declare interface HueThermometers {
+  [id: string]: HueThermometer;
 }
 
 declare interface HueApiActionResponseItem {

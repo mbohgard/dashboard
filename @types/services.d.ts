@@ -238,6 +238,7 @@ declare type TransportsServiceData = ServiceData<
     }[];
   }
 >;
+declare type TempServiceData = ServiceData<HueThermometers>;
 declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
 declare type CalendarServiceData = ServiceData<CalendarEvent[]>;

@@ -1,9 +1,11 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import styled, { css } from "styled-components";
+import styled, { css, StyleSheetManager } from "styled-components";
+import isPropValid from '@emotion/is-prop-valid';
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import updateLocale from "dayjs/plugin/updateLocale";
+import isToday from "dayjs/plugin/isToday";
 import sv from "dayjs/locale/sv";
 
 import { BaseStyles } from "./styles";
@@ -18,12 +20,15 @@ import { Time } from "./components/Time";
 import { Energy } from "./components/Energy";
 import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
+import { Temp } from "./components/Temp";
 import { VOC } from "./components/VOC";
 import { Calendar } from "./components/Calendar";
 import { Errors } from "./components/Errors";
+import { Scrollable } from "./components/Scrollable";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
+dayjs.extend(isToday);
 
 dayjs.locale(sv);
 
@@ -46,12 +51,15 @@ type AreaProps = {
   align?: "start" | "end" | "center" | "stretch";
   justify?: "start" | "end" | "center" | "stretch";
   flex?: boolean;
+  column?: boolean;
 };
 
 export const Area = styled.div<AreaProps>(
   (p) => css`
     overflow: hidden;
+    position: relative;
     width: 100%;
+    height: 100%;
     max-width: 100%;
     max-height: 100%;
     grid-column-start: ${p.colStart ?? "auto"};
@@ -61,6 +69,7 @@ export const Area = styled.div<AreaProps>(
     align-self: ${p.align ?? "auto"};
     justify-self: ${p.justify ?? "auto"};
     display: ${p.flex ? "flex" : "block"};
+    flex-direction: ${p.column ? "column" : "row"};
   `
 );
 
@@ -76,6 +85,7 @@ const GridWrapper = styled(Area)<GridWrapperProps>`
   grid-template-columns: ${(p) => p.columns};
   grid-template-rows: ${(p) => p.rows ?? "none"};
   grid-gap: 20px;
+  row-gap: 10px;
   height: 100%;
   position: relative;
 `;
@@ -106,28 +116,34 @@ const App: React.FC = (props) => {
   const connected = useSocket();
 
   return (
-    <GridWrapper columns="repeat(24, 1fr)" rows="30% auto 38%" padding={25}>
+    <StyleSheetManager shouldForwardProp={isPropValid}>
+      <GridWrapper columns="repeat(32, 1fr)" rows="30% auto 38%" padding={25}>
       <ErrorBoundary>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
           <Status ok={connected} />
           <About {...props} />
-          <Area colStart={1} colEnd={11}>
+          <Area colStart={1} colEnd={14}>
             <Weather type="big" />
           </Area>
-          <Area colStart={11} colEnd={16}>
+          <Area colStart={14} colEnd={21}>
             <Energy />
           </Area>
-          <Area colStart={16} colEnd={25} flex>
+          <Area colStart={21} colEnd={33} flex>
             <Time />
           </Area>
-          <Area colStart={1} colEnd={18} align="center">
-            <Weather />
+          <Area colStart={1} colEnd={19}>
+            <Scrollable>
+              <Weather />
+            </Scrollable>
           </Area>
-          <Area colStart={18} colEnd={25} rowStart={2} rowEnd={4}>
+          <Area colStart={19} colEnd={23} flex column align="center">
+            <Temp />
+          </Area>
+          <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
             <Calendar />
           </Area>
-          <BottomContainer colStart={1} colEnd={18} flex>
+          <BottomContainer colStart={1} colEnd={23} flex>
             <Transports />
             <VOC />
             <Fill>
@@ -138,6 +154,8 @@ const App: React.FC = (props) => {
         </ConnectionContext.Provider>
       </ErrorBoundary>
     </GridWrapper>
+    </StyleSheetManager>
+    
   );
 };
 
