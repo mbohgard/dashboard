@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import styled, { css } from "styled-components";
+import styled, { css, StyleSheetManager } from "styled-components";
+import isPropValid from '@emotion/is-prop-valid';
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import updateLocale from "dayjs/plugin/updateLocale";
@@ -115,7 +116,8 @@ const App: React.FC = (props) => {
   const connected = useSocket();
 
   return (
-    <GridWrapper columns="repeat(32, 1fr)" rows="30% auto 38%" padding={25}>
+    <StyleSheetManager shouldForwardProp={isPropValid}>
+      <GridWrapper columns="repeat(32, 1fr)" rows="30% auto 38%" padding={25}>
       <ErrorBoundary>
         <ConnectionContext.Provider value={connected}>
           <BaseStyles />
@@ -152,6 +154,8 @@ const App: React.FC = (props) => {
         </ConnectionContext.Provider>
       </ErrorBoundary>
     </GridWrapper>
+    </StyleSheetManager>
+    
   );
 };
 

@@ -45,7 +45,7 @@ export const Temp = () => {
   return (
     <Container>
       {Object.entries(tempData).map(([id, { name, value }]) => {
-        const deg = Math.round(value / 10) / 10;
+        const deg = Number((value / 100).toFixed(1));
         const color = getTempColor(deg, [5, 35]);
         const icon = Object.values(groups).find((o) => o.name === name)?.class;
 
