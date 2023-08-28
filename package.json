@@ -1,6 +1,6 @@
 {
   "name": "dashboard",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "license": "GPL-3.0-or-later",
   "svgr": {
     "icon": true
@@ -8,8 +8,8 @@
   "scripts": {
     "ts:dev": "ts-node --files ./src/server/index.ts",
     "ts:dev:no-poll": "ts-node --files ./src/server/index.ts no-poll",
-    "dev": "nodemon --exec 'yarn ts:dev'",
-    "dev:no-poll": "nodemon --exec 'yarn ts:dev:no-poll'",
+    "dev": "nodemon --exec 'yarn ts:dev' & yarn dev:client",
+    "dev:no-poll": "nodemon --exec 'yarn ts:dev:no-poll' & yarn dev:client",
     "dev:client": "parcel src/index.html -p 8080 ",
     "tsc": "tsc --noEmit --noUnusedLocals",
     "build": "rm -rf dist && yarn install && parcel build src/index.html",
