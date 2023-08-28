@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import styled, { css, StyleSheetManager } from "styled-components";
-import isPropValid from '@emotion/is-prop-valid';
+import isPropValid from "@emotion/is-prop-valid";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import updateLocale from "dayjs/plugin/updateLocale";
@@ -62,6 +62,7 @@ export const Area = styled.div<AreaProps>(
     height: 100%;
     max-width: 100%;
     max-height: 100%;
+    grid-gap: 20px;
     grid-column-start: ${p.colStart ?? "auto"};
     grid-column-end: ${p.colEnd ?? "auto"};
     grid-row-start: ${p.rowStart ?? "auto"};
@@ -84,10 +85,14 @@ const GridWrapper = styled(Area)<GridWrapperProps>`
   display: grid;
   grid-template-columns: ${(p) => p.columns};
   grid-template-rows: ${(p) => p.rows ?? "none"};
-  grid-gap: 20px;
+  grid-gap: 15px;
   row-gap: 10px;
   height: 100%;
   position: relative;
+`;
+
+const ScrollableContainer = styled(Scrollable)`
+  min-width: 0;
 `;
 
 const BottomContainer = styled(Area)`
@@ -118,44 +123,41 @@ const App: React.FC = (props) => {
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
       <GridWrapper columns="repeat(32, 1fr)" rows="30% auto 38%" padding={25}>
-      <ErrorBoundary>
-        <ConnectionContext.Provider value={connected}>
-          <BaseStyles />
-          <Status ok={connected} />
-          <About {...props} />
-          <Area colStart={1} colEnd={14}>
-            <Weather type="big" />
-          </Area>
-          <Area colStart={14} colEnd={21}>
-            <Energy />
-          </Area>
-          <Area colStart={21} colEnd={33} flex>
-            <Time />
-          </Area>
-          <Area colStart={1} colEnd={19}>
-            <Scrollable>
-              <Weather />
-            </Scrollable>
-          </Area>
-          <Area colStart={19} colEnd={23} flex column align="center">
-            <Temp />
-          </Area>
-          <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
-            <Calendar />
-          </Area>
-          <BottomContainer colStart={1} colEnd={23} flex>
-            <Transports />
-            <VOC />
-            <Fill>
-              <Hue />
-            </Fill>
-          </BottomContainer>
-          <Errors />
-        </ConnectionContext.Provider>
-      </ErrorBoundary>
-    </GridWrapper>
+        <ErrorBoundary>
+          <ConnectionContext.Provider value={connected}>
+            <BaseStyles />
+            <Status ok={connected} />
+            <About {...props} />
+            <Area colStart={1} colEnd={14}>
+              <Weather type="big" />
+            </Area>
+            <Area colStart={14} colEnd={21}>
+              <Energy />
+            </Area>
+            <Area colStart={21} colEnd={33} flex>
+              <Time />
+            </Area>
+            <Area colStart={1} colEnd={23} flex>
+              <ScrollableContainer>
+                <Weather />
+              </ScrollableContainer>
+              <Temp />
+            </Area>
+            <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
+              <Calendar />
+            </Area>
+            <BottomContainer colStart={1} colEnd={23} flex>
+              <Transports />
+              <VOC />
+              <Fill>
+                <Hue />
+              </Fill>
+            </BottomContainer>
+            <Errors />
+          </ConnectionContext.Provider>
+        </ErrorBoundary>
+      </GridWrapper>
     </StyleSheetManager>
-    
   );
 };
 

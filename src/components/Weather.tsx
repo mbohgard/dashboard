@@ -173,7 +173,7 @@ const SmallWrapper = styled.div`
   height: 100%;
   justify-content: space-between;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 `;
 
 const Small: React.FC<SingleWeatherProps & { day?: string }> = ({

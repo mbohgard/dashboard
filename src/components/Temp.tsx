@@ -14,6 +14,7 @@ const Container = styled.ul`
   height: 100%;
   gap: 10px;
   margin-bottom: 15px;
+  margin-right: 10px;
 `;
 
 const Item = styled.li`
@@ -45,14 +46,14 @@ export const Temp = () => {
   return (
     <Container>
       {Object.entries(tempData).map(([id, { name, value }]) => {
-        const deg = Number((value / 100).toFixed(1));
+        const deg = value / 100;
         const color = getTempColor(deg, [5, 35]);
         const icon = Object.values(groups).find((o) => o.name === name)?.class;
 
         return (
           <Item key={id} style={{ color }}>
             {icon ? <Icon hueClass={icon} size={36} /> : `${name}:`}
-            <Degrees>{deg}</Degrees>
+            <Degrees>{deg.toFixed(1)}</Degrees>
           </Item>
         );
       })}

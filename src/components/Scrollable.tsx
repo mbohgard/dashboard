@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 const Container = styled.div`
   height: 100%;
+  position: relative;
 
   &::before,
   &::after {
@@ -11,7 +12,7 @@ const Container = styled.div`
     position: absolute;
     top: 0;
     height: 100%;
-    width: 20px;
+    width: 30px;
     background: linear-gradient(to right, #000, rgba(0, 0, 0, 0));
     transition: opacity 0.3s;
   }
@@ -41,7 +42,9 @@ const Inner = styled.div`
   overflow-x: scroll;
 `;
 
-export const Scrollable: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const Scrollable: React.FC<
+  React.PropsWithChildren<{ className?: string }>
+> = ({ children, className = "" }) => {
   const inner = useRef<HTMLDivElement | null>(null);
   const [scrollState, setScrollState] = useState(0);
 
@@ -72,13 +75,13 @@ export const Scrollable: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   return (
     <Container
-      className={
+      className={`${className} ${
         scrollState === 2
           ? "scrolled at-end"
           : scrollState === 1
           ? "scrolled"
           : ""
-      }
+      }`}
     >
       <Inner ref={inner}>{children}</Inner>
     </Container>
