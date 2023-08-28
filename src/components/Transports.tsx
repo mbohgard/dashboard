@@ -14,13 +14,13 @@ type TimeProps = { empty?: boolean };
 
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
-  font-size: 53px;
+  font-size: 46px;
   margin-top: 3px;
   line-height: 1.2;
   white-space: nowrap;
 
   > span {
-    font-size: 40px;
+    font-size: 34px;
   }
 
   ${({ empty }) =>
@@ -31,7 +31,7 @@ const TimeWrapper = styled.div<TimeProps>`
 `;
 
 const Box = styled(ServiceBox)`
-  min-width: 150px;
+  min-width: 140px;
 `;
 
 type TranportTimeProps = {

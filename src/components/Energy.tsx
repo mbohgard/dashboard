@@ -4,6 +4,7 @@ import styled, { css } from "styled-components";
 import { useService } from "../hooks";
 import { colors } from "../styles";
 import { Icon } from "./Icon";
+import { Loader } from "./Atoms";
 
 const Container = styled.div`
   height: 100%;
@@ -68,6 +69,8 @@ const getColor = (value?: string) => {
 
 export const Energy = () => {
   const [data] = useService<EnergyServiceData>("energy");
+
+  if (!data) return <Loader />;
 
   return (
     <Container>

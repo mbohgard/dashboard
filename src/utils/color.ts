@@ -2,6 +2,7 @@
 import convert from "cie-rgb-color-converter";
 import { TinyColor } from "@ctrl/tinycolor";
 
+import { colors } from "../styles";
 import {
   roundValues,
   percentageOfRange,
@@ -81,4 +82,19 @@ export const lights2background = (
             bri: add(bri).median,
           };
         }, start);
+};
+
+const percentage = percentageOfRange(-15, 30);
+
+export const getTempColor = (deg: number, range?: [number, number]) => {
+  const color = new TinyColor(colors.cold)
+    .mix(
+      new TinyColor(colors.hot),
+      range ? percentageOfRange(...range)(deg) : percentage(deg)
+    )
+    .toHsv();
+  return new TinyColor({
+    ...color,
+    v: 1,
+  }).toString("hex6") as string;
 };
