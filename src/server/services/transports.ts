@@ -2,7 +2,6 @@ import * as config from "../../../config";
 import { axios } from "./index";
 
 import { min2Ms, sec2Ms } from "../../utils/time";
-import { retry } from "../../utils/retry";
 import { wait } from "../../utils/helpers";
 
 export const name = "transports";
@@ -18,9 +17,9 @@ const getTransportUrl = (types: string[], siteId: string) => {
 };
 
 const callers = config.transports.settings.map(
-  ({ types, siteId }) => (delay: number) =>
-    wait(delay).then(() =>
-      retry(
+  ({ types, siteId }) =>
+    (delay: number) =>
+      wait(delay).then(() =>
         axios
           .get<Timetable>(getTransportUrl(types, siteId))
           .then(({ data }) => ({
@@ -30,7 +29,6 @@ const callers = config.transports.settings.map(
             },
           }))
       )
-    )
 );
 
 export const get = () =>

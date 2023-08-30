@@ -7,7 +7,6 @@ import { axios } from "./index";
 
 import * as config from "../../../config";
 import { sec2Ms, ms2Hour } from "../../utils/time";
-import { retry } from "../../utils/retry";
 import { Colors } from "../../styles";
 
 export const name = "calendar";
@@ -56,29 +55,27 @@ export const get = () => {
   const now = nowDate.valueOf();
 
   const requests = config.calendar.settings.map(({ name, url, color }) =>
-    retry(
-      axios.get(url).then(({ data }) => {
-        const ical = new Ical({ ics: data, maxIterations: 100 });
-        const { events, occurrences } = ical.between(from, to);
+    axios.get(url).then(({ data }) => {
+      const ical = new Ical({ ics: data, maxIterations: 100 });
+      const { events, occurrences } = ical.between(from, to);
 
-        return [
-          ...events.map(({ startDate, endDate, summary, uid }: any) => ({
+      return [
+        ...events.map(({ startDate, endDate, summary, uid }: any) => ({
+          startDate,
+          endDate,
+          summary,
+          uid,
+        })),
+        ...occurrences.map(
+          ({ startDate, endDate, item: { summary }, uid }: any) => ({
             startDate,
             endDate,
             summary,
             uid,
-          })),
-          ...occurrences.map(
-            ({ startDate, endDate, item: { summary }, uid }: any) => ({
-              startDate,
-              endDate,
-              summary,
-              uid,
-            })
-          ),
-        ].map((e) => createEvent(name, color as Colors, e, nowDate, now));
-      })
-    )
+          })
+        ),
+      ].map((e) => createEvent(name, color as Colors, e, nowDate, now));
+    })
   );
 
   return Promise.allSettled(requests).then((events) => ({
