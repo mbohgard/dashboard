@@ -10,7 +10,7 @@ import { Loader } from "./Atoms";
 const Container = styled.ul`
   list-style: none;
   font-size: 21px;
-  margin-top: 20px;
+  padding-top: 5px;
 `;
 
 const pebble = css`

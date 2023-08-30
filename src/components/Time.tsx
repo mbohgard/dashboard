@@ -79,7 +79,10 @@ const getTime = (timestamp: number) => {
 
   return [h, m, time] as Time;
 };
-const getDate = (date: Dayjs) => date.format("dddd DD MMMM:YYYY").split(":");
+const getDate = (date: Dayjs) => [
+  ...date.format("dddd DD MMMM:YYYY").split(":"),
+  date.week(),
+];
 
 export const Time: React.FC = () => {
   const timestamp = useRef<number>();
@@ -111,7 +114,7 @@ export const Time: React.FC = () => {
     }
   }, [data]);
 
-  const [date, year] = getDate(time);
+  const [date, year, week] = getDate(time);
 
   return (
     <Container>
@@ -126,7 +129,7 @@ export const Time: React.FC = () => {
         </TimeBlind>
       </TimeView>
       <DateView>
-        {date} <span>{year}</span>
+        <span>v{week},</span> {date} <span>{year}</span>
       </DateView>
     </Container>
   );

@@ -164,3 +164,35 @@ export const useForceUpdate = () => {
     updateComponent({});
   }, []);
 };
+
+export const useStableCallback = <T extends (...args: any[]) => any>(
+  f: T | undefined
+) => {
+  const ref = useRef(f);
+
+  ref.current = f;
+
+  return useCallback(
+    (...args: Parameters<T>) => ref.current?.(...args) as ReturnType<T>,
+    []
+  );
+};
+
+export const useOnIdle = (
+  cb: () => void,
+  { timeout = 10000 }: { timeout?: number } = {}
+) => {
+  const f = useStableCallback(cb);
+
+  useEffect(() => {
+    let timer = 0;
+    const listener = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(f, timeout);
+    };
+
+    document.addEventListener("touchstart", listener);
+
+    return () => document.removeEventListener("touchstart", listener);
+  }, [f, timeout]);
+};

@@ -128,11 +128,10 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
   }
 
   > svg {
-    ${({ size }) =>
-      css`
-        height: ${size || "45px"};
-        width: ${size || "45px"};
-      `}
+    ${({ size }) => css`
+      height: ${size || "45px"};
+      width: ${size || "45px"};
+    `}
     path {
       fill: currentColor;
     }
