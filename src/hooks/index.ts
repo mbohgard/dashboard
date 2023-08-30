@@ -3,8 +3,8 @@ import { useContext, useEffect, useState, useCallback, useRef } from "react";
 import { socket } from "../utils/socket";
 import { reportError } from "../utils/report";
 import { ConnectionContext } from "../main";
-
 export { useErrorsStore } from "../stores";
+import type { ServiceName } from "../types";
 
 export const useSocket = () => {
   const [connected, setConnected] = useState(socket.connected);
@@ -37,12 +37,12 @@ type Emit<P, D> = (
 
 interface UseService {
   <T extends ServiceData, P = any>(
-    serviceName: string,
+    serviceName: ServiceName,
     condition?: (res: T) => boolean
   ): [T["data"], Emit<P, T["data"]>, T["meta"]];
 
   <T extends ServiceData, P = any>(
-    serviceName: string,
+    serviceName: ServiceName,
     initialData: Required<T>["data"],
     condition?: (res: T) => boolean
   ): [Required<T>["data"], Emit<P, Required<T>["data"]>, T["meta"]];

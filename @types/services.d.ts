@@ -246,6 +246,59 @@ declare interface FoodResponse {
   };
 }
 
+interface SonosTrack {
+  artist: string;
+  title: string;
+  album: string;
+  duration: 116;
+  type: string;
+  absoluteAlbumArtUri: string;
+}
+
+interface SonosCompleteDevice {
+  uuid: string;
+  state: {
+    volume: number;
+    mute: boolean;
+    currentTrack: SonosTrack;
+    nextTrack: SonosTrack;
+    trackNo: number;
+    elapsedTime: number;
+    elapsedTimeFormatted: string;
+    playbackState: string;
+    playMode: {
+      repeat: string;
+      shuffle: boolean;
+      crossfade: boolean;
+    };
+  };
+  roomName: string;
+  coordinator: string;
+  groupState: {
+    volume: number;
+    mute: boolean;
+  };
+}
+
+declare type SonosDevice = Pick<
+  SonosCompleteDevice,
+  "state" | "roomName" | "groupState"
+> & {
+  members: string[];
+};
+
+declare type SonosResponse = Array<{
+  uuid: string;
+  coordinator: SonosCompleteDevice;
+  members: SonosCompleteDevice[];
+}>;
+
+declare interface SonosEmit {
+  roomName: string;
+  action: "play" | "pause" | "volume" | "next" | "previous";
+  volume?: string;
+}
+
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type EnergyServiceData = ServiceData<Energy>;
 declare type WeatherServiceData = ServiceData<Forecast>;
@@ -264,3 +317,7 @@ declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
 declare type CalendarServiceData = ServiceData<CalendarEvent[]>;
 declare type FoodServiceData = ServiceData<FoodWeek[]>;
+declare type SonosServiceData = ServiceData<
+  SonosDevice[],
+  { playing: boolean }
+>;
