@@ -89,7 +89,7 @@ export const get = () => {
         []
       )
       .sort(sortEvents)
-      .filter((_, i) => i < 14),
+      .filter((_, i) => i < 13),
   }));
 };
 

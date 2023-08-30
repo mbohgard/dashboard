@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import updateLocale from "dayjs/plugin/updateLocale";
 import isToday from "dayjs/plugin/isToday";
+import weekOfYear from "dayjs/plugin/weekOfYear";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import sv from "dayjs/locale/sv";
 
 import { BaseStyles } from "./styles";
@@ -25,10 +27,14 @@ import { VOC } from "./components/VOC";
 import { Calendar } from "./components/Calendar";
 import { Errors } from "./components/Errors";
 import { Scrollable } from "./components/Scrollable";
+import { Tabs } from "./components/Tabs";
+import { Food } from "./components/Food";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
 dayjs.extend(isToday);
+dayjs.extend(weekOfYear);
+dayjs.extend(isSameOrBefore);
 
 dayjs.locale(sv);
 
@@ -144,7 +150,13 @@ const App: React.FC = (props) => {
               <Temp />
             </Area>
             <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
-              <Calendar />
+              <Tabs
+                items={[
+                  ["Kalender", <Calendar />],
+                  ["Skolmat", <Food />],
+                ]}
+                resetDelay={15000}
+              />
             </Area>
             <BottomContainer colStart={1} colEnd={23} flex>
               <Transports />
