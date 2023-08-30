@@ -25,6 +25,7 @@
     "@ctrl/tinycolor": "^4.0.1",
     "@emotion/is-prop-valid": "^1.2.1",
     "axios": "^1.5.0",
+    "axios-retry": "^3.7.0",
     "cheerio": "^1.0.0-rc.12",
     "cie-rgb-color-converter": "^1.0.6",
     "dayjs": "^1.11.9",

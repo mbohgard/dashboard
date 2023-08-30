@@ -1,4 +1,5 @@
 import _axios, { AxiosRequestConfig } from "axios";
+import axiosRetry from "axios-retry";
 
 import * as config from "../../../config";
 
@@ -46,5 +47,7 @@ const conf = config as Config;
 export const axios = conf.axiosConfig
   ? _axios.create(conf.axiosConfig)
   : _axios;
+
+axiosRetry(axios);
 
 export default services;
