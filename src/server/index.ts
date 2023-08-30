@@ -27,6 +27,7 @@ const io = new ws.Server(server, {
 
 const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
 const cache: { [key in ServiceName]?: ServiceData } = {};
+const actionsInProgress = new Set<ServiceName>();
 const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
 
@@ -55,26 +56,30 @@ const formatError = (e: unknown) => {
   return stringify(e) || "Unknown error";
 };
 
-const fetcher = (service: Service) =>
-  service
-    .get()
-    .then((data) => {
-      emit({ ...data, error: formatError(data.error) });
-      saveToCache(data.service, data);
-    })
-    .catch((e) => {
-      emit({
-        service: service.name,
-        error: formatError(e),
-      });
-    })
-    .finally(() => {
-      if (poll)
-        timers[service.name] = setTimeout(
-          () => fetcher(service),
-          service.delay()
-        );
-    });
+const fetcher = (service: Service) => {
+  const next = (waitOnAction = false) => {
+    timers[service.name] = global.setTimeout(
+      () => fetcher(service),
+      waitOnAction ? 1000 : service.delay()
+    );
+  };
+
+  return actionsInProgress.has(service.name)
+    ? next(true)
+    : service
+        .get()
+        .then((data) => {
+          emit({ ...data, error: formatError(data.error) });
+          saveToCache(data.service, data);
+        })
+        .catch((e) => {
+          emit({
+            service: service.name,
+            error: formatError(e),
+          });
+        })
+        .finally(() => poll && next());
+};
 
 const subscribe = (id: string, s: ServiceName) => {
   sendCached(s);
@@ -115,12 +120,16 @@ io.on("connection", (socket) => {
   Object.values(services).forEach((service) => {
     if (service.name && "listener" in service) {
       socket.on(service.name, (payload) => {
-        service.listener(payload).catch((e) => {
-          emit({
-            service: service.name,
-            error: formatError(e),
-          });
-        });
+        actionsInProgress.add(service.name);
+        service
+          .listener(payload)
+          .catch((e) => {
+            emit({
+              service: service.name,
+              error: formatError(e),
+            });
+          })
+          .finally(() => actionsInProgress.delete(service.name));
       });
     }
   });
