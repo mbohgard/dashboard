@@ -20,7 +20,7 @@ export const get = (): Promise<FoodServiceData> =>
     return axios
       .get<FoodResponse>(
         `https://skolmaten.se/api/4/menu/?station=${
-          config.schoolFood.station
+          config.food.station
         }&year=${date.year()}&weekOfYear=${date.week()}&count=2`,
         {
           headers: {

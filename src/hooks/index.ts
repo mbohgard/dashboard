@@ -1,34 +1,18 @@
-import { useContext, useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 import { socket } from "../utils/socket";
 import { reportError } from "../utils/report";
-import { ConnectionContext } from "../main";
-export { useErrorsStore } from "../stores";
 import type { ServiceName } from "../types";
+import { configStore, connectedStore } from "../stores";
 
-export const useSocket = () => {
-  const [connected, setConnected] = useState(socket.connected);
-
-  useEffect(() => {
-    const connect = () => setConnected(true);
-    const disconnect = () => setConnected(false);
-
-    socket.on("connect", connect);
-    socket.on("disconnect", disconnect);
-
-    setConnected(socket.connected);
-
-    return () => {
-      socket.off("connect", connect);
-      socket.off("disconnect", disconnect);
-    };
-  }, []);
-
-  return connected;
+export const useConfig = () => {
+  const [config] = configStore.useStore();
+  return config;
 };
 
 export const useConnected = () => {
-  return useContext(ConnectionContext);
+  const [connected] = connectedStore.useStore();
+  return connected;
 };
 
 type Emit<P, D> = (
@@ -155,14 +139,6 @@ export const useTouchPress = (cbs: {
   };
 
   return { onTouchStart, onTouchEnd, onTouchMove };
-};
-
-export const useForceUpdate = () => {
-  const [, updateComponent] = useState({});
-
-  return useCallback(() => {
-    updateComponent({});
-  }, []);
 };
 
 export const useStableCallback = <T extends (...args: any[]) => any>(

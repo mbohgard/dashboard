@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import { parseJSON } from "./helpers";
-import { setErrors } from "../stores";
+import { errorStore } from "../stores";
 
 export type ReportError = (service: string, err: any) => void;
 
@@ -33,11 +33,11 @@ export const reportError: ReportError = (service, e) => {
     time: dayjs().format("DD/MM HH:mm:ss"),
   };
 
-  setErrors((s) => ({
+  errorStore.set((s) => ({
     errors: [error, ...s.errors.slice(0, 9)],
     notify: true,
   }));
 };
 
 export const resetErrorsNotification = () =>
-  setErrors((s) => ({ ...s, notify: false }));
+  errorStore.set((s) => ({ ...s, notify: false }));

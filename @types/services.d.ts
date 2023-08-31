@@ -265,7 +265,7 @@ interface SonosCompleteDevice {
     trackNo: number;
     elapsedTime: number;
     elapsedTimeFormatted: string;
-    playbackState: string;
+    playbackState: "PLAYING" | "PAUSED_PLAYBACK";
     playMode: {
       repeat: string;
       shuffle: boolean;
@@ -299,6 +299,11 @@ declare interface SonosEmit {
   volume?: string;
 }
 
+declare type InitServiceData = ServiceData<{
+  version: string;
+  launched: number;
+  config: LightConfig;
+}>;
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type EnergyServiceData = ServiceData<Energy>;
 declare type WeatherServiceData = ServiceData<Forecast>;

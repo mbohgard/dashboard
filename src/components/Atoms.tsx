@@ -9,7 +9,7 @@ export const ButtonGrid = styled.div`
   grid-auto-flow: column;
 `;
 
-export const Status = styled.div<{ ok: boolean }>`
+export const StatusDot = styled.div<{ ok: boolean }>`
   position: absolute;
   right: 15px;
   top: 15px;
