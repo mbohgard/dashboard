@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import { colors } from "../styles";
-import { useErrorsStore } from "../hooks";
-import { setErrors } from "../stores";
+import { errorStore } from "../stores";
 
 import { Icon } from "./Icon";
 import { Overlay } from "./Molecules";
@@ -40,7 +39,7 @@ const ErrorIndicator = styled.a<{ newError?: boolean }>`
 `;
 
 export const Errors: React.FC = () => {
-  const [{ errors, notify }] = useErrorsStore();
+  const [{ errors, notify }, setErrors] = errorStore.useStore();
   const [showErrors, setShowErrors] = useState(false);
 
   const toggleError = (showErrors: boolean) => {

@@ -48,6 +48,7 @@ module.exports = {
   },
   // ical (ics) links
   calendar: {
+    label: "",
     settings: [
       {
         name: "",
@@ -56,7 +57,7 @@ module.exports = {
       },
     ],
   },
-  schoolFood: {
+  food: {
     station: 0,
     label: "",
   },

@@ -11,11 +11,12 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import sv from "dayjs/locale/sv";
 
 import { BaseStyles } from "./styles";
-import { useSocket } from "./hooks";
+import { configStore, connectedStore } from "./stores";
 import { socket } from "./utils/socket";
 import { reportError } from "./utils/report";
+import { useConfig, useConnected } from "./hooks";
 
-import { Status } from "./components/Atoms";
+import { StatusDot } from "./components/Atoms";
 import { About } from "./components/About";
 import { Weather } from "./components/Weather";
 import { Time } from "./components/Time";
@@ -111,6 +112,12 @@ const Fill = styled.div`
 
 export type ReportError = (service: string, err: any) => void;
 
+const Status = () => {
+  const connected = useConnected();
+
+  return <StatusDot ok={connected} />;
+};
+
 class ErrorBoundary extends React.Component<React.PropsWithChildren> {
   componentDidCatch(err: any) {
     reportError("catch in Main", err);
@@ -121,52 +128,48 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren> {
   }
 }
 
-export const ConnectionContext = React.createContext<boolean>(false);
-
 const App: React.FC = (props) => {
-  const connected = useSocket();
+  const config = useConfig();
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
       <GridWrapper columns="repeat(32, 1fr)" rows="30% auto 38%" padding={25}>
         <ErrorBoundary>
-          <ConnectionContext.Provider value={connected}>
-            <BaseStyles />
-            <Status ok={connected} />
-            <About {...props} />
-            <Area colStart={1} colEnd={14}>
-              <Weather type="big" />
-            </Area>
-            <Area colStart={14} colEnd={21}>
-              <Energy />
-            </Area>
-            <Area colStart={21} colEnd={33} flex>
-              <Time />
-            </Area>
-            <Area colStart={1} colEnd={23} flex>
-              <ScrollableContainer>
-                <Weather />
-              </ScrollableContainer>
-              <Temp />
-            </Area>
-            <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
-              <Tabs
-                items={[
-                  ["Kalender", <Calendar />],
-                  ["Skolmat", <Food />],
-                ]}
-                resetDelay={15000}
-              />
-            </Area>
-            <BottomContainer colStart={1} colEnd={23} flex>
-              <Transports />
-              <VOC />
-              <Fill>
-                <Hue />
-              </Fill>
-            </BottomContainer>
-            <Errors />
-          </ConnectionContext.Provider>
+          <BaseStyles />
+          <Status />
+          <About {...props} />
+          <Area colStart={1} colEnd={14}>
+            <Weather type="big" />
+          </Area>
+          <Area colStart={14} colEnd={21}>
+            <Energy />
+          </Area>
+          <Area colStart={21} colEnd={33} flex>
+            <Time />
+          </Area>
+          <Area colStart={1} colEnd={23} flex>
+            <ScrollableContainer>
+              <Weather />
+            </ScrollableContainer>
+            <Temp />
+          </Area>
+          <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
+            <Tabs
+              items={[
+                [config.calendar?.label ?? "Calendar", <Calendar />],
+                [config.food?.label ?? "Food", <Food />],
+              ]}
+              resetDelay={15000}
+            />
+          </Area>
+          <BottomContainer colStart={1} colEnd={23} flex>
+            <Transports />
+            <VOC />
+            <Fill>
+              <Hue />
+            </Fill>
+          </BottomContainer>
+          <Errors />
         </ErrorBoundary>
       </GridWrapper>
     </StyleSheetManager>
@@ -180,11 +183,21 @@ let version: string | undefined;
 const container = document.getElementById("app");
 const root = createRoot(container!);
 
-socket.on("server", ({ data }: ServiceData) => {
-  if (version !== undefined && version !== data.version) location.reload();
+socket.on("server", ({ data, error }: InitServiceData) => {
+  if (!data || error) {
+    container!.innerText = "FATAL: Error loading initial server response...";
+    return;
+  }
+
+  if (version && version !== data.version) location.reload();
   else {
     version = data.version;
 
-    root.render(<App {...data} />);
+    configStore.set(data.config);
+
+    root.render(<App />);
   }
 });
+
+socket.on("connect", () => connectedStore.set(true));
+socket.on("disconnect", () => connectedStore.set(false));

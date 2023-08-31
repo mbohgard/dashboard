@@ -1,4 +1,5 @@
 type ServiceName = import("../src/server/services").ServiceName;
+type Config = import("../config");
 
 declare interface ServiceData<T = any, Meta = any> {
   data?: T;
@@ -18,4 +19,16 @@ declare type Service<T = any, S = ServiceName> = {
 declare module "*.svg" {
   const content: React.FC;
   export default content;
+}
+
+declare interface LightConfig {
+  calendar?: {
+    label: string;
+  };
+  voc?: {
+    label: string;
+  };
+  food?: {
+    label: string;
+  };
 }

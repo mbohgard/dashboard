@@ -5,6 +5,7 @@ import fs from "fs";
 import ws from "socket.io";
 
 import { version } from "../../package.json";
+import * as config from "../../config";
 
 import * as subscribers from "./subscribers";
 import services, { ServiceName } from "./services";
@@ -134,7 +135,13 @@ io.on("connection", (socket) => {
     }
   });
 
-  emit({ service: "server", data: { version, launched } });
+  const configBody: LightConfig = {};
+
+  if (config.calendar) configBody.calendar = { label: config.calendar.label };
+  if (config.voc) configBody.voc = { label: config.voc.settings.label };
+  if (config.food) configBody.food = { label: config.food.label };
+
+  emit({ service: "server", data: { version, launched, config: configBody } });
 });
 
 if (prod) app.use("/", express.static(path.join(rootDir, "dist")));

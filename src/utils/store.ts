@@ -1,50 +1,56 @@
-import { useLayoutEffect } from "react";
+import { useSyncExternalStore } from "react";
 
-import { useForceUpdate } from "../hooks";
+type Listener<T> = (state: T) => void;
+type SetterCallback<T> = (state: T) => T;
+type Setter<T> = (state: T | SetterCallback<T>) => T;
+type Selector<T, S> = (state: T) => S;
+interface UseStore<T> {
+  (): readonly [T, Setter<T>];
+  <S>(selector: Selector<T, S>): readonly [S, Setter<T>];
+}
 
-type ShouldUpdate<T> = (oldState: T, newState: T) => boolean;
+const getNewState = <T>(newState: T | SetterCallback<T>, oldState?: T): T =>
+  typeof newState === "function"
+    ? (newState as SetterCallback<T>)(oldState as T)
+    : newState;
 
-type Listeners<T> = {
-  forceUpdate: () => void;
-  shouldUpdate?: ShouldUpdate<T>;
-};
+export const createStore = <T>(initialState: T | SetterCallback<T>) => {
+  let state = getNewState(initialState);
 
-type Updater<T> = (state: T) => T;
+  const listeners = new Set<Listener<T>>();
 
-export const createStore = <T>(defaultValue: T) => {
-  let state = defaultValue;
-  let listeners: Listeners<T>[] = [];
+  const store = {
+    getState: () => state,
+    setState: (newState: T | SetterCallback<T>) => {
+      // create the new state
+      state = getNewState(newState, state);
 
-  const updateState = (stateOrFunc: T | Updater<T>) => {
-    const oldState = state;
-    state =
-      typeof stateOrFunc === "function"
-        ? (stateOrFunc as Updater<T>)(state)
-        : stateOrFunc;
+      // notify all subscrtibers
+      listeners.forEach((listener) => listener(state));
 
-    listeners.forEach(({ forceUpdate, shouldUpdate = () => true }) => {
-      if (shouldUpdate(oldState, state)) forceUpdate();
-    });
+      return state;
+    },
+    subscribe: (listener: Listener<T>) => {
+      // add subscriber to list of listeners
+      listeners.add(listener);
+
+      // clean up by removing the listerer reference
+      return () => listeners.delete(listener);
+    },
   };
 
-  const useState = (shouldUpdate?: ShouldUpdate<T>) => {
-    const forceUpdate = useForceUpdate();
+  const useStore: UseStore<T> = (selector?: Selector<T, T>) => {
+    const getState = () => selector?.(store.getState()) ?? store.getState();
 
-    useLayoutEffect(() => {
-      const listener: Listeners<T> = {
-        forceUpdate,
-        shouldUpdate,
-      };
-
-      listeners = [...listeners, listener];
-
-      return () => {
-        listeners = listeners.filter((l) => l !== listener);
-      };
-    }, []);
-
-    return [state, updateState] as const;
+    return [
+      useSyncExternalStore<T>(store.subscribe, getState, getState),
+      store.setState,
+    ] as const;
   };
 
-  return [useState, updateState] as const;
+  return {
+    useStore,
+    get: store.getState,
+    set: store.setState,
+  };
 };
