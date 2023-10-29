@@ -59,7 +59,7 @@ const Dots = styled.i`
 const TimeBlind = styled.span`
   position: absolute;
   display: block;
-  background: ${colors.black};
+  /* background: ${colors.black}; */
   clip-path: inset(99% 0 0 0);
   font-weight: 400;
   top: 0;

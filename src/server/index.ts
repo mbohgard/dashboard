@@ -14,10 +14,11 @@ import { stringify } from "../utils/helpers";
 
 let launched: number;
 
-const prod = process.env.NODE_ENV === "production";
-const port = 8081;
+const PROD = process.env.NODE_ENV === "production";
+const PORT = 8081;
 
 const app = express();
+app.use(express.json());
 
 const server = http.createServer(app);
 const io = new ws.Server(server, {
@@ -37,7 +38,9 @@ const stopService = (s: ServiceName) => global.clearTimeout(timers[s]!);
 const saveToCache = (s: ServiceName, data: ServiceData) => (cache[s] = data);
 const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
 
-const emit = (data: Omit<ServiceData, "service"> & { service: string }) => {
+const emit = <T extends ServiceData>(
+  data: Omit<ServiceData<T["data"]>, "service"> & { service: string }
+) => {
   io.emit(data.service, data);
 
   if (data.error) {
@@ -74,6 +77,7 @@ const fetcher = (service: Service) => {
           saveToCache(data.service, data);
         })
         .catch((e) => {
+          console.log(e);
           emit({
             service: service.name,
             error: formatError(e),
@@ -133,6 +137,15 @@ io.on("connection", (socket) => {
           .finally(() => actionsInProgress.delete(service.name));
       });
     }
+
+    if (service.name && "feed" in service) {
+      app.post(service.feed.endpoint, (req, res) => {
+        const result = service.feed.handler(req.body);
+        if (result) emit(result);
+
+        res.sendStatus(200);
+      });
+    }
   });
 
   const configBody: LightConfig = {};
@@ -144,9 +157,21 @@ io.on("connection", (socket) => {
   emit({ service: "server", data: { version, launched, config: configBody } });
 });
 
-if (prod) app.use("/", express.static(path.join(rootDir, "dist")));
+app.get("/reloadAll", (_, res) => {
+  emit<ControlServiceData>({ service: "control", data: { action: "RELOAD" } });
 
-server.listen(port, () => {
+  res.sendStatus(200);
+});
+
+if (PROD) app.use("/", express.static(path.join(rootDir, "dist")));
+
+server.listen(PORT, () => {
   launched = ms2Sec(Date.now());
-  console.log("Server listening on port", port);
+  console.log("Server listening on port", PORT);
+});
+
+process.on("SIGINT", function () {
+  console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
+  // some other closing procedures go here
+  process.exit(0);
 });

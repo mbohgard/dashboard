@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { colors } from "../styles";
-import { useOnIdle, useService } from "../hooks";
+import { useIsIdle, useService } from "../hooks";
 import { Loader } from "./Atoms";
 import styled, { css } from "styled-components";
 import { Icon } from "./Icon";
@@ -120,7 +120,7 @@ export const Food: React.FC = () => {
     if (!week && thisWeek) reset();
   }, [reset, week]);
 
-  useOnIdle(reset, { timeout: 15000 });
+  useIsIdle(reset, { timeout: 15000 });
 
   if (!thisWeek) return <Loader />;
 
@@ -153,7 +153,7 @@ export const Food: React.FC = () => {
               </DayDate>
               <Meals>
                 {meals.map(({ value }, ix) => (
-                  <Meal key={value} variant={ix}>
+                  <Meal key={ix} variant={ix}>
                     {value}
                   </Meal>
                 ))}

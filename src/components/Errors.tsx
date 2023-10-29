@@ -7,7 +7,9 @@ import { errorStore } from "../stores";
 import { Icon } from "./Icon";
 import { Overlay } from "./Molecules";
 
-const ErrorsContainer = styled(Overlay)`
+const ErrorsContainer = styled(Overlay).withConfig({
+  shouldForwardProp: () => true,
+})`
   border: solid 10px ${colors.red};
 `;
 

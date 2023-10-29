@@ -2,10 +2,11 @@ import React, { useState, useRef, useLayoutEffect } from "react";
 import styled from "styled-components";
 
 import { colors } from "../styles";
-import { ms2Sec, sec2Str } from "../utils/time";
+import { ms2Sec, sec2Time } from "../utils/time";
 import { useConnected } from "../hooks";
 
 import { Overlay } from "./Molecules";
+import { settingsStore } from "../stores";
 
 const Trigger = styled.a`
   position: fixed;
@@ -18,7 +19,7 @@ const Trigger = styled.a`
 `;
 
 const Content = styled.div`
-  padding: 30px;
+  padding: 20px;
   background: linear-gradient(
     0deg,
     rgba(255, 201, 161, 1) 0%,
@@ -28,6 +29,13 @@ const Content = styled.div`
   margin: 0 auto;
   color: rgba(0, 0, 0, 0.7);
   min-width: 380px;
+  line-height: 1.65;
+  font-size: 18px;
+  text-align: center;
+
+  strong {
+    font-weight: bold;
+  }
 
   h2 {
     font-size: 30px;
@@ -38,13 +46,6 @@ const Content = styled.div`
 
 const ContentData = styled.div`
   white-space: nowrap;
-  line-height: 1.65;
-  font-size: 18px;
-  text-align: center;
-
-  strong {
-    font-weight: bold;
-  }
 `;
 
 const Status = styled.span<{ connected: boolean }>`
@@ -55,6 +56,45 @@ const Status = styled.span<{ connected: boolean }>`
   background: ${({ connected }) => (connected ? colors.green : colors.red)};
   color: ${colors.white};
 `;
+
+const SettingsContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  padding-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  strong {
+    width: 100%;
+  }
+`;
+
+const Setting = styled.button<{ active: boolean }>`
+  background: ${(p) => (p.active ? colors.green : colors.gray)};
+  color: ${(p) => (p.active ? colors.white : colors.lightGray)};
+  text-transform: capitalize;
+  border: none;
+  padding: 4px 8px;
+`;
+
+const Settings: React.FC = () => {
+  const [settings, setSettings] = settingsStore.useStore();
+
+  return (
+    <SettingsContainer>
+      <strong>Settings:</strong>
+      {Object.entries(settings).map(([key, val]) => (
+        <Setting
+          key={key}
+          active={val}
+          onClick={() => setSettings((s) => ({ ...s, [key]: !val }))}
+        >
+          {key}
+        </Setting>
+      ))}
+    </SettingsContainer>
+  );
+};
 
 type Props = {
   version?: string;
@@ -80,8 +120,8 @@ export const About = ({ version, launched: serverStarted }: Props) => {
   }, [show]);
 
   return show ? (
-    <Overlay closeOnPress autoClose={5000} close={() => setShow(false)}>
-      <Content>
+    <Overlay closeOnPress autoClose={undefined} close={() => setShow(false)}>
+      <Content onClick={(e) => e.stopPropagation()}>
         <h2>dashboard v{version}</h2>
         <ContentData>
           <strong>Status:</strong>{" "}
@@ -90,13 +130,16 @@ export const About = ({ version, launched: serverStarted }: Props) => {
           </Status>
         </ContentData>
         <ContentData>
-          <strong>Client uptime:</strong> {sec2Str(now - started.current)}
+          <strong>Client uptime:</strong>{" "}
+          {sec2Time(now - started.current).formatted}
         </ContentData>
         {serverStarted && connected && (
           <ContentData>
-            <strong>Server uptime:</strong> {sec2Str(now - serverStarted)}
+            <strong>Server uptime:</strong>{" "}
+            {sec2Time(now - serverStarted).formatted}
           </ContentData>
         )}
+        <Settings />
       </Content>
     </Overlay>
   ) : (

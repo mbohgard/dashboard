@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 
 import { socket } from "../utils/socket";
 import { reportError } from "../utils/report";
 import type { ServiceName } from "../types";
-import { configStore, connectedStore } from "../stores";
+import { configStore, connectedStore, isPlayingStore } from "../stores";
 
 export const useConfig = () => {
   const [config] = configStore.useStore();
@@ -13,6 +13,11 @@ export const useConfig = () => {
 export const useConnected = () => {
   const [connected] = connectedStore.useStore();
   return connected;
+};
+
+export const useIsPlaying = () => {
+  const [isPlaying] = isPlayingStore.useStore();
+  return isPlaying;
 };
 
 type Emit<P, D> = (
@@ -90,6 +95,22 @@ export const useService: UseService = <T extends ServiceData, P = any>(
   return [data, emit, meta.current];
 };
 
+export const useSonosService = () => {
+  const [data, emit] = useService<SonosServiceData, SonosEmit>("sonos");
+
+  const isPlaying = useMemo(() => {
+    if (!data || !data.length) return false;
+
+    return data.some((device) => device.state.playbackState === "PLAYING");
+  }, [data]);
+
+  useEffect(() => {
+    isPlayingStore.set(isPlaying);
+  }, [isPlaying]);
+
+  return [data, emit, isPlaying] as const;
+};
+
 const isOutside = (
   { left, top, width, height }: DOMRect,
   { clientX: x, clientY: y }: React.Touch
@@ -154,21 +175,40 @@ export const useStableCallback = <T extends (...args: any[]) => any>(
   );
 };
 
-export const useOnIdle = (
-  cb: () => void,
+export const useIsIdle = (
+  cb?: () => void,
   { timeout = 10000 }: { timeout?: number } = {}
 ) => {
   const f = useStableCallback(cb);
+  const [idle, setIdle] = useState(false);
 
   useEffect(() => {
     let timer = 0;
     const listener = () => {
+      setIdle(false);
       window.clearTimeout(timer);
-      timer = window.setTimeout(f, timeout);
+
+      timer = window.setTimeout(() => setIdle(true), timeout);
     };
 
     document.addEventListener("touchstart", listener);
 
     return () => document.removeEventListener("touchstart", listener);
   }, [f, timeout]);
+
+  useOnChange(f, [idle]);
+
+  return idle;
+};
+
+export const useOnChange = (
+  cb: () => void | (() => void),
+  deps: React.DependencyList
+) => {
+  const init = useRef(false);
+
+  useEffect(() => {
+    if (init.current) return cb();
+    init.current = true;
+  }, deps);
 };

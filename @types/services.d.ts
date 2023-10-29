@@ -247,12 +247,16 @@ declare interface FoodResponse {
 }
 
 interface SonosTrack {
-  artist: string;
-  title: string;
-  album: string;
+  artist?: string;
+  title?: string;
+  album?: string;
   duration: 116;
-  type: string;
-  absoluteAlbumArtUri: string;
+  type: "track" | "line_in";
+  stationName?: string;
+  uri?: string;
+  trackUri?: string;
+  absoluteAlbumArtUri?: string;
+  albumArtSrc?: string;
 }
 
 interface SonosCompleteDevice {
@@ -265,7 +269,7 @@ interface SonosCompleteDevice {
     trackNo: number;
     elapsedTime: number;
     elapsedTimeFormatted: string;
-    playbackState: "PLAYING" | "PAUSED_PLAYBACK";
+    playbackState: "PLAYING" | "PAUSED_PLAYBACK" | "STOPPED" | "TRANSITIONING";
     playMode: {
       repeat: string;
       shuffle: boolean;
@@ -293,6 +297,34 @@ declare type SonosResponse = Array<{
   members: SonosCompleteDevice[];
 }>;
 
+declare type SonosFeedResponse =
+  | {
+      type: "transport-state";
+      data: SonosCompleteDevice;
+    }
+  | {
+      type: "volume-change";
+      data: {
+        uuid: string;
+        previousVolume: number;
+        newVolume: number;
+        roomName: string;
+      };
+    }
+  | {
+      type: "mute-change";
+      data: {
+        uuid: string;
+        previousMute: boolean;
+        newMute: boolean;
+        roomName: string;
+      };
+    }
+  | {
+      type: "topology-change";
+      data: SonosResponse;
+    };
+
 declare interface SonosEmit {
   roomName: string;
   action: "play" | "pause" | "volume" | "next" | "previous";
@@ -303,6 +335,9 @@ declare type InitServiceData = ServiceData<{
   version: string;
   launched: number;
   config: LightConfig;
+}>;
+declare type ControlServiceData = ServiceData<{
+  action: "RELOAD";
 }>;
 declare type TimeServiceData = ServiceData<TimeZone>;
 declare type EnergyServiceData = ServiceData<Energy>;
@@ -322,7 +357,4 @@ declare type HueServiceData = ServiceData<HueGroups>;
 declare type VOCServiceData = ServiceData<VOCData>;
 declare type CalendarServiceData = ServiceData<CalendarEvent[]>;
 declare type FoodServiceData = ServiceData<FoodWeek[]>;
-declare type SonosServiceData = ServiceData<
-  SonosDevice[],
-  { playing: boolean }
->;
+declare type SonosServiceData = ServiceData<SonosDevice[], { feed: boolean }>;

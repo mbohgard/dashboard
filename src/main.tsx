@@ -11,10 +11,10 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import sv from "dayjs/locale/sv";
 
 import { BaseStyles } from "./styles";
-import { configStore, connectedStore } from "./stores";
+import { configStore, connectedStore, settingsStore } from "./stores";
 import { socket } from "./utils/socket";
 import { reportError } from "./utils/report";
-import { useConfig, useConnected } from "./hooks";
+import { useConnected } from "./hooks";
 
 import { StatusDot } from "./components/Atoms";
 import { About } from "./components/About";
@@ -25,11 +25,10 @@ import { Transports } from "./components/Transports";
 import { Hue } from "./components/Hue";
 import { Temp } from "./components/Temp";
 import { VOC } from "./components/VOC";
-import { Calendar } from "./components/Calendar";
 import { Errors } from "./components/Errors";
 import { Scrollable } from "./components/Scrollable";
-import { Tabs } from "./components/Tabs";
-import { Food } from "./components/Food";
+import { RightTabGroup } from "./components/RightTabGroup";
+import { HalloweenOverlay } from "./components/HalloweenOverlay";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
@@ -129,7 +128,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren> {
 }
 
 const App: React.FC = (props) => {
-  const config = useConfig();
+  const [settings] = settingsStore.useStore();
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
@@ -154,13 +153,7 @@ const App: React.FC = (props) => {
             <Temp />
           </Area>
           <Area colStart={23} colEnd={33} rowStart={2} rowEnd={4}>
-            <Tabs
-              items={[
-                [config.calendar?.label ?? "Calendar", <Calendar />],
-                [config.food?.label ?? "Food", <Food />],
-              ]}
-              resetDelay={15000}
-            />
+            <RightTabGroup />
           </Area>
           <BottomContainer colStart={1} colEnd={23} flex>
             <Transports />
@@ -170,6 +163,7 @@ const App: React.FC = (props) => {
             </Fill>
           </BottomContainer>
           <Errors />
+          {settings.halloween && <HalloweenOverlay />}
         </ErrorBoundary>
       </GridWrapper>
     </StyleSheetManager>
@@ -196,6 +190,15 @@ socket.on("server", ({ data, error }: InitServiceData) => {
     configStore.set(data.config);
 
     root.render(<App />);
+  }
+});
+
+socket.on("control", ({ data }: ControlServiceData) => {
+  if (!data) return;
+
+  switch (data.action) {
+    case "RELOAD":
+      location.reload();
   }
 });
 

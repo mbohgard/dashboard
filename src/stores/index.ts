@@ -9,3 +9,9 @@ export const errorStore = createStore<{
 export const connectedStore = createStore(false);
 
 export const configStore = createStore<LightConfig>({} as LightConfig);
+
+export const isPlayingStore = createStore(false);
+
+export const settingsStore = createStore({
+  halloween: false,
+});
