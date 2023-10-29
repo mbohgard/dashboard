@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 
 import { useTouchPress } from "../hooks";
@@ -222,6 +222,8 @@ export const Overlay = ({
 
     events.forEach((e) => document.addEventListener(e, resetTimer));
 
+    resetTimer();
+
     return () => {
       events.forEach((e) => document.removeEventListener(e, resetTimer));
 
@@ -230,10 +232,7 @@ export const Overlay = ({
   }, []);
 
   return (
-    <OverlayContainer
-      onClick={() => closeOnPress !== false && close?.()}
-      {...props}
-    >
+    <OverlayContainer onClick={() => closeOnPress && close?.()} {...props}>
       {children}
     </OverlayContainer>
   );

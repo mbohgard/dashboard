@@ -3,7 +3,7 @@ export const sec2Ms = (sec: number) => sec * 1000;
 export const ms2Sec = (ms: number) => Math.round(ms / 1000);
 export const ms2Hour = (ms: number) => ms2Sec(ms) / 3600;
 
-export const sec2Str = (sec: number) => {
+export const sec2Time = (sec: number) => {
   let s = sec;
   const d = Math.floor(s / (3600 * 24));
   s -= d * 3600 * 24;
@@ -15,5 +15,12 @@ export const sec2Str = (sec: number) => {
   const days = d ? `${d} days, ` : "";
   const hours = h ? `${h} hours, ` : "";
   const min = m ? `${m} min, ` : "";
-  return `${days}${hours}${min}${s} sec`;
+
+  return {
+    formatted: `${days}${hours}${min}${s} sec`,
+    d,
+    h,
+    m,
+    s,
+  };
 };

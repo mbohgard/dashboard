@@ -62,6 +62,7 @@ module.exports = {
     label: "",
   },
   sonos: {
-    api: "", // url to local node-sonos-http-api
+    api: "", // url to local node-sonos-http-api,
+    feed: "",
   },
 };

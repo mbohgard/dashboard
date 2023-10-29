@@ -1198,10 +1198,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@ctrl/tinycolor@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@ctrl/tinycolor/-/tinycolor-4.0.1.tgz#982651217246bf241850dd979a04ff41a06b0847"
-  integrity sha512-dfimuE1mfaqL8P8jyQzdk9yFeFUWCyhjK5VyydXgDtQO0fezr6aWaGauHnlI07BZBIF45gahb0oxJjkUcylDwQ==
+"@ctrl/tinycolor@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@ctrl/tinycolor/-/tinycolor-4.0.2.tgz#7665b09c0163722ffc20ee885eb9a8ff80d9ebde"
+  integrity sha512-fKQinXE9pJ83J1n+C3rDl2xNLJwfoYNvXLRy5cYZA9hBJJw2q+sbb/AOSNKmLxnTWyNTmy4994dueSwP4opi5g==
 
 "@emotion/is-prop-valid@^1.2.1":
   version "1.2.1"
@@ -4270,10 +4270,10 @@ posthtml@^0.16.4, posthtml@^0.16.5:
     posthtml-parser "^0.10.0"
     posthtml-render "^3.0.0"
 
-prettier@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.2.tgz#78fcecd6d870551aa5547437cdae39d4701dca5b"
-  integrity sha512-o2YR9qtniXvwEZlOKbveKfDQVyqxbEIWn48Z8m3ZJjBjcCmUy3xZGIv+7AkaeuaTr6yPXJjwv07ZWlsWbEy1rQ==
+prettier@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.3.tgz#432a51f7ba422d1469096c0fdc28e235db8f9643"
+  integrity sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==
 
 process@^0.11.10:
   version "0.11.10"

@@ -89,8 +89,8 @@ const BigContainer = styled.div`
   display: flex;
 
   > svg {
-    width: 220px;
-    height: 220px;
+    width: 200px;
+    height: 200px;
     margin-right: 22px;
   }
 `;

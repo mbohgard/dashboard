@@ -22,7 +22,7 @@ export const percentageOfRange =
   (min: number, max: number) => (input: number) =>
     max ? ((input - min) * 100) / (max - min) : 0;
 
-export const roundedPercentageOf = (value: number = 0, max: number = 0) =>
+export const roundedPercentageOf = (value = 0, max = 0) =>
   round((value / max) * 100);
 
 export const roundedValueFromPercentage = (
@@ -37,6 +37,8 @@ export const compressor = (b: number, min: number) => (b > min ? b : min);
 
 export const count = (arr: (number | undefined)[]) =>
   arr.reduce((acc, n = 0) => acc! + n, 0) || 0;
+
+export const addLeadingZero = (n: number) => `${n < 10 ? `0${n}` : n}`;
 
 export const parseJSON = (input: unknown) => {
   if (typeof input !== "string") return input;
@@ -161,14 +163,20 @@ export const throttle = <F extends (...args: any[]) => any>(
       } else {
         clearTimeout(t);
 
-        t = setTimeout(() => {
-          run();
+        t = setTimeout(
+          () => {
+            run();
 
-          last = Date.now();
-        }, interval - (now - last));
+            last = Date.now();
+          },
+          interval - (now - last)
+        );
       }
     });
 };
 
 export const wait = (delay: number = 100) =>
   new Promise((resolve) => setTimeout(resolve, delay));
+
+export const randomInt = (min = 0, max = 100) =>
+  Math.floor(Math.random() * (max - min + 1) + min);
