@@ -24,7 +24,7 @@
   "dependencies": {
     "@ctrl/tinycolor": "^4.0.2",
     "@emotion/is-prop-valid": "^1.2.1",
-    "axios": "^1.5.0",
+    "axios": "^1.6.0",
     "axios-retry": "^3.7.0",
     "cheerio": "^1.0.0-rc.12",
     "cie-rgb-color-converter": "^1.0.6",
