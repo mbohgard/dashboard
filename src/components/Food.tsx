@@ -137,9 +137,11 @@ export const Food: React.FC = () => {
       </WeekButton>
       <Week>Vecka {week}</Week>
       <List ref={list}>
-        {selectedWeek?.days.map(({ day, month, year, meals }) => {
+        {selectedWeek?.days.map(({ day, month, year, ...rest }) => {
           const dateStr = `${year}-${month}-${day}`;
           const date = dayjs(dateStr);
+          const meals = ("meals" in rest && rest.meals) || null;
+          const reason = ("reason" in rest && rest.reason) || null;
 
           return (
             <Day
@@ -152,11 +154,12 @@ export const Food: React.FC = () => {
                 <span>{date.format("D/M")}</span>
               </DayDate>
               <Meals>
-                {meals.map(({ value }, ix) => (
-                  <Meal key={ix} variant={ix}>
-                    {value}
-                  </Meal>
-                ))}
+                {reason ??
+                  meals?.map(({ value }, ix) => (
+                    <Meal key={ix} variant={ix}>
+                      {value}
+                    </Meal>
+                  ))}
               </Meals>
             </Day>
           );

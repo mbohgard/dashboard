@@ -225,14 +225,20 @@ declare interface CalendarEvent {
   summary: string;
 }
 
-declare interface FoodDay {
-  meals: Array<{
-    value: string;
-  }>;
+declare type FoodDay = (
+  | {
+      meals: Array<{
+        value: string;
+      }>;
+    }
+  | {
+      reason: string;
+    }
+) & {
   month: number;
   day: number;
   year: number;
-}
+};
 
 declare interface FoodWeek {
   days: FoodDay[];

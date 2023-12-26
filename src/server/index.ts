@@ -36,7 +36,12 @@ const rootDir = path.join(__dirname, "..", "..");
 const stopService = (s: ServiceName) => global.clearTimeout(timers[s]!);
 
 const saveToCache = (s: ServiceName, data: ServiceData) => (cache[s] = data);
-const sendCached = (s: ServiceName) => cache[s] && emit(cache[s]!);
+const sendCached = (s: ServiceName) => {
+  const data = cache[s];
+  data && emit(data);
+
+  return Boolean(data);
+};
 
 const emit = <T extends ServiceData>(
   data: Omit<ServiceData<T["data"]>, "service"> & { service: string }
@@ -60,7 +65,7 @@ const formatError = (e: unknown) => {
   return stringify(e) || "Unknown error";
 };
 
-const fetcher = (service: Service) => {
+const fetcher = (service: Service, forceWait = false) => {
   const next = (waitOnAction = false) => {
     timers[service.name] = global.setTimeout(
       () => fetcher(service),
@@ -68,7 +73,7 @@ const fetcher = (service: Service) => {
     );
   };
 
-  return actionsInProgress.has(service.name)
+  return actionsInProgress.has(service.name) || forceWait
     ? next(true)
     : service
         .get()
@@ -87,12 +92,12 @@ const fetcher = (service: Service) => {
 };
 
 const subscribe = (id: string, s: ServiceName) => {
-  sendCached(s);
+  const hasCache = sendCached(s);
 
   if (subscribers.add(id, s)) {
     const service = services[s] as Service;
 
-    if (service) fetcher(service);
+    if (service) fetcher(service, hasCache);
     else {
       emit({
         service: s,

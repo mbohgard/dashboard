@@ -117,13 +117,29 @@ const Status = () => {
   return <StatusDot ok={connected} />;
 };
 
-class ErrorBoundary extends React.Component<React.PropsWithChildren> {
+class ErrorBoundary extends React.Component<
+  React.PropsWithChildren,
+  { error: null | any }
+> {
+  constructor(props: React.PropsWithChildren) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { error };
+  }
+
   componentDidCatch(err: any) {
     reportError("catch in Main", err);
   }
 
   render() {
-    return this.props.children;
+    const err = this.state.error;
+
+    const msg =
+      err instanceof Error ? err.message : err ? "Something went wrong" : null;
+    return msg ?? this.props.children;
   }
 }
 
