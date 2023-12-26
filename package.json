@@ -1,6 +1,6 @@
 {
   "name": "dashboard",
-  "version": "0.10.0-alpha",
+  "version": "0.10.0",
   "license": "GPL-3.0-or-later",
   "svgr": {
     "icon": true
