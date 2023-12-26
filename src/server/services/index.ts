@@ -51,6 +51,6 @@ export const axios = conf.axiosConfig
   ? _axios.create(conf.axiosConfig)
   : _axios;
 
-axiosRetry(axios);
+axiosRetry(axios, { retryDelay: (retryCount) => retryCount * 1000 });
 
 export default services;
