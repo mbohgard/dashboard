@@ -1,5 +1,5 @@
 import _axios, { AxiosRequestConfig } from "axios";
-import axiosRetry from "axios-retry";
+import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 
 import * as config from "../../../config";
 
@@ -51,6 +51,13 @@ export const axios = conf.axiosConfig
   ? _axios.create(conf.axiosConfig)
   : _axios;
 
-axiosRetry(axios, { retryDelay: (retryCount) => retryCount * 1000 });
+axiosRetry(axios, {
+  retryDelay: (retryCount) => retryCount * 1000,
+  retryCondition: (err) => {
+    if (err.status === 429) return false;
+
+    return isNetworkOrIdempotentRequestError(err);
+  },
+});
 
 export default services;
