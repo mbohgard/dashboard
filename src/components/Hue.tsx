@@ -15,11 +15,11 @@ const getIconColor = (bri: number) =>
   satOrBriPercentage(bri) > 50 ? colors.black : colors.white;
 
 export const Hue: React.FC = () => {
-  const [groups, emit] = useService<HueServiceData, HueGroupEmit>("hue", {});
+  const [groups, emit] = useService("hue", {});
   const [adjustId, setAdjustId] = useState<string>();
 
   const send = useCallback(
-    ({ id, ...payload }: HueGroupEmit) => {
+    ({ id, ...payload }: Parameters<typeof emit>[0]) => {
       const set = emit({ id, ...payload });
 
       if (set)

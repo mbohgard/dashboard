@@ -89,7 +89,7 @@ export const Time: React.FC = () => {
   if (!timestamp.current) timestamp.current = now();
   const ts = timestamp.current;
 
-  const [data] = useService<TimeServiceData>("time");
+  const [data] = useService("time");
   const [[h, m, time], setTime] = useState(() => getTime(ts));
 
   useEffect(() => {

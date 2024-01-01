@@ -1,13 +1,15 @@
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
 
-import { min2Ms } from "../../utils/time";
+import { axios } from "../index";
+import type { ApiResponse } from "./types";
+
+import { min2Ms } from "../../../utils/time";
 
 export const name = "time";
 
 export const get = () =>
   axios
-    .get<TimeZone>(
+    .get<ApiResponse>(
       `http://api.timezonedb.com/v2.1/get-time-zone?key=${config.time.key}&format=json&by=zone&zone=${config.time.settings.timezone}`
     )
     .then(({ data }) => ({

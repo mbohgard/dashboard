@@ -38,8 +38,8 @@ const Degrees = styled.span`
 `;
 
 export const Temp = () => {
-  const [tempData] = useService<TempServiceData>("temp", {});
-  const [groups] = useService<HueServiceData>("hue", {});
+  const [tempData] = useService("temp", {});
+  const [groups] = useService("hue", {});
 
   if (!tempData || !groups) return <Loader />;
 

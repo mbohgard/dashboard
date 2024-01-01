@@ -14,7 +14,7 @@ const getChargeColor = (value?: number) => {
 };
 
 export const VOC: React.FC = () => {
-  const [data] = useService<VOCServiceData>("voc");
+  const [data] = useService("voc");
 
   return (
     <ServiceBox title={data?.label} type="icons">

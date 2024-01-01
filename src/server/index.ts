@@ -11,6 +11,12 @@ import * as subscribers from "./subscribers";
 import services, { ServiceName } from "./services";
 import { ms2Sec } from "../utils/time";
 import { stringify } from "../utils/helpers";
+import type {
+  ServiceResponse,
+  InitServiceData,
+  ControlServiceData,
+  ServicesUnion,
+} from "./services";
 
 let launched: number;
 
@@ -28,14 +34,15 @@ const io = new ws.Server(server, {
 });
 
 const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
-const cache: { [key in ServiceName]?: ServiceData } = {};
+const cache: { [key in ServiceName]?: ServiceResponse } = {};
 const actionsInProgress = new Set<ServiceName>();
 const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
 
 const stopService = (s: ServiceName) => global.clearTimeout(timers[s]!);
 
-const saveToCache = (s: ServiceName, data: ServiceData) => (cache[s] = data);
+const saveToCache = (s: ServiceName, data: ServiceResponse) =>
+  (cache[s] = data);
 const sendCached = (s: ServiceName) => {
   const data = cache[s];
   data && emit(data);
@@ -43,8 +50,12 @@ const sendCached = (s: ServiceName) => {
   return Boolean(data);
 };
 
-const emit = <T extends ServiceData>(
-  data: Omit<ServiceData<T["data"]>, "service"> & { service: string }
+const emit = (
+  // data: Omit<ServiceResponse, "meta"> | InitServiceData | ControlServiceData
+  data:
+    | { service: string; data?: any; error?: any }
+    | InitServiceData
+    | ControlServiceData
 ) => {
   io.emit(data.service, data);
 
@@ -65,7 +76,7 @@ const formatError = (e: unknown) => {
   return stringify(e) || "Unknown error";
 };
 
-const fetcher = (service: Service, forceWait = false) => {
+const fetcher = (service: ServicesUnion, forceWait = false) => {
   const next = (waitOnAction = false) => {
     timers[service.name] = global.setTimeout(
       () => fetcher(service),
@@ -78,8 +89,11 @@ const fetcher = (service: Service, forceWait = false) => {
     : service
         .get()
         .then((data) => {
-          emit({ ...data, error: formatError(data.error) });
-          saveToCache(data.service, data);
+          emit({
+            ...data,
+            error: formatError("error" in data ? data.error : undefined),
+          });
+          saveToCache(data.service as ServiceName, data as ServiceResponse);
         })
         .catch((e) => {
           console.log(e);
@@ -95,7 +109,7 @@ const subscribe = (id: string, s: ServiceName) => {
   const hasCache = sendCached(s);
 
   if (subscribers.add(id, s)) {
-    const service = services[s] as Service;
+    const service = services[s] as ServicesUnion;
 
     if (service) fetcher(service, hasCache);
     else {
@@ -163,7 +177,7 @@ io.on("connection", (socket) => {
 });
 
 app.get("/reloadAll", (_, res) => {
-  emit<ControlServiceData>({ service: "control", data: { action: "RELOAD" } });
+  emit({ service: "control", data: { action: "RELOAD" } });
 
   res.sendStatus(200);
 });

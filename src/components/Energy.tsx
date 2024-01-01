@@ -68,7 +68,7 @@ const getColor = (value?: string) => {
 };
 
 export const Energy = () => {
-  const [data] = useService<EnergyServiceData>("energy");
+  const [data] = useService("energy");
 
   if (!data) return <Loader />;
 

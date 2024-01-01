@@ -3,11 +3,12 @@ import isBetween from "dayjs/plugin/isBetween";
 // @ts-ignore
 import Ical from "ical-expander";
 
-import { axios } from "./index";
+import { axios } from "../index";
+import type { CalendarEvent } from "./types";
 
-import * as config from "../../../config";
-import { sec2Ms, ms2Hour } from "../../utils/time";
-import { Colors } from "../../styles";
+import * as config from "../../../../config";
+import { sec2Ms, ms2Hour } from "../../../utils/time";
+import { Colors } from "../../../styles";
 
 export const name = "calendar";
 

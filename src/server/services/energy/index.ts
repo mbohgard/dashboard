@@ -1,9 +1,11 @@
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
+
+import { axios } from "../index";
 import * as cheerio from "cheerio";
 import dayjs from "dayjs";
 
-import { min2Ms, sec2Ms } from "../../utils/time";
+import type { ApiResponse } from "./types";
+import { min2Ms, sec2Ms } from "../../../utils/time";
 
 export const name = "energy";
 
@@ -24,11 +26,11 @@ const catMap = {
   "Högsta timpris": "high",
 } as const;
 
-export const get = (): Promise<EnergyServiceData> =>
+export const get = () =>
   axios.get<string>(getUrl(config.energy.zone)).then(({ data: src }) => {
     const $ = cheerio.load(src);
 
-    const data: Energy = {
+    const data: ApiResponse = {
       now: { value: "N/A", time: "N/A" },
       high: { value: "N/A", time: "N/A" },
       low: { value: "N/A", time: "N/A" },

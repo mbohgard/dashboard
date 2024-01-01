@@ -4,6 +4,7 @@ import styled, { css, type IStyledComponent } from "styled-components";
 import { pascal } from "../utils/helpers";
 
 import allIcons from "../assets/icons/*.svg";
+import { HueTypes } from "../types";
 
 type Props = { size?: number };
 type Imported = { [s: string]: { default: React.FC } };
@@ -41,7 +42,7 @@ const iconsObj: IconsObj = Object.entries(
   {}
 );
 
-const iconNameFromHueClass = (hueClass: HueGroupClass) =>
+const iconNameFromHueClass = (hueClass: HueTypes.HueGroupClass) =>
   Object.keys(iconsObj).reduce(
     (acc, key) =>
       acc ||
@@ -50,7 +51,7 @@ const iconNameFromHueClass = (hueClass: HueGroupClass) =>
   );
 
 type IconProps = { [name: string]: any } & { name?: string } & {
-  hueClass?: HueGroupClass;
+  hueClass?: HueTypes.HueGroupClass;
 } & Props;
 
 export const Icon = React.memo(({ size, name, hueClass, ...p }: IconProps) => {

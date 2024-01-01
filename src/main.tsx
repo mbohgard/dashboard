@@ -29,6 +29,7 @@ import { Errors } from "./components/Errors";
 import { Scrollable } from "./components/Scrollable";
 import { RightTabGroup } from "./components/RightTabGroup";
 import { HalloweenOverlay } from "./components/HalloweenOverlay";
+import { ControlServiceData, InitServiceData } from "./types";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);

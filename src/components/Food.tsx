@@ -103,7 +103,7 @@ const Meal = styled.li<{ variant: number }>`
 
 export const Food: React.FC = () => {
   const list = useRef<HTMLUListElement | null>(null);
-  const [data] = useService<FoodServiceData>("food");
+  const [data] = useService("food");
   const [week, setWeek] = useState(0);
 
   const thisWeek = data?.[0];
