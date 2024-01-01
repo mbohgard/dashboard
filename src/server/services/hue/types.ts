@@ -1,4 +1,4 @@
-declare type HueGroupClass =
+export type HueGroupClass =
   | "Attic"
   | "Balcony"
   | "Barbecue"
@@ -40,7 +40,7 @@ declare type HueGroupClass =
   | "TV"
   | "Upstairs";
 
-declare type HueApiState = {
+type HueApiState = {
   bri: number;
   effect?: "none" | "colorloop";
 } & (
@@ -60,7 +60,7 @@ declare type HueApiState = {
   | {}
 );
 
-declare type HueApiCapabilities = {
+type HueApiCapabilities = {
   certified: boolean;
   control: {
     colorgamut?: [number, number][];
@@ -78,7 +78,7 @@ declare type HueApiCapabilities = {
   };
 };
 
-declare interface HueApiLight {
+export interface HueApiLight {
   name: string;
   state: {
     on: boolean;
@@ -90,11 +90,11 @@ declare interface HueApiLight {
   capabilities: HueApiCapabilities;
 }
 
-declare interface HueApiLights {
+interface HueApiLights {
   [id: string]: HueApiLight;
 }
 
-declare interface HueApiGroups {
+interface HueApiGroups {
   [id: string]: {
     name: string;
     lights: string[];
@@ -110,35 +110,17 @@ declare interface HueApiGroups {
   };
 }
 
-declare interface HueApiSensorsResponse {
-  [id: string]: {
-    state: {
-      [key: string]: boolean | number | string;
-    };
-    name: string;
-    type: string;
-    modelid: string;
-    productname?: string;
-    uniqueid: string;
-  };
-}
-
-declare interface HueApiResponse {
-  lights: HueApiLights;
-  groups: HueApiGroups;
-}
-
-declare type HSV = {
+export type HSV = {
   h: number;
   s: number;
   v: number;
 };
 
-declare type HueLights = {
+export type HueLights = {
   [id: string]: HSV;
 };
 
-declare interface HueGroup {
+interface HueGroup {
   bri: number;
   name: string;
   class: HueGroupClass;
@@ -146,26 +128,17 @@ declare interface HueGroup {
   lights: HueLights | null;
 }
 
-declare interface HueGroups {
+export interface HueGroups {
   [id: string]: HueGroup;
 }
 
-declare interface HueGroupEmit {
+export interface HueGroupEmit {
   id: string;
   on?: boolean;
   bri?: number;
 }
 
-declare interface HueThermometer {
-  name: string;
-  value: number;
-}
-
-declare interface HueThermometers {
-  [id: string]: HueThermometer;
-}
-
-declare interface HueApiActionResponseItem {
+interface HueApiActionResponseItem {
   error?: {
     description: string;
   };
@@ -174,4 +147,9 @@ declare interface HueApiActionResponseItem {
   };
 }
 
-declare type HueApiActionResponse = HueApiActionResponseItem[];
+export type HueApiActionResponse = HueApiActionResponseItem[];
+
+export interface ApiResponse {
+  lights: HueApiLights;
+  groups: HueApiGroups;
+}

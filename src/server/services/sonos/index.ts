@@ -1,17 +1,19 @@
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
+import { axios } from "../index";
+import type { ApiResponse } from "./types";
 
-import { sec2Ms } from "../../utils/time";
+import { sec2Ms } from "../../../utils/time";
+import { SonosCompleteDevice, SonosEmit, SonosFeedResponse } from "./types";
 
 export const name = "sonos";
 
 const API = config.sonos.api;
 const SONOS_API = "https://embed.spotify.com/oembed?url=";
 
-let dataCache: SonosResponse = [];
+let dataCache: ApiResponse = [];
 const albumCache = new Map<string, string | undefined>();
 
-const getAlbumArtSrc = async (device: SonosResponse[number]) => {
+const getAlbumArtSrc = async (device: ApiResponse[number]) => {
   const track = device.coordinator.state.currentTrack;
 
   if (track.absoluteAlbumArtUri?.startsWith("http")) {
@@ -66,9 +68,9 @@ const filterData = (updatedDevice?: SonosCompleteDevice) => {
   );
 };
 
-export const get = (): Promise<SonosServiceData> =>
+export const get = () =>
   axios
-    .get<SonosResponse>(`${API}/zones`)
+    .get<ApiResponse>(`${API}/zones`)
     .then(({ data }) => {
       if (!data.length) throw Error("No Sonos devices found");
 
@@ -96,8 +98,7 @@ export const listener = ({ roomName, action, volume }: SonosEmit) => {
 
 export const feed = {
   endpoint: config.sonos.feed,
-  handler: (body: SonosFeedResponse): SonosServiceData | null => {
-    // console.dir(body, { depth: 3 });
+  handler: (body: SonosFeedResponse) => {
     if (!dataCache.length) return null;
 
     const res = {

@@ -9,6 +9,7 @@ import { Loader } from "./Atoms";
 import { WeatherIcon } from "./WeatherIcon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
 import { getTempColor } from "../utils/color";
+import type { WeatherTypes } from "../types";
 
 type Type = {
   type?: "normal" | "big";
@@ -21,7 +22,7 @@ type SunData = {
   sunsetMinutes: number;
 };
 
-const param = (params: Parameter[], name: string) =>
+const param = (params: WeatherTypes.Parameter[], name: string) =>
   params.find((p) => p.name === name)!.values[0]!;
 
 const minutes = (t: Dayjs) => t.minute() + t.hour() * 60;
@@ -70,7 +71,7 @@ const DegreesContainer = styled.div<DegreesProps>`
 `;
 
 type WeatherProps = {
-  data: TimeSerie;
+  data: WeatherTypes.TimeSerie;
 };
 
 const Degrees: React.FC<WeatherProps & Type> = ({ data, type = "normal" }) => {
@@ -194,10 +195,10 @@ const Small: React.FC<SingleWeatherProps & { day?: string }> = ({
   </SmallContainer>
 );
 
-export const SmallWeather: React.FC<{ data: TimeSerie[]; sun?: SunData }> = ({
-  data,
-  sun,
-}) => (
+export const SmallWeather: React.FC<{
+  data: WeatherTypes.TimeSerie[];
+  sun?: SunData;
+}> = ({ data, sun }) => (
   <SmallWrapper>
     {data
       .filter((t) => {
@@ -225,15 +226,15 @@ export type Props = {
 };
 
 export const Weather: React.FC<Props> = ({ type = "small" }) => {
-  const [data] = useService<WeatherServiceData>("weather", (res) =>
+  const [data] = useService("weather", (res) =>
     Boolean(res.data && res.data.timeSeries)
   );
 
   if (!data) return <Loader />;
 
   const [currentWeather, ...forecast] = data.timeSeries!;
-  const sunrise = data.sun && dayjs(data.sun.results.sunrise);
-  const sunset = data.sun && dayjs(data.sun.results.sunset);
+  const sunrise = data.sun && dayjs(data.sun.results?.sunrise);
+  const sunset = data.sun && dayjs(data.sun.results?.sunset);
 
   const sun = sunrise &&
     sunset && {

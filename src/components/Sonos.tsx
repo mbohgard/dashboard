@@ -8,6 +8,7 @@ import { sec2Time } from "../utils/time";
 import { colors } from "../styles";
 import { addLeadingZero, debounce } from "../utils/helpers";
 import { Icon } from "./Icon";
+import { SonosTypes } from "../types";
 
 const COVER_SIZE = 250;
 
@@ -85,7 +86,9 @@ const Room: React.FC<React.PropsWithChildren<RoomContainerProps>> = ({
   </RoomContainer>
 );
 
-const getRoomName = (device: SonosDevice) => {
+type Device = SonosTypes.SonosDevice;
+
+const getRoomName = (device: Device) => {
   const len = device.members.length;
 
   return `${device.roomName}${len > 1 ? ` +${len - 1}` : ""}`;
@@ -93,7 +96,7 @@ const getRoomName = (device: SonosDevice) => {
 
 const Rooms: React.FC<{
   selectedRoom: string;
-  rooms: SonosDevice[];
+  rooms: Device[];
   setSelectedRoom: (name: string) => void;
 }> = ({ selectedRoom, rooms, setSelectedRoom }) => {
   const [open, setOpen] = useState(false);
@@ -154,8 +157,10 @@ const ControlsContainer = styled.div`
 `;
 
 type ControlsProps = {
-  state: SonosDevice["state"]["playbackState"];
-  command: (action: Exclude<SonosEmit["action"], "volume"> | number) => void;
+  state: Device["state"]["playbackState"];
+  command: (
+    action: Exclude<SonosTypes.SonosEmit["action"], "volume"> | number
+  ) => void;
 };
 
 const Controls: React.FC<ControlsProps> = ({ state, command }) => (
@@ -412,11 +417,11 @@ const Volume: React.FC<{ state: number } & Pick<ControlsProps, "command">> = ({
 };
 
 const getCurrentRoom = (
-  data: SonosDevice[],
+  data: Device[],
   name?: string | null,
   isPlaying?: boolean
 ) => {
-  const predicate = ({ state, roomName }: SonosDevice) => {
+  const predicate = ({ state, roomName }: Device) => {
     const track = state.currentTrack;
     const playback = state.playbackState;
     if (!name && isPlaying)

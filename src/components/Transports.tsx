@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { useService } from "../hooks";
 import { colors } from "../styles";
 import { ServiceBox } from "./Molecules";
+import { ServiceResponse, TransportsTypes } from "../types";
 
 const Container = styled.div`
   display: flex;
@@ -35,7 +36,7 @@ const Box = styled(ServiceBox)`
 `;
 
 type TranportTimeProps = {
-  data?: TransportItem;
+  data?: TransportsTypes.TransportItem;
 } & TimeProps;
 
 const TransportTime: React.FC<TranportTimeProps> = ({ data }) => {
@@ -51,17 +52,19 @@ const TransportTime: React.FC<TranportTimeProps> = ({ data }) => {
   );
 };
 
+type Data = NonNullable<ServiceResponse<"transports">["data"]>;
+
 const getTransports = (
-  t: keyof Omit<TimetableResponse, "LatestUpdate" | "DataAge">,
-  data?: Timetable[]
+  t: keyof Omit<TransportsTypes.TimetableResponse, "LatestUpdate" | "DataAge">,
+  data?: Data
 ) =>
   data?.find((d) => {
-    const transport = d && d.ResponseData && d.ResponseData[t];
+    const transport = d.ResponseData?.[t];
 
     return transport ? transport.length > 0 : false;
   })?.ResponseData?.[t] || [];
 
-type TransportItems = (TransportItem | undefined)[];
+type TransportItems = (TransportsTypes.TransportItem | undefined)[];
 
 const fill = (x: TransportItems): TransportItems =>
   Array(4)
@@ -70,15 +73,14 @@ const fill = (x: TransportItems): TransportItems =>
 
 export const Transports: React.FC = () => {
   const labels = useRef<Record<string, string>>({});
-  const [data, _, meta] = useService<TransportsServiceData>("transports");
+  const [data, _, meta] = useService("transports");
 
   const transports = useMemo(
     () =>
       data?.map((transport, i) => {
         const siteId = transport.siteId;
-        const label = meta?.sites.find(
-          ({ siteId: id }) => siteId === id
-        )?.label;
+        const label = meta?.sites.find(({ siteId: id }) => siteId === id)
+          ?.label;
         const type = label === "Tåg" ? "Trains" : "Buses";
         const currentLabel = labels.current[siteId];
 

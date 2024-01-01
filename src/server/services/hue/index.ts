@@ -1,11 +1,20 @@
 import https from "https";
 
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
 
-import { sec2Ms } from "../../utils/time";
-import { round, pick, createMedian } from "../../utils/helpers";
-import { hue2Hsv } from "../../utils/color";
+import { axios } from "../index";
+import { hue2Hsv } from "./helpers";
+import type { ApiResponse } from "./types";
+
+import type {
+  HueGroups,
+  HueGroupEmit,
+  HueApiActionResponse,
+  HSV,
+  HueLights,
+} from "./types";
+import { sec2Ms } from "../../../utils/time";
+import { round, pick, createMedian } from "../../../utils/helpers";
 
 const url = `https://${config.hue.settings.ip}/api/${config.hue.key}`;
 
@@ -15,7 +24,7 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
 });
 
-const getLights = (l: HueApiLights) => {
+const getLights = (l: ApiResponse["lights"]) => {
   const add = createMedian();
 
   return Object.entries(l)
@@ -36,9 +45,9 @@ const getLights = (l: HueApiLights) => {
     );
 };
 
-export const get = (): Promise<HueServiceData> =>
+export const get = () =>
   axios
-    .get<HueApiResponse>(url, {
+    .get<ApiResponse>(url, {
       headers: {
         "Cache-Control": "no-cache",
       },

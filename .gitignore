@@ -82,6 +82,3 @@ config.js
 
 # mac os
 .DS_Store
-
-# temp
-temp

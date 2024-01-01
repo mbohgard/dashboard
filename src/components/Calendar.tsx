@@ -6,6 +6,7 @@ import { useService } from "../hooks";
 import { colors } from "../styles";
 
 import { Loader } from "./Atoms";
+import { ServiceResponse } from "../types";
 
 const Container = styled.ul`
   list-style: none;
@@ -70,13 +71,15 @@ const makeGetCalTime = (allDay: boolean) => (date: Dayjs) => {
   return allDay ? time.split(" ").slice(0, -1).join(" ") : time;
 };
 
+type Data = NonNullable<ServiceResponse<"calendar">["data"]>;
+
 const getTime = ({
   start: startDate,
   end: endDate,
   allDay,
   ongoing,
   passed,
-}: CalendarEvent): [string, boolean] => {
+}: Data[number]): [string, boolean] => {
   const getCalTime = makeGetCalTime(allDay);
   const start = dayjs(startDate);
   const end = dayjs(endDate);
@@ -97,7 +100,7 @@ const getTime = ({
 };
 
 export const Calendar: React.FC = () => {
-  const [data] = useService<CalendarServiceData>("calendar");
+  const [data] = useService("calendar");
 
   if (!data) return <Loader />;
 

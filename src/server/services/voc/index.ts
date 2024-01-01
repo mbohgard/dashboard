@@ -1,7 +1,8 @@
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
 
-import { sec2Ms, min2Ms } from "../../utils/time";
+import { axios } from "../index";
+import type { ApiResponse } from "./types";
+import { sec2Ms, min2Ms } from "../../../utils/time";
 
 const {
   settings: { region, label },
@@ -15,9 +16,9 @@ const url = `https://vocapi${
 
 export const name = "voc";
 
-export const get = (): Promise<VOCServiceData> =>
+export const get = () =>
   axios
-    .request<VOCResponse>({
+    .request<ApiResponse>({
       auth: {
         username,
         password,

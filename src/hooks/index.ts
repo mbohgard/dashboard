@@ -2,7 +2,11 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 
 import { socket } from "../utils/socket";
 import { reportError } from "../utils/report";
-import type { ServiceName } from "../types";
+import type {
+  ServiceName,
+  ServiceResponse,
+  Emit as EmitPayload,
+} from "../types";
 import { configStore, connectedStore, isPlayingStore } from "../stores";
 
 export const useConfig = () => {
@@ -24,24 +28,32 @@ type Emit<P, D> = (
   payload: P
 ) => React.Dispatch<React.SetStateAction<D>> | undefined;
 
-interface UseService {
-  <T extends ServiceData, P = any>(
-    serviceName: ServiceName,
-    condition?: (res: T) => boolean
-  ): [T["data"], Emit<P, T["data"]>, T["meta"]];
+type Data<Name extends ServiceName> = ServiceResponse<Name>["data"];
+// @ts-ignore
+type Meta<Name extends ServiceName> = ServiceResponse<Name>["meta"];
 
-  <T extends ServiceData, P = any>(
-    serviceName: ServiceName,
-    initialData: Required<T>["data"],
-    condition?: (res: T) => boolean
-  ): [Required<T>["data"], Emit<P, Required<T>["data"]>, T["meta"]];
+interface UseService {
+  <Name extends ServiceName>(
+    serviceName: Name,
+    condition?: (res: ServiceResponse<Name>) => boolean
+  ): [Data<Name>, Emit<EmitPayload<Name>, Data<Name>>, Meta<Name>];
+
+  <Name extends ServiceName>(
+    serviceName: Name,
+    initialData: NonNullable<Data<Name>>,
+    condition?: (res: ServiceResponse<Name>) => boolean
+  ): [
+    NonNullable<Data<Name>>,
+    Emit<EmitPayload<Name>, NonNullable<Data<Name>>>,
+    Meta<Name>,
+  ];
 }
 
-export const useService: UseService = <T extends ServiceData, P = any>(
+export const useService: UseService = <T extends ServiceResponse>(
   serviceName: any,
   arg1?: any,
-  arg2: any = (res: T) => Boolean(res.data)
-): [any, any, any] => {
+  arg2: any = (res: any) => Boolean(res.data)
+) => {
   const short = typeof arg1 === "function";
   const condition = short ? arg1 : arg2;
 
@@ -74,8 +86,8 @@ export const useService: UseService = <T extends ServiceData, P = any>(
     []
   );
 
-  const emit: Emit<P, T["data"]> = useCallback(
-    <P>(payload: P) => {
+  const emit = useCallback(
+    (payload: any) => {
       if (connected) {
         socket.emit(serviceName, payload);
 
@@ -96,7 +108,7 @@ export const useService: UseService = <T extends ServiceData, P = any>(
 };
 
 export const useSonosService = () => {
-  const [data, emit] = useService<SonosServiceData, SonosEmit>("sonos");
+  const [data, emit] = useService("sonos");
 
   const isPlaying = useMemo(() => {
     if (!data || !data.length) return false;

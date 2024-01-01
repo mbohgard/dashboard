@@ -1,9 +1,11 @@
 import https from "https";
 
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
+import type { ApiResponse, HueThermometers } from "./types";
 
-import { min2Ms } from "../../utils/time";
+import { axios } from "../index";
+
+import { min2Ms } from "../../../utils/time";
 
 const url = `https://${config.hue.settings.ip}/api/${config.hue.key}/sensors`;
 
@@ -13,9 +15,9 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
 });
 
-export const get = (): Promise<TempServiceData> =>
+export const get = () =>
   axios
-    .get<HueApiSensorsResponse>(url, {
+    .get<ApiResponse>(url, {
       headers: {
         "Cache-Control": "no-cache",
       },

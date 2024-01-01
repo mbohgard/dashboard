@@ -1,8 +1,10 @@
-import * as config from "../../../config";
-import { axios } from "./index";
+import * as config from "../../../../config";
 
-import { min2Ms, sec2Ms } from "../../utils/time";
-import { wait } from "../../utils/helpers";
+import { axios } from "../index";
+import type { ApiResponse } from "./types";
+
+import { min2Ms, sec2Ms } from "../../../utils/time";
+import { wait } from "../../../utils/helpers";
 
 export const name = "transports";
 
@@ -21,31 +23,34 @@ const callers = config.transports.settings.map(
     (delay: number) =>
       wait(delay).then(() =>
         axios
-          .get<Timetable>(getTransportUrl(types, siteId))
+          .get<ApiResponse>(getTransportUrl(types, siteId))
           .then(({ data }) => ({
-            data: {
-              ...data,
-              siteId,
-            },
+            ...data,
+            siteId,
           }))
       )
 );
 
-export const get = () =>
-  Promise.all(callers.map((call, i) => call(sec2Ms(i * 2)))).then((responses) =>
-    responses.reduce<TransportsServiceData>(
-      (acc, r) => {
-        const data = r.data ? [...(acc.data || []), r.data] : r.data;
+type Data = Awaited<ReturnType<(typeof callers)[number]>>;
 
-        return { ...acc, data };
-      },
-      {
+export const get = () =>
+  Promise.all(callers.map((call, i) => call(sec2Ms(i * 2)))).then(
+    (responses) => {
+      const start = {
         service: name,
         meta: {
           sites: config.transports.settings,
         },
-      }
-    )
+      };
+
+      return responses.reduce(
+        (acc, r) => {
+          acc.data.push(r);
+          return acc;
+        },
+        start as typeof start & { data: Data[] }
+      );
+    }
   );
 
 export const delay = () => {
