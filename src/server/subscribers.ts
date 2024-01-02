@@ -1,5 +1,5 @@
 import { count } from "../utils/helpers";
-import services, { ServiceName } from "./services";
+import services, { ServiceName } from "../integrations";
 
 type Subscriptions = {
   [id: string]: number | undefined;
