@@ -34,6 +34,7 @@ module.exports = {
     settings: {
       // ip for hue hub
       ip: "",
+      tempOffset: 0, // increase/decrease reading of temp sensors
     },
   },
   // volvo on call

@@ -5,10 +5,10 @@ import fs from "fs";
 import ws from "socket.io";
 
 import { version } from "../../package.json";
-import * as config from "../../config";
+import config from "../config";
 
 import * as subscribers from "./subscribers";
-import services, { ServiceName } from "./services";
+import services, { ServiceName } from "../integrations";
 import { ms2Sec } from "../utils/time";
 import { stringify } from "../utils/helpers";
 import type {
@@ -16,7 +16,7 @@ import type {
   InitServiceData,
   ControlServiceData,
   ServicesUnion,
-} from "./services";
+} from "../integrations";
 
 let launched: number;
 
@@ -157,7 +157,7 @@ io.on("connection", (socket) => {
       });
     }
 
-    if (service.name && "feed" in service) {
+    if (service.name && "feed" in service && service.feed.endpoint) {
       app.post(service.feed.endpoint, (req, res) => {
         const result = service.feed.handler(req.body);
         if (result) emit(result);
@@ -169,9 +169,11 @@ io.on("connection", (socket) => {
 
   const configBody: LightConfig = {};
 
-  if (config.calendar) configBody.calendar = { label: config.calendar.label };
-  if (config.voc) configBody.voc = { label: config.voc.settings.label };
-  if (config.food) configBody.food = { label: config.food.label };
+  if (config.calendar)
+    configBody.calendar = { label: config.calendar.label ?? "Calendar" };
+  if (config.voc)
+    configBody.voc = { label: config.voc.settings?.label ?? "Volvo" };
+  if (config.food) configBody.food = { label: config.food?.label ?? "Food" };
 
   emit({ service: "server", data: { version, launched, config: configBody } });
 });

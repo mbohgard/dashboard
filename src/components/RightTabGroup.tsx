@@ -4,9 +4,9 @@ import styled, { css } from "styled-components";
 import { useConfig, useIsPlaying } from "../hooks";
 
 import { Tabs } from "./Tabs";
-import { Calendar } from "./Calendar";
-import { Food } from "./Food";
-import { Sonos } from "./Sonos";
+import { Calendar } from "../integrations/calendar/ui";
+import { Food } from "../integrations/food/ui";
+import { Sonos } from "../integrations/sonos/ui";
 import { colors } from "../styles";
 
 export const Container = styled.div<{ isPlaying: boolean }>`
