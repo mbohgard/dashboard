@@ -130,11 +130,14 @@ export const Food: React.FC = () => {
 
   return (
     <Container>
-      <WeekButton onClick={() => reset(isCurrent ? week + 1 : week - 1)}>
-        {!isCurrent && <Icon Arrow />}
-        <span>{isCurrent ? "Nästa vecka" : "Denna vecka"}</span>
-        {isCurrent && <Icon Arrow />}
-      </WeekButton>
+      {Boolean(data.length) && (
+        <WeekButton onClick={() => reset(isCurrent ? week + 1 : week - 1)}>
+          {!isCurrent && <Icon Arrow />}
+          <span>{isCurrent ? "Nästa vecka" : "Denna vecka"}</span>
+          {isCurrent && <Icon Arrow />}
+        </WeekButton>
+      )}
+
       <Week>Vecka {week}</Week>
       <List ref={list}>
         {selectedWeek?.days.map(({ day, month, year, ...rest }) => {

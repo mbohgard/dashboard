@@ -1,4 +1,5 @@
 import dayjs, { Dayjs } from "dayjs";
+import { v4 as uuid } from "uuid";
 import isBetween from "dayjs/plugin/isBetween";
 // @ts-ignore
 import Ical from "ical-expander";
@@ -34,7 +35,7 @@ const createEvent = (
     ongoing: nowDate.isBetween(startDate, endDate),
     color,
     end: endDate.getTime(),
-    id: uid || startDate.getTime() + summary.replace(" ", "-"),
+    id: uid || uuid(),
     name,
     now,
     passed,
