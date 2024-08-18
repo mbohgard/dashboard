@@ -10,7 +10,7 @@ export const name = "transports";
 const { transports } = config;
 
 const getTransportUrl = (types: string[], siteId?: string) => {
-  if (!transports?.key || typeof siteId !== "number")
+  if (!transports?.key || typeof siteId !== "string")
     throw ConfigError(name, "Missing transports api key or siteIdconfig");
 
   const q = (t: string) => `&${t}=${String(types.includes(t))}`;
@@ -43,6 +43,7 @@ export const get = () =>
     (responses) => {
       const start = {
         service: name,
+        data: [],
         meta: {
           sites: transports?.settings,
         },
