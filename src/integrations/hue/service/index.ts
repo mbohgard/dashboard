@@ -24,7 +24,7 @@ const httpsAgent = new https.Agent({
 });
 
 const url = () => {
-  if (!hue?.settings?.ip || hue.key)
+  if (!hue?.settings?.ip || !hue.key)
     throw ConfigError(name, "Missing 'ip' and/or 'key' config");
 
   return `https://${hue.settings.ip}/api/${hue.key}`;
