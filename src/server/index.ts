@@ -3,6 +3,7 @@ import path from "path";
 import http from "http";
 import fs from "fs";
 import ws from "socket.io";
+import { v4 as uuid } from "uuid";
 
 import { version } from "../../package.json";
 import config from "../config";
@@ -51,7 +52,6 @@ const sendCached = (s: ServiceName) => {
 };
 
 const emit = (
-  // data: Omit<ServiceResponse, "meta"> | InitServiceData | ControlServiceData
   data:
     | { service: string; data?: any; error?: any }
     | InitServiceData
@@ -72,7 +72,8 @@ const emit = (
 
 const formatError = (e: unknown) => {
   if (e === undefined) return e;
-  if (e instanceof Error) return { message: e.message, name: e.name };
+  if (e instanceof Error)
+    return { message: e.message, name: e.name, id: uuid() };
   return stringify(e) || "Unknown error";
 };
 

@@ -25,7 +25,7 @@ export const reportError: ReportError = (service, e) => {
     : String(err);
   const name = (isObj && (err.name || err.code)) || "Error";
   const error: ServiceError = {
-    id: ++errI,
+    id: (isObj && err.id) || ++errI,
     code,
     service,
     message,
@@ -33,10 +33,14 @@ export const reportError: ReportError = (service, e) => {
     time: dayjs().format("DD/MM HH:mm:ss"),
   };
 
-  errorStore.set((s) => ({
-    errors: [error, ...s.errors.slice(0, 9)],
-    notify: true,
-  }));
+  errorStore.set((s) => {
+    if (s.errors.find((e) => e.id === error.id)) return s;
+
+    return {
+      errors: [error, ...s.errors.slice(0, 9)],
+      notify: true,
+    };
+  });
 };
 
 export const resetErrorsNotification = () =>
