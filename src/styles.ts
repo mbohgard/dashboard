@@ -10,6 +10,7 @@ export const colors = {
   dimmed: "#aaa",
   superDimmed: "#666",
   ultraDimmed: "#444",
+  megaDimmed: "#333",
   hyperDimmed: "#222",
   yellow: "#ffda47",
   cold: "#00c3f9",
@@ -17,8 +18,9 @@ export const colors = {
   red: "#bf2f2f",
   green: "#55cb3c",
   blue: "#2f92d4",
-  purple: "#cf449a",
-};
+  purple: "#a144cf",
+  magenta: "#cf449a",
+} as const;
 
 export type Colors = keyof typeof colors;
 
@@ -28,12 +30,10 @@ export const BaseStyles = createGlobalStyle`
   html {
     box-sizing: border-box;
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
-    height: 100%;
-    max-height: 100%;
   }
   
   *, *:before, *:after {
-    box-sizing: inherit;
+    box-sizing: border-box;
     user-select:none;
     font: inherit;
     -webkit-tap-highlight-color:  transparent; 
@@ -42,12 +42,11 @@ export const BaseStyles = createGlobalStyle`
   body {
       background: #000;
       color: #fff;
-      height: 100%;
       overscroll-behavior: none;
   }
 
   #app {
-    max-height: 100%;
-    height: 100%;
+    height: 100vh;
+    overflow-y: hidden;
   }
 `;
