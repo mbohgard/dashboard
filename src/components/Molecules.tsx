@@ -11,12 +11,19 @@ type ServiceBoxProps = {
   type?: "normal" | "icons";
   title?: string;
   loading?: boolean;
+  fillWidth?: boolean;
 };
 
-const ServiceContainer = styled.div`
+const ServiceContainer = styled.div<ServiceBoxProps>`
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  ${(p) =>
+    p.fillWidth &&
+    css`
+      flex-grow: 1;
+    `};
 `;
 
 const ServiceContent = styled.div<ServiceBoxProps>`
@@ -24,6 +31,7 @@ const ServiceContent = styled.div<ServiceBoxProps>`
   flex-direction: row;
   position: relative;
   flex-grow: 1;
+  overflow: hidden;
 `;
 
 const ServiceTitle = styled.h3<ServiceBoxProps>`
@@ -113,8 +121,8 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
         ? background
           ? "transparent"
           : coloredBorder
-          ? color
-          : colors.white
+            ? color
+            : colors.white
         : colors.superDimmed};
   width: 84px;
   cursor: pointer;

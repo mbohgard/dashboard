@@ -35,6 +35,7 @@ module.exports = {
       // ip for hue hub
       ip: "",
       tempOffset: 0, // increase/decrease reading of temp sensors
+      tempLabel: "", // label for temp sensors
     },
   },
   // volvo on call
@@ -57,6 +58,10 @@ module.exports = {
         color: "",
       },
     ],
+  },
+  chores: {
+    label: "",
+    url: ".ics",
   },
   food: {
     station: 0,

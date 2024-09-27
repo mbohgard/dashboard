@@ -180,3 +180,14 @@ export const wait = (delay: number = 100) =>
 
 export const randomInt = (min = 0, max = 100) =>
   Math.floor(Math.random() * (max - min + 1) + min);
+
+export const swtch = <T, R>(
+  target: T,
+  ...cases: Readonly<Array<[T, R]>>
+): R | undefined => {
+  for (const [k, v] of cases) {
+    if (target === k) return v;
+  }
+
+  return undefined;
+};

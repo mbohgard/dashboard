@@ -1,4 +1,4 @@
-import _axios, { AxiosRequestConfig } from "axios";
+import _axios from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 import type { ValueOf } from "../types";
 
@@ -11,6 +11,7 @@ import * as Transports from "./transports/service";
 import * as Voc from "./voc/service";
 import * as Weather from "./weather/service";
 import * as Calendar from "./calendar/service";
+import * as Chores from "./chores/service";
 import * as Temp from "./temp/service";
 import * as Food from "./food/service";
 import * as Sonos from "./sonos/service";
@@ -23,6 +24,7 @@ const services = {
   voc: Voc,
   weather: Weather,
   calendar: Calendar,
+  chores: Chores,
   temp: Temp,
   food: Food,
   sonos: Sonos,
