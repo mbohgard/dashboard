@@ -13,6 +13,9 @@ declare interface LightConfig {
   food?: {
     label: string;
   };
+  temp?: {
+    label: string;
+  };
 }
 
 declare module "*.png" {

@@ -43,7 +43,7 @@ export const get = () =>
     (responses) => {
       const start = {
         service: name,
-        data: [],
+        data: [] as Data[],
         meta: {
           sites: transports?.settings,
         },
