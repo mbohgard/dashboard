@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "noUncheckedIndexedAccess": true,
     "outDir": "dist/",
     "plugins": [{ "name": "typescript-styled-plugin" }],
