@@ -97,7 +97,6 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
           saveToCache(data.service as ServiceName, data as ServiceResponse);
         })
         .catch((e) => {
-          console.log(e);
           emit({
             service: service.name,
             error: formatError(e),
@@ -175,6 +174,8 @@ io.on("connection", (socket) => {
   if (config.voc)
     configBody.voc = { label: config.voc.settings?.label ?? "Volvo" };
   if (config.food) configBody.food = { label: config.food?.label ?? "Food" };
+  if (config.hue)
+    configBody.temp = { label: config.hue?.settings?.tempLabel ?? "Temp" };
 
   emit({ service: "server", data: { version, launched, config: configBody } });
 });

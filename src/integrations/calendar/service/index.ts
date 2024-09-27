@@ -1,5 +1,4 @@
 import dayjs, { Dayjs } from "dayjs";
-import { v4 as uuid } from "uuid";
 import isBetween from "dayjs/plugin/isBetween";
 // @ts-ignore
 import Ical from "ical-expander";
@@ -22,25 +21,27 @@ const isAllDay = (from: Date, to: Date) =>
 const createEvent = (
   name: string,
   color: Colors,
-  { uid, summary, ...e }: any,
+  { uid, summary, description, ...e }: any,
   nowDate: Dayjs,
   now: number
 ): CalendarEvent => {
   const startDate = e.startDate.toJSDate();
   const endDate = e.endDate.toJSDate();
   const passed = dayjs(endDate).isBefore(now);
+  const start = startDate.getTime();
 
   return {
     allDay: isAllDay(startDate, endDate),
     ongoing: nowDate.isBetween(startDate, endDate),
     color,
     end: endDate.getTime(),
-    id: uid || uuid(),
+    id: `${uid}-${start}`, // recurring events have the same uid - adding start time to differentiate
     name,
     now,
     passed,
-    start: startDate.getTime(),
+    start,
     summary,
+    description,
   };
 };
 
@@ -51,13 +52,61 @@ const sortEvents = <T extends CalendarEvent>(a: T, b: T) => {
   return timeA > timeB ? 1 : -1;
 };
 
+const priority = calendar?.settings?.map((x) => x.name!) ?? [];
+
+export const parseCalendarData = ({
+  data,
+  from,
+  to,
+  name,
+  color,
+}: {
+  data: any;
+  from: Date;
+  to: Date;
+  name: string;
+  color?: string;
+}) => {
+  const nowDate = dayjs();
+  const now = nowDate.valueOf();
+  const ical = new Ical({ ics: data, maxIterations: 100 });
+  const { events, occurrences } = ical.between(from, to);
+
+  return [
+    ...events.map(
+      ({ startDate, endDate, summary, description = "", uid }: any) => {
+        return {
+          startDate,
+          endDate,
+          summary,
+          description,
+          uid,
+        };
+      }
+    ),
+    ...occurrences.map(
+      ({
+        startDate,
+        endDate,
+        item: { summary, description = "", uid },
+      }: any) => {
+        return {
+          startDate,
+          endDate,
+          summary,
+          description,
+          uid,
+        };
+      }
+    ),
+  ].map((e) => createEvent(name, color as Colors, e, nowDate, now));
+};
+
 export const get = async () => {
   if (!calendar?.settings) throw ConfigError(name, "Missing calendar settings");
 
   const from = dayjs().startOf("day").toDate();
   const to = dayjs().add(30, "day").startOf("day").toDate();
-  const nowDate = dayjs();
-  const now = nowDate.valueOf();
 
   const requests = calendar.settings.map(
     async ({ name: calendarName, url, color }) => {
@@ -65,25 +114,8 @@ export const get = async () => {
         throw ConfigError(name, "Missing url and/or name for calendar");
 
       const data = (await axios.get(url)).data;
-      const ical = new Ical({ ics: data, maxIterations: 100 });
-      const { events, occurrences } = ical.between(from, to);
 
-      return [
-        ...events.map(({ startDate, endDate, summary, uid }: any) => ({
-          startDate,
-          endDate,
-          summary,
-          uid,
-        })),
-        ...occurrences.map(
-          ({ startDate, endDate, item: { summary }, uid }: any) => ({
-            startDate,
-            endDate,
-            summary,
-            uid,
-          })
-        ),
-      ].map((e) => createEvent(calendarName, color as Colors, e, nowDate, now));
+      return parseCalendarData({ data, from, to, name: calendarName, color });
     }
   );
 
@@ -94,6 +126,27 @@ export const get = async () => {
         (acc, es) => (es.status === "fulfilled" ? [...acc, ...es.value] : acc),
         []
       )
+      .reduce<CalendarEvent[]>((acc, item, ix) => {
+        let duplicateIndex = -1;
+        const duplicate = acc.find((e) => {
+          const isDup =
+            e.start === item.start &&
+            e.end === item.end &&
+            e.summary === item.summary;
+
+          if (isDup && priority.indexOf(item.name) < priority.indexOf(e.name)) {
+            duplicateIndex = ix;
+          }
+
+          return isDup;
+        });
+
+        if (duplicate && duplicateIndex > -1) {
+          acc[duplicateIndex] = item;
+        }
+
+        return duplicate ? acc : [...acc, item];
+      }, [])
       .sort(sortEvents)
       .filter((_, i) => i < 13),
   }));

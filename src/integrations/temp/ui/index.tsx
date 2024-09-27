@@ -1,10 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
-import { useService } from "../../../hooks";
+import { useConfig, useService } from "../../../hooks";
 import { getTempColor } from "../../../utils/color";
 import { Icon } from "../../../components/Icon";
 import { Loader } from "../../../components/Atoms";
+import { ServiceBox } from "../../../components/Molecules";
 
 const Container = styled.ul`
   display: flex;
@@ -12,17 +13,14 @@ const Container = styled.ul`
   justify-content: center;
   align-self: center;
   height: 100%;
-  gap: 10px;
-  margin-bottom: 15px;
-  margin-right: 10px;
+  gap: 16px;
 `;
 
 const Item = styled.li`
   display: flex;
-  font-size: 22px;
+  font-size: 24px;
   text-transform: uppercase;
   gap: 8px;
-  align-items: flex-end;
 
   > svg path {
     fill: currentColor;
@@ -32,31 +30,35 @@ const Item = styled.li`
 const Degrees = styled.span`
   display: block;
   text-align: right;
-  margin-top: 0.3em;
   font-size: 1.5em;
   font-weight: 300;
 `;
 
 export const Temp = () => {
+  const config = useConfig();
   const [tempData] = useService("temp", {});
   const [groups] = useService("hue", {});
 
   if (!tempData || !groups) return <Loader />;
 
   return (
-    <Container>
-      {Object.entries(tempData).map(([id, { name, value }]) => {
-        const deg = value / 100;
-        const color = getTempColor(deg, [5, 35]);
-        const icon = Object.values(groups).find((o) => o.name === name)?.class;
+    <ServiceBox title={config.temp?.label}>
+      <Container>
+        {Object.entries(tempData).map(([id, { name, value }]) => {
+          const deg = value / 100;
+          const color = getTempColor(deg, [5, 35]);
+          const icon = Object.values(groups).find(
+            (o) => o.name === name
+          )?.class;
 
-        return (
-          <Item key={id} style={{ color }}>
-            {icon ? <Icon hueClass={icon} size={36} /> : `${name}:`}
-            <Degrees>{deg.toFixed(1)}</Degrees>
-          </Item>
-        );
-      })}
-    </Container>
+          return (
+            <Item key={id} style={{ color }}>
+              {icon ? <Icon hueClass={icon} size={42} /> : `${name}:`}
+              <Degrees>{deg.toFixed(1)}</Degrees>
+            </Item>
+          );
+        })}
+      </Container>
+    </ServiceBox>
   );
 };

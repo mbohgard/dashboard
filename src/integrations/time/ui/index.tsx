@@ -39,7 +39,7 @@ const TimeView = styled.h2`
 `;
 
 const DateView = styled.h4`
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 300;
   text-align: right;
   margin-top: 30px;
@@ -129,7 +129,11 @@ export const Time: React.FC = () => {
         </TimeBlind>
       </TimeView>
       <DateView>
-        <span>v{week},</span> {date} <span>{year}</span>
+        <span>
+          {dayjs.locale() === "sv" ? "v" : "w"}
+          {week},
+        </span>{" "}
+        {date} <span>{year}</span>
       </DateView>
     </Container>
   );

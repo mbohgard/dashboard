@@ -9,4 +9,5 @@ export interface CalendarEvent {
   passed: boolean;
   start: number;
   summary: string;
+  description: string;
 }

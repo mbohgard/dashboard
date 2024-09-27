@@ -6,7 +6,7 @@ import { useSonosService } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
 import { sec2Time } from "../../../utils/time";
 import { colors } from "../../../styles";
-import { addLeadingZero, debounce } from "../../../utils/helpers";
+import { addLeadingZero } from "../../../utils/helpers";
 import { Icon } from "../../../components/Icon";
 import type { SonosDevice, SonosEmit } from "../types";
 
@@ -384,7 +384,7 @@ const Volume: React.FC<{ state: number } & Pick<ControlsProps, "command">> = ({
     if (!isActive.current) setValue(state);
   }, [state]);
 
-  const send = useCallback(debounce(command, 500), [command]);
+  // const send = useCallback(debounce(command, 500), [command]);
 
   const onTouch = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
     isActive.current = e.type === "touchstart";
@@ -434,7 +434,6 @@ const getCurrentRoom = (
 export const Sonos: React.FC = () => {
   const [data, emit, isPlaying] = useSonosService();
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const isChosen = useRef(false);
 
   // on first data and !roomName
   useEffect(() => {

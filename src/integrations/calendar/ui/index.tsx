@@ -10,7 +10,7 @@ import { ServiceResponse } from "../../../types";
 
 const Container = styled.ul`
   list-style: none;
-  font-size: 21px;
+  font-size: 20px;
   padding-top: 5px;
 `;
 
@@ -29,15 +29,18 @@ type ItemProps = {
   color: keyof typeof colors;
   label: string;
   valid: boolean;
+  size: number | null;
 };
 
 const Item = styled.li<ItemProps>`
-  display: block;
+  display: flex;
+  align-items: center;
   white-space: nowrap;
-  line-height: 160%;
+  line-height: 1.6;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: ${({ valid }) => (valid ? 1 : 0.5)};
+  font-size: ${(p) => (p.size ? `${p.size}px` : "inherit")};
 
   &:before {
     content: ${({ label }) => `"${label}"`};
@@ -54,7 +57,7 @@ const Time = styled.span`
   color: ${colors.lightGray};
   font-style: italic;
   ${pebble};
-  background: ${colors.hyperDimmed};
+  background: ${colors.megaDimmed};
   padding: 0 6px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -79,24 +82,34 @@ const getTime = ({
   allDay,
   ongoing,
   passed,
-}: Data[number]): [string, boolean] => {
+}: Data[number]): [string, boolean, "today" | "tomorrow" | "future"] => {
   const getCalTime = makeGetCalTime(allDay);
   const start = dayjs(startDate);
   const end = dayjs(endDate);
   const valid = !passed;
+  const urgency = start.isToday()
+    ? "today"
+    : start.isTomorrow()
+      ? "tomorrow"
+      : "future";
 
   if (allDay) {
     return [
       ongoing
         ? "nu"
         : valid
-        ? getCalTime(start)
-        : getCalTime(end.subtract(1, "second")), // make whole day events end att 23:59:59 instead of 00:00:00 the next day
+          ? getCalTime(start)
+          : getCalTime(end.subtract(1, "second")), // make whole day events end att 23:59:59 instead of 00:00:00 the next day
       valid,
+      urgency,
     ];
   }
 
-  return [ongoing ? `nu t. ${end.format("HH:mm")}` : getCalTime(start), valid];
+  return [
+    ongoing ? `nu t. ${end.format("HH:mm")}` : getCalTime(start),
+    valid,
+    urgency,
+  ];
 };
 
 export const Calendar: React.FC = () => {
@@ -107,7 +120,7 @@ export const Calendar: React.FC = () => {
   return (
     <Container>
       {data.map((e) => {
-        const [time, valid] = getTime(e);
+        const [time, valid, urgency] = getTime(e);
 
         return (
           <Item
@@ -115,6 +128,7 @@ export const Calendar: React.FC = () => {
             label={e.name.charAt(0)}
             color={e.color}
             valid={valid}
+            size={urgency === "today" ? 26 : urgency === "tomorrow" ? 23 : null}
           >
             <Time>{time}</Time>
             <Summary valid={valid}>{e.summary}</Summary>

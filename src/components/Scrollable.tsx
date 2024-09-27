@@ -61,7 +61,7 @@ export const Scrollable: React.FC<
 
       const el = inner.current!;
       const x = el.scrollLeft;
-      const atEnd = el.scrollWidth - x === el.clientWidth;
+      const atEnd = el.scrollWidth - x <= el.clientWidth + 1;
 
       setScrollState(!!x && atEnd ? 2 : !!x && !atEnd ? 1 : 0);
     };
@@ -79,8 +79,8 @@ export const Scrollable: React.FC<
         scrollState === 2
           ? "scrolled at-end"
           : scrollState === 1
-          ? "scrolled"
-          : ""
+            ? "scrolled"
+            : ""
       }`}
     >
       <Inner ref={inner}>{children}</Inner>
