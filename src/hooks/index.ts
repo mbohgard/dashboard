@@ -36,7 +36,7 @@ interface UseService {
   <Name extends ServiceName>(
     serviceName: Name,
     condition?: (res: ServiceResponse<Name>) => boolean
-  ): [Data<Name>, Emit<EmitPayload<Name>, Data<Name>>, Meta<Name>];
+  ): [Data<Name>, Emit<EmitPayload<Name>, Data<Name>>, Meta<Name> | undefined];
 
   <Name extends ServiceName>(
     serviceName: Name,
@@ -45,7 +45,7 @@ interface UseService {
   ): [
     NonNullable<Data<Name>>,
     Emit<EmitPayload<Name>, NonNullable<Data<Name>>>,
-    Meta<Name>,
+    Meta<Name> | undefined,
   ];
 }
 
@@ -223,4 +223,46 @@ export const useOnChange = (
     if (init.current) return cb();
     init.current = true;
   }, deps);
+};
+
+type DashboardData = Record<ServiceName, unknown>;
+
+type GetData = {
+  (): DashboardData;
+  <T>(service: ServiceName): T | null;
+};
+
+const getData: GetData = (service?: ServiceName) => {
+  const data = localStorage.getItem("DashboardData");
+
+  if (data) {
+    try {
+      const parsed = JSON.parse(data);
+
+      return service ? parsed[service] : parsed;
+    } catch (_) {}
+  }
+
+  return service ? null : ({} as DashboardData);
+};
+
+export const useStoredData = <T>(service: ServiceName) => {
+  const [state, setState] = useState(() => getData<T>(service));
+
+  const setStorageData = (data: T | null) => {
+    const current = getData();
+
+    current[service] = data;
+
+    try {
+      localStorage.setItem("DashboardData", JSON.stringify(current));
+      setState(data);
+    } catch (e) {
+      throw Error(
+        `Could not store ${service} data with payload ${data?.toString()}`
+      );
+    }
+  };
+
+  return [state, setStorageData] as const;
 };

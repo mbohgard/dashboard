@@ -6,7 +6,8 @@ type Config = {
   transports?: {
     key?: string;
     settings?: Array<{
-      siteId?: string;
+      label?: string;
+      siteId: string;
       types?: string[];
     }>;
   };
@@ -30,6 +31,7 @@ type Config = {
     settings?: {
       ip?: string;
       tempOffset?: number;
+      tempLabel?: string;
     };
   };
   voc?: {
@@ -48,6 +50,10 @@ type Config = {
       url?: string;
       color?: string;
     }>;
+  };
+  chores?: {
+    label?: string;
+    url?: string;
   };
   food?: {
     station?: 0;
