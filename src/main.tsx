@@ -33,6 +33,7 @@ import { HalloweenOverlay } from "./components/HalloweenOverlay";
 import { ControlServiceData, InitServiceData } from "./types";
 import { ScrollIndicator } from "./components/ScrollIndicator";
 import { Chores } from "./integrations/chores/ui";
+import { ICloud } from "./integrations/icloud/ui";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
@@ -156,9 +157,12 @@ class ErrorBoundary extends React.Component<
 const App: React.FC = (props) => {
   const [settings] = settingsStore.useStore();
 
-  useIsIdle(() => {
-    document.getElementById("app")?.scrollTo({ left: 0, behavior: "smooth" });
-  });
+  useIsIdle(
+    () => {
+      document.getElementById("app")?.scrollTo({ left: 0, behavior: "smooth" });
+    },
+    { timeout: 30000 }
+  );
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
@@ -201,16 +205,14 @@ const App: React.FC = (props) => {
           </GridWrapper>
           <GridWrapper
             columns="repeat(16, 1fr)"
-            rows="50% auto 40%"
+            rows="60% 40%"
             padding={25}
             width={50}
           >
             <Area colStart={1} colEnd={17}>
-              top
+              <ICloud />
             </Area>
-            <Area colStart={1} colEnd={17}>
-              middle
-            </Area>
+
             <Area colStart={1} colEnd={17}>
               <Hue />
             </Area>

@@ -71,4 +71,8 @@ module.exports = {
     api: "", // url to local node-sonos-http-api,
     feed: "",
   },
+  icloud: {
+    label: "",
+    albumToken: "",
+  },
 };
