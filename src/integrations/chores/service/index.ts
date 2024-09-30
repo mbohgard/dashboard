@@ -1,38 +1,48 @@
 import dayjs from "dayjs";
-// @ts-ignore
+import duration from "dayjs/plugin/duration";
 
 import { ConfigError, axios } from "../../index";
 
 import config from "../../../config";
 import { parseCalendarData } from "../../calendar/service";
 import { min2Ms } from "../../../utils/time";
-import type { Chore, Period } from "../types";
+import type { Chore, Period, Status } from "../types";
 import { swtch } from "../../../utils/helpers";
+
+dayjs.extend(duration);
 
 export const name = "chores";
 const { chores } = config;
 
-const sortEvents = (a: Chore, b: Chore) => {
-  const timeA =
-    swtch(
-      a.period,
-      ["day", dayjs(a.start).endOf("day").valueOf()],
-      ["week", dayjs(a.start).endOf("week").valueOf()]
-    ) ?? dayjs(a.start).endOf("month").valueOf();
-  const timeB =
-    swtch(
-      b.period,
-      ["day", dayjs(b.start).endOf("day").valueOf()],
-      ["week", dayjs(b.start).endOf("week").valueOf()]
-    ) ?? dayjs(b.start).endOf("month").valueOf();
+type SortInput = {
+  start: dayjs.Dayjs;
+};
+
+const sortEvents = (a: SortInput, b: SortInput) => {
+  const timeA = a.start.valueOf();
+  const timeB = b.start.valueOf();
 
   return timeA > timeB ? 1 : -1;
+};
+
+const getStatus = (
+  period: Period,
+  now: dayjs.Dayjs,
+  start: dayjs.Dayjs
+): Status => {
+  if (start.isBefore(now)) return "urgent";
+
+  if (period === "week" || period === "month")
+    return start.subtract(1, "week").isBefore(now) ? "close" : "normal";
+
+  return start.subtract(3, "days").isBefore(now) ? "close" : "normal";
 };
 
 export const get = async () => {
   if (!chores?.url) throw ConfigError(name, "Missing chores url");
 
-  const from = dayjs().startOf("month").toDate();
+  const now = dayjs();
+  const from = dayjs().subtract(1, "month").startOf("month").toDate();
   const to = dayjs().add(12, "month").toDate();
 
   const data = (await axios.get(chores.url)).data;
@@ -40,25 +50,34 @@ export const get = async () => {
   return {
     service: name,
     data: parseCalendarData({ data, from, to, name })
-      .map<Chore>(({ id, summary, description, ...e }) => {
-        const start = dayjs(e.start);
+      .map(({ id, summary, ...e }) => {
         let [text, p] = summary.split("$");
+        const period = (swtch(p, ["day", "day"], ["week", "week"]) ??
+          "month") as Period;
+        const start =
+          swtch(
+            period,
+            ["day", dayjs(e.start).endOf("day")],
+            ["week", dayjs(e.start).endOf("week")]
+          ) ?? dayjs(e.start).endOf("month");
 
         return {
           id,
           summary: text!,
-          description,
-          start: e.start,
-          year: start.year(),
-          month: start.month(),
-          week: start.week(),
-          date: start.date(),
-          period: (swtch(p, ["day", "day"], ["week", "week"]) ??
-            "month") as Period,
+          start,
+          period,
+          status: getStatus(period, now, start),
         };
       })
       .sort(sortEvents)
-      .filter((_, ix) => ix < 20),
+      .map<Chore>(({ start, ...rest }) => ({
+        ...rest,
+        start: start.valueOf(),
+        year: start.year(),
+        month: start.month(),
+        week: start.week(),
+      }))
+      .filter((_, ix) => ix < 30),
     meta: {
       label: chores.label,
     },

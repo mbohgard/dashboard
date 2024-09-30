@@ -9,6 +9,8 @@ import type {
 } from "../types";
 import { configStore, connectedStore, isPlayingStore } from "../stores";
 
+export * from "./useSparkle";
+
 export const useConfig = () => {
   const [config] = configStore.useStore();
   return config;

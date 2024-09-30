@@ -1,10 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import styled, { css } from "styled-components";
 
 import { Loader } from "../../../components/Atoms";
-import { useService, useStoredData } from "../../../hooks";
+import {
+  useIsIdle,
+  useService,
+  useSparkle,
+  useStoredData,
+} from "../../../hooks";
 import { ServiceBox } from "../../../components/Molecules";
-import type { Chore } from "../types";
+import type { Chore as ChoreContainer, Status } from "../types";
 import { colors } from "../../../styles";
 import dayjs from "dayjs";
 
@@ -19,10 +24,21 @@ const Container = styled.ul`
   margin-top: 10px;
 `;
 
-const Chore = styled.li<{ separate: boolean }>`
+const MONTH_LABEL_WIDTH = 70;
+
+const ChoreContainer = styled.li<{
+  status?: Status;
+  separate: boolean;
+}>`
   display: flex;
   align-items: center;
   line-height: 1.3;
+  color: ${(p) =>
+    p.status === "urgent"
+      ? colors.red
+      : p.status === "close"
+        ? colors.orange
+        : "inherit"};
 
   ${(p) =>
     p.separate &&
@@ -38,6 +54,7 @@ const Chore = styled.li<{ separate: boolean }>`
     gap: 8px;
     display: flex;
     flex-grow: 1;
+    max-width: calc(100% - ${MONTH_LABEL_WIDTH}px);
 
     input {
       display: grid;
@@ -52,18 +69,25 @@ const Chore = styled.li<{ separate: boolean }>`
         height: 22px;
         background: ${colors.ultraDimmed};
         border-radius: 3px;
+        box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2);
       }
 
-      &:checked:after {
-        content: "";
+      &:after {
+        content: "✔";
+        color: ${colors.green};
         position: absolute;
         width: 14px;
         height: 14px;
-        border-radius: 3px;
         top: 50%;
         left: 50%;
         translate: -50% -50%;
-        background: ${colors.green};
+        line-height: 14px;
+        scale: 0;
+        transition: all 0.1s ease-out;
+      }
+
+      &:checked:after {
+        scale: 1;
       }
     }
 
@@ -89,17 +113,60 @@ const Chore = styled.li<{ separate: boolean }>`
     overflow: hidden;
   }
 
-  .label {
+  .month {
     text-transform: uppercase;
-    width: 70px;
+    width: ${MONTH_LABEL_WIDTH}px;
     text-align: right;
     color: ${colors.dimmed};
     visibility: ${(p) => (p.separate ? "visible" : "hidden")};
   }
 `;
 
+type ChoreProps = {
+  checked: boolean;
+  item: ListItem;
+  onChange: (el: HTMLInputElement, item: ListItem) => void;
+};
+
+const Chore = ({ checked, item, onChange }: ChoreProps) => {
+  const { ref, sparkle } = useSparkle<HTMLInputElement>();
+
+  let period = "";
+
+  if (item.chore.period === "week") {
+    period = `${dayjs.locale() === "sv" ? "v" : "w"}${item.chore.week}`;
+  }
+
+  if (item.chore.period === "day") {
+    period = dayjs(item.chore.start).calendar();
+  }
+
+  return (
+    <ChoreContainer
+      key={item.chore.id}
+      separate={!item.hideLabel}
+      status={item.chore.status}
+    >
+      <label className={checked ? "checked" : ""}>
+        <input
+          ref={ref}
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => {
+            onChange(e.target, item);
+            if (e.target.checked) sparkle();
+          }}
+        />
+        {period && <span className="period">{period}</span>}
+        <span className="summary">{item.chore.summary}</span>
+      </label>
+      <span className="month">{item.label}</span>
+    </ChoreContainer>
+  );
+};
+
 type ListItem = {
-  chore: Chore;
+  chore: ChoreContainer;
   label: string;
   hideLabel: boolean;
 };
@@ -107,8 +174,14 @@ type ListItem = {
 type StoreData = string[];
 
 export const Chores: React.FC = () => {
+  const listRef = useRef<HTMLUListElement | null>(null);
   const [data, , meta] = useService("chores");
   const [checkedChores, setCheckedChores] = useStoredData<StoreData>("chores");
+
+  useIsIdle(() => {
+    if (listRef.current)
+      listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   const list = useMemo(
     () =>
@@ -129,42 +202,28 @@ export const Chores: React.FC = () => {
 
   if (!data) return <Loader />;
 
+  const onChange = (el: HTMLInputElement, item: ListItem) => {
+    const chores = checkedChores?.slice() ?? [];
+
+    if (el.checked) chores.push(item.chore.id);
+    else chores.splice(chores.indexOf(item.chore.id), 1);
+
+    setCheckedChores(chores);
+  };
+
   return (
     <ServiceBox title={meta?.label} fillWidth>
-      <Container>
+      <Container ref={listRef}>
         {list?.map((item) => {
-          let period = "";
-
-          if (item.chore.period === "week") {
-            period = `${dayjs.locale() === "sv" ? "v" : "w"}${item.chore.week}`;
-          }
-
-          if (item.chore.period === "day") {
-            period = dayjs(item.chore.start).calendar();
-          }
-
           const checked = checkedChores?.includes(item.chore.id) ?? false;
 
           return (
-            <Chore key={item.chore.id} separate={!item.hideLabel}>
-              <label className={checked ? "checked" : ""}>
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={(e) => {
-                    const chores = checkedChores?.slice() ?? [];
-
-                    if (e.target.checked) chores.push(item.chore.id);
-                    else chores.splice(chores.indexOf(item.chore.id), 1);
-
-                    setCheckedChores(chores);
-                  }}
-                />
-                {period && <span className="period">{period}</span>}
-                <span className="summary">{item.chore.summary}</span>
-              </label>
-              <span className="label">{item.label}</span>
-            </Chore>
+            <Chore
+              key={item.chore.id + item.chore.start}
+              checked={checked}
+              item={item}
+              onChange={onChange}
+            />
           );
         })}
       </Container>
