@@ -33,10 +33,8 @@ type ItemProps = {
 };
 
 const Item = styled.li<ItemProps>`
-  display: flex;
-  align-items: center;
   white-space: nowrap;
-  line-height: 1.6;
+  line-height: 34px;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: ${({ valid }) => (valid ? 1 : 0.5)};

@@ -23,6 +23,7 @@ const ServiceContainer = styled.div<ServiceBoxProps>`
     p.fillWidth &&
     css`
       flex-grow: 1;
+      overflow: hidden;
     `};
 `;
 
