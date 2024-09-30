@@ -1,63 +1,42 @@
 import config from "../../../config";
 
 import { ConfigError, axios } from "../../index";
-import type { ApiResponse } from "../types";
+import type { DeparturesResponse } from "../types";
 
 import { min2Ms, sec2Ms } from "../../../utils/time";
-import { wait } from "../../../utils/helpers";
 
 export const name = "transports";
 const { transports } = config;
 
-const getTransportUrl = (types: string[], siteId?: string) => {
-  if (!transports?.key || typeof siteId !== "string")
+export const get = async () => {
+  const { settings } = transports ?? {};
+  if (typeof settings?.siteId !== "string") {
     throw ConfigError(name, "Missing transports api key or siteIdconfig");
+  }
 
-  const q = (t: string) => `&${t}=${String(types.includes(t))}`;
+  const { siteId, type } = settings;
 
-  return `http://api.sl.se/api2/realtimedeparturesV4.json?key=${
-    transports.key
-  }&siteId=${siteId}&timewindow=60${q("bus")}${q("train")}${q("metro")}${q(
-    "ship"
-  )}${q("tram")}`;
-};
-
-const callers =
-  transports?.settings?.map(
-    ({ types = [], siteId }) =>
-      (delay: number) =>
-        wait(delay).then(() =>
-          axios
-            .get<ApiResponse>(getTransportUrl(types, siteId))
-            .then(({ data }) => ({
-              ...data,
-              siteId,
-            }))
-        )
-  ) ?? [];
-
-type Data = Awaited<ReturnType<(typeof callers)[number]>>;
-
-export const get = () =>
-  Promise.all(callers.map((call, i) => call(sec2Ms(i * 2)))).then(
-    (responses) => {
-      const start = {
-        service: name,
-        data: [] as Data[],
-        meta: {
-          sites: transports?.settings,
-        },
-      };
-
-      return responses.reduce(
-        (acc, r) => {
-          acc.data.push(r);
-          return acc;
-        },
-        start as typeof start & { data: Data[] }
-      );
-    }
+  const {
+    data: { departures },
+  } = await axios.get<DeparturesResponse>(
+    `https://transport.integration.sl.se/v1/sites/${siteId}/departures?timewindow=60${type ? `&transport=${type}` : ""}`
   );
+
+  if (!departures) throw Error("Missing departures data");
+
+  return {
+    service: name,
+    data: departures
+      .map(({ display, scheduled, journey }) => ({
+        id: `${journey.id}-${scheduled}`,
+        display,
+      }))
+      .filter((_, ix) => ix < 5),
+    meta: {
+      label: settings.label ?? "Transports",
+    },
+  };
+};
 
 export const delay = () => {
   const time = new Date();
