@@ -191,3 +191,16 @@ export const swtch = <T, R>(
 
   return undefined;
 };
+
+export const rand = (
+  min: number,
+  max: number,
+  cond?: (x: number) => boolean
+) => {
+  let x = Math.floor(Math.random() * (max - min + 1) + min);
+
+  if (cond)
+    while (!cond(x)) x = Math.floor(Math.random() * (max - min + 1) + min);
+
+  return x;
+};
