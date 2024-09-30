@@ -148,7 +148,7 @@ export const get = async () => {
         return duplicate ? acc : [...acc, item];
       }, [])
       .sort(sortEvents)
-      .filter((_, i) => i < 13),
+      .filter((_, i) => i < 20),
   }));
 };
 

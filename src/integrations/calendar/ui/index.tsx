@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
-import { useService } from "../../../hooks";
+import { useIsIdle, useService } from "../../../hooks";
 import { colors } from "../../../styles";
 
 import { Loader } from "../../../components/Atoms";
@@ -12,6 +12,8 @@ const Container = styled.ul`
   list-style: none;
   font-size: 20px;
   padding-top: 5px;
+  height: 100%;
+  overflow: auto;
 `;
 
 const pebble = css`
@@ -34,7 +36,7 @@ type ItemProps = {
 
 const Item = styled.li<ItemProps>`
   white-space: nowrap;
-  line-height: 34px;
+  line-height: 33px;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: ${({ valid }) => (valid ? 1 : 0.5)};
@@ -60,6 +62,7 @@ const Time = styled.span`
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   margin-right: 5px;
+  vertical-align: middle;
 `;
 
 const Summary = styled.span<Pick<ItemProps, "valid">>`
@@ -111,12 +114,18 @@ const getTime = ({
 };
 
 export const Calendar: React.FC = () => {
+  const listRef = useRef<HTMLUListElement | null>(null);
   const [data] = useService("calendar");
+
+  useIsIdle(() => {
+    if (listRef.current)
+      listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   if (!data) return <Loader />;
 
   return (
-    <Container>
+    <Container ref={listRef}>
       {data.map((e) => {
         const [time, valid, urgency] = getTime(e);
 
