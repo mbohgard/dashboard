@@ -15,6 +15,7 @@ import * as Chores from "./chores/service";
 import * as Temp from "./temp/service";
 import * as Food from "./food/service";
 import * as Sonos from "./sonos/service";
+import * as ICloud from "./icloud/service";
 
 const services = {
   hue: Hue,
@@ -28,6 +29,7 @@ const services = {
   temp: Temp,
   food: Food,
   sonos: Sonos,
+  icloud: ICloud,
 } as const;
 
 type Services = typeof services;

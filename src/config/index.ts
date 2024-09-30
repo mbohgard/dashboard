@@ -63,6 +63,10 @@ type Config = {
     api?: string;
     feed?: string;
   };
+  icloud?: {
+    label: string;
+    albumToken: string;
+  };
 };
 
 export default config as unknown as Config;
