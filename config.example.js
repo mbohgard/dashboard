@@ -3,14 +3,10 @@
 module.exports = {
   axiosConfig: undefined, // optional base config for Axios
   transports: {
-    // key for sl.se realtimedeparturesV4 service
-    key: "",
-    settings: [
-      {
-        siteId: "",
-        types: ["bus", "train"],
-      },
-    ],
+    settings: {
+      siteId: "",
+      type: "",
+    },
   },
   energy: {
     zone: "SE3",

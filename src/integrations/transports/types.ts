@@ -1,30 +1,111 @@
-export interface TransportItem {
-  Destination: string;
-  Deviations: any;
-  DisplayTime: string;
-  ExpectedDateTime: string;
-  JourneyDirection: number;
-  JourneyNumber: number;
-  LineNumber: string;
-  StopAreaName: string;
-  StopAreaNumber: number;
-  StopPointDesignation: any;
-  StopPointNumber: number;
-  TimeTabledDateTime: string;
-  TransportMode: string;
+type DepartureState =
+  | "NOTEXPECTED"
+  | "NOTCALLED"
+  | "EXPECTED"
+  | "CANCELLED"
+  | "INHIBITED"
+  | "ATSTOP"
+  | "BOARDING"
+  | "BOARDINGCLOSED"
+  | "DEPARTED"
+  | "PASSED"
+  | "MISSED"
+  | "REPLACED"
+  | "ASSUMEDDEPARTED";
+
+type JourneyState =
+  | "NOTEXPECTED"
+  | "NOTRUN"
+  | "EXPECTED"
+  | "ASSIGNED"
+  | "CANCELLED"
+  | "ATORIGIN"
+  | "FASTPROGRESS"
+  | "NORMALPROGRESS"
+  | "SLOWPROGRESS"
+  | "NOPROGRESS"
+  | "OFFROUTE"
+  | "ABORTED"
+  | "COMPLETED"
+  | "ASSUMEDCOMPLETED";
+
+interface DepartureJourney {
+  id: number;
+  state: JourneyState;
+  prediction_state?: "NORMAL" | "LOSTCONTACT" | "UNRELIABLE";
+  passenger_level?:
+    | "EMPTY"
+    | "SEATSAVAILABLE"
+    | "STANDINGPASSENGERS"
+    | "PASSENGERSLEFTBEHIND"
+    | "UNKNOWN";
 }
 
-export interface TimetableResponse {
-  Buses: TransportItem[];
-  DataAge: number;
-  LatestUpdate: string;
-  Trains: TransportItem[];
+interface DepartureDeviation {
+  importance: number;
+  consequence: string;
+  message: string;
 }
 
-export type ApiResponse = {
-  ExecutionTime: number;
-  Message: any;
-  ResponseData?: TimetableResponse;
-  StatusCode: number;
-  StopPointDeviations: any[];
-};
+interface Departure {
+  direction: string;
+  direction_code: number;
+  via?: string;
+  destination?: string;
+  state: DepartureState;
+  scheduled: string;
+  expected?: string;
+  display: string;
+  journey: DepartureJourney;
+  stop_area: {
+    id: number;
+    name: string;
+    sname?: string;
+    type?:
+      | "BUSTERM"
+      | "METROSTN"
+      | "TRAMSTN"
+      | "RAILWSTN"
+      | "SHIPBER"
+      | "FERRYBER"
+      | "AIRPORT"
+      | "TAXITERM"
+      | "UNKNOWN";
+  };
+  stop_point: {
+    id: number;
+    name?: string;
+    designation?: string;
+  };
+  line: {
+    id: number;
+    designation?: string;
+    transport_mode?:
+      | "BUS"
+      | "TRAM"
+      | "METRO"
+      | "TRAIN"
+      | "FERRY"
+      | "SHIP"
+      | "TAXI";
+    group_of_lines?: string;
+  };
+  deviations: DepartureDeviation[];
+}
+
+interface StopDeviation {
+  id: number;
+  level: number;
+  message: string;
+  scope: {
+    description?: string;
+    lines?: string;
+    stop_areas?: string;
+    stop_points?: string;
+  };
+}
+
+export interface DeparturesResponse {
+  departures?: Departure[];
+  stop_deviations: StopDeviation[];
+}
