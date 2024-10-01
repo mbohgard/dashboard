@@ -159,8 +159,15 @@ io.on("connection", (socket) => {
 
     if (service.name && "feed" in service && service.feed.endpoint) {
       app.post(service.feed.endpoint, (req, res) => {
-        const result = service.feed.handler(req.body);
-        if (result) emit(result);
+        try {
+          const result = service.feed.handler(req.body);
+          if (result) emit(result);
+        } catch (e) {
+          emit({
+            service: service.name,
+            error: formatError(e),
+          });
+        }
 
         res.sendStatus(200);
       });
