@@ -208,7 +208,9 @@ export const Chores: React.FC = () => {
     if (el.checked) chores.push(item.chore.id);
     else chores.splice(chores.indexOf(item.chore.id), 1);
 
-    setCheckedChores(chores);
+    setCheckedChores(
+      chores.filter((id) => list!.find((item) => item.chore.id === id))
+    );
   };
 
   return (
