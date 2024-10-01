@@ -102,7 +102,7 @@ const getTime = ({
           ? getCalTime(start)
           : getCalTime(end.subtract(1, "second")), // make whole day events end att 23:59:59 instead of 00:00:00 the next day
       valid,
-      urgency,
+      ongoing ? "today" : urgency,
     ];
   }
 

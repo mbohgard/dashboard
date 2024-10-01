@@ -6,7 +6,7 @@ import ws from "socket.io";
 import { v4 as uuid } from "uuid";
 
 import { version } from "../../package.json";
-import config from "../config";
+import config, { AppConfig } from "../config";
 
 import * as subscribers from "./subscribers";
 import services, { ServiceName } from "../integrations";
@@ -174,7 +174,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  const configBody: LightConfig = {};
+  const configBody: AppConfig = {};
 
   if (config.calendar)
     configBody.calendar = { label: config.calendar.label ?? "Calendar" };

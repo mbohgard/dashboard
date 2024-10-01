@@ -159,7 +159,7 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-const App: React.FC = (props) => {
+const App = () => {
   const [settings] = settingsStore.useStore();
   const { filterRef } = useScrollFilter<HTMLDivElement>({
     filter: "grayscale",
@@ -180,7 +180,7 @@ const App: React.FC = (props) => {
         <BaseStyles />
         <ErrorBoundary>
           <Status />
-          <About {...props} />
+          <About />
           <ScrollIndicator />
           <GridWrapper
             columns="repeat(32, 1fr)"
@@ -251,8 +251,9 @@ socket.on("server", ({ data, error }: InitServiceData) => {
   if (version && version !== data.version) location.reload();
   else {
     version = data.version;
+    const { config, ...app } = data;
 
-    configStore.set(data.config);
+    configStore.set({ ...config, app });
 
     root.render(<App />);
   }

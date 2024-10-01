@@ -2,7 +2,7 @@ import _axios from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 import type { ValueOf } from "../types";
 
-import config from "../config";
+import config, { AppConfig } from "../config";
 
 import * as Hue from "./hue/service";
 import * as Time from "./time/service";
@@ -82,7 +82,7 @@ export type InitServiceData = CreateServiceResponse<
   {
     version: string;
     launched: number;
-    config: LightConfig;
+    config: AppConfig;
   }
 >;
 export type ControlServiceData = CreateServiceResponse<

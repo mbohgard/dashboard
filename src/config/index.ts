@@ -71,3 +71,22 @@ type Config = {
 };
 
 export default config as unknown as Config;
+
+export type AppConfig = {
+  calendar?: {
+    label: string;
+  };
+  voc?: {
+    label: string;
+  };
+  food?: {
+    label: string;
+  };
+  temp?: {
+    label: string;
+  };
+  app?: {
+    version?: string;
+    launched?: number;
+  };
+};

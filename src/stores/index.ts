@@ -1,5 +1,6 @@
 import { createStore } from "../utils/store";
 import { ServiceError } from "../utils/report";
+import type { AppConfig } from "../config";
 
 export const errorStore = createStore<{
   errors: ServiceError[];
@@ -8,7 +9,7 @@ export const errorStore = createStore<{
 
 export const connectedStore = createStore(false);
 
-export const configStore = createStore<LightConfig>({} as LightConfig);
+export const configStore = createStore<AppConfig>({});
 
 export const isPlayingStore = createStore(false);
 

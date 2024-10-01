@@ -3,7 +3,6 @@ import styled, { keyframes } from "styled-components";
 
 import { useService, useStableCallback, useThrottle } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
-import { debounce, throttle } from "../../../utils/helpers";
 
 const clickAnimation = keyframes`
   from { opacity: 1; }

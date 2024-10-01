@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { colors } from "../styles";
 import { ms2Sec, sec2Time } from "../utils/time";
-import { useConnected } from "../hooks";
+import { useConfig, useConnected } from "../hooks";
 
 import { Overlay } from "./Molecules";
 import { settingsStore } from "../stores";
@@ -96,12 +96,8 @@ const Settings: React.FC = () => {
   );
 };
 
-type Props = {
-  version?: string;
-  launched?: number;
-};
-
-export const About = ({ version, launched: serverStarted }: Props) => {
+export const About = () => {
+  const { app } = useConfig();
   const started = useRef(ms2Sec(Date.now()));
   const connected = useConnected();
   const [now, setNow] = useState(0);
@@ -122,7 +118,7 @@ export const About = ({ version, launched: serverStarted }: Props) => {
   return show ? (
     <Overlay closeOnPress autoClose={undefined} close={() => setShow(false)}>
       <Content onClick={(e) => e.stopPropagation()}>
-        <h2>dashboard v{version}</h2>
+        <h2>dashboard v{app?.version}</h2>
         <ContentData>
           <strong>Status:</strong>{" "}
           <Status connected={connected}>
@@ -133,10 +129,10 @@ export const About = ({ version, launched: serverStarted }: Props) => {
           <strong>Client uptime:</strong>{" "}
           {sec2Time(now - started.current).formatted}
         </ContentData>
-        {serverStarted && connected && (
+        {app?.launched && connected && (
           <ContentData>
             <strong>Server uptime:</strong>{" "}
-            {sec2Time(now - serverStarted).formatted}
+            {sec2Time(now - app.launched).formatted}
           </ContentData>
         )}
         <Settings />
