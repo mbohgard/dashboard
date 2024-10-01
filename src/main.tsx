@@ -15,7 +15,7 @@ import { BaseStyles } from "./styles";
 import { configStore, connectedStore, settingsStore } from "./stores";
 import { socket } from "./utils/socket";
 import { reportError } from "./utils/report";
-import { useConnected, useIsIdle } from "./hooks";
+import { useConnected, useIsIdle, useScrollFilter } from "./hooks";
 
 import { StatusDot } from "./components/Atoms";
 import { About } from "./components/About";
@@ -55,9 +55,9 @@ dayjs.updateLocale("sv", {
   },
 });
 
-const AppContainer = styled.div`
+const AppContainer = styled.div<{ width?: number }>`
   height: 100%;
-  width: 150%;
+  width: ${(p) => p.width ?? 100}%;
   display: flex;
 `;
 
@@ -101,6 +101,7 @@ type GridWrapperProps = {
 
 const GridWrapper = styled(Area)<GridWrapperProps>`
   padding: ${(p) => p.padding ?? 0}px;
+  padding-right: 0;
   display: grid;
   grid-template-columns: ${(p) => p.columns};
   grid-template-rows: ${(p) => p.rows ?? "none"};
@@ -109,6 +110,10 @@ const GridWrapper = styled(Area)<GridWrapperProps>`
   height: 100%;
   width: ${(p) => p.width ?? 100}vw;
   position: relative;
+
+  &:last-child {
+    padding-right: ${(p) => p.padding ?? 0}px;
+  }
 `;
 
 const ScrollableContainer = styled(Scrollable)`
@@ -156,6 +161,11 @@ class ErrorBoundary extends React.Component<
 
 const App: React.FC = (props) => {
   const [settings] = settingsStore.useStore();
+  const { filterRef } = useScrollFilter<HTMLDivElement>({
+    filter: "grayscale",
+    maxValue: 300,
+    interval: 200,
+  });
 
   useIsIdle(
     () => {
@@ -166,7 +176,7 @@ const App: React.FC = (props) => {
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <AppContainer>
+      <AppContainer width={145}>
         <BaseStyles />
         <ErrorBoundary>
           <Status />
@@ -176,6 +186,7 @@ const App: React.FC = (props) => {
             columns="repeat(32, 1fr)"
             rows="30% auto 38%"
             padding={25}
+            width={95}
           >
             <Area colStart={1} colEnd={14}>
               <Weather type="big" />
@@ -186,15 +197,15 @@ const App: React.FC = (props) => {
             <Area colStart={21} colEnd={33} flex>
               <Time />
             </Area>
-            <Area colStart={1} colEnd={22} flex>
+            <Area colStart={1} colEnd={21} flex>
               <ScrollableContainer>
                 <Weather />
               </ScrollableContainer>
             </Area>
-            <Area colStart={22} colEnd={33} rowStart={2} rowEnd={4}>
+            <Area colStart={21} colEnd={33} rowStart={2} rowEnd={4}>
               <RightTabGroup />
             </Area>
-            <BottomContainer colStart={1} colEnd={22} flex>
+            <BottomContainer colStart={1} colEnd={21} flex>
               <Transports />
               <VOC />
               <Temp />
@@ -208,6 +219,7 @@ const App: React.FC = (props) => {
             rows="60% 40%"
             padding={25}
             width={50}
+            ref={filterRef}
           >
             <Area colStart={1} colEnd={17}>
               <ICloud />

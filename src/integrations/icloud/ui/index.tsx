@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 
 import { useService, useStableCallback, useThrottle } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
-import { debounce } from "../../../utils/helpers";
+import { debounce, throttle } from "../../../utils/helpers";
 
 const clickAnimation = keyframes`
   from { opacity: 1; }
@@ -18,13 +18,13 @@ const Container = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
+  transition: filter 0.3s;
 
   img {
     position: absolute;
-    top: 0;
-    left: 0;
+    bottom: 0;
     width: 100%;
-    height: 100%;
+    height: 95%;
     object-fit: cover;
     opacity: 0;
     transition: opacity 2s;
@@ -49,9 +49,10 @@ const ClickArea = styled.button`
 
 export const ICloud = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+
   const [data] = useService("icloud");
   const [id, setId] = useState(-1);
-  const throttle = useThrottle({ interval: 1000 });
+  const th1 = useThrottle({ interval: 1000 });
 
   const next = useStableCallback((e?: React.MouseEvent<HTMLButtonElement>) => {
     const target = e?.target as HTMLButtonElement;
@@ -59,7 +60,7 @@ export const ICloud = () => {
     const exec = () => setId((s) => (data?.[s + 1] ? s + 1 : 0));
 
     if (target) {
-      throttle(() => {
+      th1(() => {
         target.style.animation = "none";
         target.offsetHeight; /* trigger reflow */
         target.style.animation = "";

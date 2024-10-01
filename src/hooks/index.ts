@@ -269,16 +269,114 @@ export const useStoredData = <T>(service: ServiceName) => {
   return [state, setStorageData] as const;
 };
 
-export const useThrottle = ({ interval = 300 }: { interval?: number }) => {
-  const t = useRef<number>();
+type UseThrottleOptions = {
+  interval?: number;
+  // call cb again after final cb call
+  finalize?: boolean;
+};
 
-  useEffect(() => () => window.clearTimeout(t.current), []);
+export const useThrottle = ({
+  interval = 300,
+  finalize = false,
+}: UseThrottleOptions) => {
+  const t1 = useRef<number>();
+  const t2 = useRef<number>();
 
-  return useCallback((cb: () => void) => {
-    if (!t.current) cb();
+  useEffect(
+    () => () => {
+      clearTimeout(t1.current);
+      clearTimeout(t2.current);
+    },
+    []
+  );
 
-    t.current ??= window.setTimeout(() => {
-      t.current = undefined;
-    }, interval);
-  }, []);
+  return useCallback(
+    (cb: () => void) => {
+      clearTimeout(t2.current);
+
+      if (!t1.current) cb();
+
+      t1.current ??= window.setTimeout(() => {
+        t1.current = undefined;
+      }, interval);
+
+      t2.current = window.setTimeout(() => {
+        if (finalize) cb();
+      }, interval);
+    },
+    [interval, finalize]
+  );
+};
+
+type UseScrollOptions = {
+  direction?: "horizontal" | "vertical";
+  onScroll: (value: number) => void;
+};
+
+export const useScroll = <T extends HTMLElement>({
+  direction = "vertical",
+  onScroll,
+}: UseScrollOptions) => {
+  const ref = useRef<T>(null);
+  const initialized = useRef(false);
+  const cb = useStableCallback(onScroll);
+
+  useEffect(() => {
+    const el = ref.current ?? document.getElementById("app")!;
+    const listener = (e: Event) => {
+      const target = e.target as HTMLElement;
+
+      cb(direction === "vertical" ? target.scrollTop : target.scrollLeft);
+    };
+
+    el.addEventListener("scroll", listener);
+
+    if (!initialized.current) {
+      el.dispatchEvent(new Event("scroll"));
+      initialized.current = true;
+    }
+
+    return () => el.removeEventListener("scroll", listener);
+  }, [direction]);
+
+  return ref;
+};
+
+type UseScrollFilterOptions = Pick<UseScrollOptions, "direction"> & {
+  interval?: number;
+  maxValue?: number;
+  filter: string;
+};
+
+export const useScrollFilter = <
+  T extends HTMLElement,
+  S extends HTMLElement = HTMLElement,
+>({
+  direction = "horizontal",
+  interval = 300,
+  maxValue = 500,
+  filter,
+}: UseScrollFilterOptions) => {
+  const filterRef = useRef<T>(null);
+  const filtered = useRef(true);
+  const throttle = useThrottle({ interval, finalize: true });
+
+  const scrollRef = useScroll<S>({
+    direction,
+    onScroll: (val) => {
+      throttle(() => {
+        if (!filterRef.current) return;
+
+        if (val < maxValue) {
+          filtered.current = true;
+          filterRef.current.style.filter = `${filter}(${1 - val / maxValue})`;
+        } else if (val >= maxValue && filtered.current) {
+          filtered.current = false;
+          filterRef.current.style.filter = `${filter}(0)`;
+        }
+      });
+    },
+  });
+
+  return { scrollRef, filterRef };
 };
