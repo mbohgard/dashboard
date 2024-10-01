@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { createRoot } from "react-dom/client";
 import styled, { css, StyleSheetManager } from "styled-components";
 import isPropValid from "@emotion/is-prop-valid";
@@ -15,7 +15,7 @@ import { BaseStyles } from "./styles";
 import { configStore, connectedStore, settingsStore } from "./stores";
 import { socket } from "./utils/socket";
 import { reportError } from "./utils/report";
-import { useConnected, useIsIdle, useScrollFilter } from "./hooks";
+import { useConnected, useIsIdle, useScroll } from "./hooks";
 
 import { StatusDot } from "./components/Atoms";
 import { About } from "./components/About";
@@ -110,6 +110,7 @@ const GridWrapper = styled(Area)<GridWrapperProps>`
   height: 100%;
   width: ${(p) => p.width ?? 100}vw;
   position: relative;
+  transition: filter 0.2s;
 
   &:last-child {
     padding-right: ${(p) => p.padding ?? 0}px;
@@ -161,10 +162,28 @@ class ErrorBoundary extends React.Component<
 
 const App = () => {
   const [settings] = settingsStore.useStore();
-  const { filterRef } = useScrollFilter<HTMLDivElement>({
-    filter: "grayscale",
-    maxValue: 300,
-    interval: 200,
+  const filterRef = useRef<HTMLDivElement>(null);
+  const filtered = useRef(true);
+
+  useScroll({
+    throttle: 100,
+    direction: "horizontal",
+    onScroll: (val) => {
+      if (!filterRef.current) return;
+
+      const maxValue = 300;
+      const proportion = val / maxValue;
+      const grayscaleValue = 1 - proportion;
+      const brightnessValue = proportion * 0.7 + 0.3; // get value between 0.3 and 1
+
+      if (val < maxValue) {
+        filtered.current = true;
+        filterRef.current.style.filter = `grayscale(${grayscaleValue}) brightness(${brightnessValue})`;
+      } else if (val >= maxValue && filtered.current) {
+        filtered.current = false;
+        filterRef.current.style.filter = `grayscale(0) brightness(1)`;
+      }
+    },
   });
 
   useIsIdle(
@@ -186,7 +205,7 @@ const App = () => {
             columns="repeat(32, 1fr)"
             rows="30% auto 38%"
             padding={25}
-            width={95}
+            width={98}
           >
             <Area colStart={1} colEnd={14}>
               <Weather type="big" />

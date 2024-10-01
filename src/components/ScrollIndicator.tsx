@@ -5,7 +5,7 @@ import { colors } from "../styles";
 
 const Container = styled.div`
   position: fixed;
-  top: 10px;
+  top: 20px;
   left: 50%;
   height: 6px;
   width: 100px;

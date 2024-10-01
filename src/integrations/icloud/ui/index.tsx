@@ -17,7 +17,6 @@ const Container = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  transition: filter 0.3s;
 
   img {
     position: absolute;
@@ -36,10 +35,10 @@ const ClickArea = styled.button`
   background: rgba(255, 255, 255, 0.2);
   border: none;
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 95%;
   box-shadow: inset 0 0 50px 30px rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   animation: ${clickAnimation} 0.8s ease-out forwards;

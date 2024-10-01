@@ -311,14 +311,17 @@ export const useThrottle = ({
 type UseScrollOptions = {
   direction?: "horizontal" | "vertical";
   onScroll: (value: number) => void;
+  throttle?: number;
 };
 
 export const useScroll = <T extends HTMLElement>({
   direction = "vertical",
   onScroll,
+  throttle = 0,
 }: UseScrollOptions) => {
   const ref = useRef<T>(null);
   const initialized = useRef(false);
+  const th = useThrottle({ interval: throttle, finalize: true });
   const cb = useStableCallback(onScroll);
 
   useEffect(() => {
@@ -326,7 +329,11 @@ export const useScroll = <T extends HTMLElement>({
     const listener = (e: Event) => {
       const target = e.target as HTMLElement;
 
-      cb(direction === "vertical" ? target.scrollTop : target.scrollLeft);
+      const exec = () =>
+        cb(direction === "vertical" ? target.scrollTop : target.scrollLeft);
+
+      if (throttle) th(exec);
+      else exec();
     };
 
     el.addEventListener("scroll", listener);
@@ -337,46 +344,7 @@ export const useScroll = <T extends HTMLElement>({
     }
 
     return () => el.removeEventListener("scroll", listener);
-  }, [direction]);
+  }, [direction, th]);
 
   return ref;
-};
-
-type UseScrollFilterOptions = Pick<UseScrollOptions, "direction"> & {
-  interval?: number;
-  maxValue?: number;
-  filter: string;
-};
-
-export const useScrollFilter = <
-  T extends HTMLElement,
-  S extends HTMLElement = HTMLElement,
->({
-  direction = "horizontal",
-  interval = 300,
-  maxValue = 500,
-  filter,
-}: UseScrollFilterOptions) => {
-  const filterRef = useRef<T>(null);
-  const filtered = useRef(true);
-  const throttle = useThrottle({ interval, finalize: true });
-
-  const scrollRef = useScroll<S>({
-    direction,
-    onScroll: (val) => {
-      throttle(() => {
-        if (!filterRef.current) return;
-
-        if (val < maxValue) {
-          filtered.current = true;
-          filterRef.current.style.filter = `${filter}(${1 - val / maxValue})`;
-        } else if (val >= maxValue && filtered.current) {
-          filtered.current = false;
-          filterRef.current.style.filter = `${filter}(0)`;
-        }
-      });
-    },
-  });
-
-  return { scrollRef, filterRef };
 };
