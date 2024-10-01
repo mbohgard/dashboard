@@ -23,4 +23,4 @@ export const get = async () => {
   };
 };
 
-export const delay = () => min2Ms(15);
+export const delay = () => min2Ms(5);

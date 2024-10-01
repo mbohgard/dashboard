@@ -268,3 +268,17 @@ export const useStoredData = <T>(service: ServiceName) => {
 
   return [state, setStorageData] as const;
 };
+
+export const useThrottle = ({ interval = 300 }: { interval?: number }) => {
+  const t = useRef<number>();
+
+  useEffect(() => () => window.clearTimeout(t.current), []);
+
+  return useCallback((cb: () => void) => {
+    if (!t.current) cb();
+
+    t.current ??= window.setTimeout(() => {
+      t.current = undefined;
+    }, interval);
+  }, []);
+};

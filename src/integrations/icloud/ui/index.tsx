@@ -1,8 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
-import { useService } from "../../../hooks";
+import { useService, useStableCallback, useThrottle } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
+import { debounce } from "../../../utils/helpers";
+
+const clickAnimation = keyframes`
+  from { opacity: 1; }
+  to { opacity: 0; }
+`;
 
 const Container = styled.div`
   display: flex;
@@ -26,49 +32,69 @@ const Container = styled.div`
   }
 `;
 
+const ClickArea = styled.button`
+  content: "";
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 50px 30px rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  animation: ${clickAnimation} 0.8s ease-out forwards;
+  z-index: 1;
+`;
+
 export const ICloud = () => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [data] = useService("icloud");
   const [id, setId] = useState(-1);
+  const throttle = useThrottle({ interval: 1000 });
+
+  const next = useStableCallback((e?: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e?.target as HTMLButtonElement;
+
+    const exec = () => setId((s) => (data?.[s + 1] ? s + 1 : 0));
+
+    if (target) {
+      throttle(() => {
+        target.style.animation = "none";
+        target.offsetHeight; /* trigger reflow */
+        target.style.animation = "";
+        exec();
+      });
+    } else exec();
+  });
 
   useEffect(() => {
     if (!data) return;
 
     if (id < 0) setId(0);
 
-    const t = setTimeout(() => {
-      setId((s) => (data[s + 1] ? s + 1 : 0));
-    }, 10000);
+    const t = setTimeout(next, 10000);
 
     return () => clearTimeout(t);
   }, [data, id]);
 
   useEffect(() => {
-    if (!containerRef.current || !data || id < 0) return;
+    const el = containerRef.current;
+    if (!el || id < 0) return;
 
-    const prevImg = containerRef.current.querySelectorAll("img");
+    const prevImg = el.querySelectorAll("img");
     const img = document.createElement("img");
-    img.src = data[id]!;
-    containerRef.current.appendChild(img);
 
-    let t1: number, t2: number;
+    img.onload = () => (img.style.opacity = "1");
+    img.ontransitionend = () => prevImg.forEach((el) => el.remove());
+    img.src = data?.[id]!;
 
-    t1 = window.setTimeout(
-      () => {
-        img.style.opacity = "1";
-
-        t2 = window.setTimeout(() => {
-          prevImg.forEach((el) => el.remove());
-        }, 2000);
-      },
-      id < 0 ? 0 : 2000
-    );
-
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-    };
+    el.appendChild(img);
   }, [id]);
 
-  return <Container ref={containerRef}>{!data && <Loader />}</Container>;
+  return (
+    <Container ref={containerRef}>
+      {!data ? <Loader /> : <ClickArea type="button" onClick={next} />}
+    </Container>
+  );
 };
