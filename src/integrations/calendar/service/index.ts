@@ -45,7 +45,12 @@ const createEvent = (
   };
 };
 
-const sortEvents = <T extends CalendarEvent>(a: T, b: T) => {
+export const sortEvents = <
+  T extends Pick<CalendarEvent, "ongoing" | "start" | "now">,
+>(
+  a: T,
+  b: T
+) => {
   const timeA = a.ongoing ? a.now : a.start;
   const timeB = b.ongoing ? b.now : b.start;
 
@@ -72,34 +77,43 @@ export const parseCalendarData = ({
   const ical = new Ical({ ics: data, maxIterations: 100 });
   const { events, occurrences } = ical.between(from, to);
 
-  return [
-    ...events.map(
-      ({ startDate, endDate, summary, description = "", uid }: any) => {
-        return {
+  return (
+    [
+      ...events.map(
+        ({ startDate, endDate, summary, description = "", uid }: any) => {
+          return {
+            startDate,
+            endDate,
+            summary,
+            description,
+            uid,
+          };
+        }
+      ),
+      ...occurrences.map(
+        ({
           startDate,
           endDate,
-          summary,
-          description,
-          uid,
-        };
-      }
-    ),
-    ...occurrences.map(
-      ({
-        startDate,
-        endDate,
-        item: { summary, description = "", uid },
-      }: any) => {
-        return {
-          startDate,
-          endDate,
-          summary,
-          description,
-          uid,
-        };
-      }
-    ),
-  ].map((e) => createEvent(name, color as Colors, e, nowDate, now));
+          item: { summary, description = "", uid },
+        }: any) => {
+          return {
+            startDate,
+            endDate,
+            summary,
+            description,
+            uid,
+          };
+        }
+      ),
+    ]
+      .map((e) => createEvent(name, color as Colors, e, nowDate, now))
+      // remove duplicates (same id in both events and occurrences)
+      .reduce<CalendarEvent[]>((acc, event) => {
+        if (acc.find((e) => e.id === event.id)) return acc;
+        acc.push(event);
+        return acc;
+      }, [])
+  );
 };
 
 export const get = async () => {

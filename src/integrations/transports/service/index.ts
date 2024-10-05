@@ -14,12 +14,12 @@ export const get = async () => {
     throw ConfigError(name, "Missing transports api key or siteIdconfig");
   }
 
-  const { siteId, type } = settings;
+  const { siteId, type, direction } = settings;
 
   const {
     data: { departures },
   } = await axios.get<DeparturesResponse>(
-    `https://transport.integration.sl.se/v1/sites/${siteId}/departures?timewindow=60${type ? `&transport=${type}` : ""}`
+    `https://transport.integration.sl.se/v1/sites/${siteId}/departures?timewindow=60${type ? `&transport=${type}` : ""}${direction ? `&direction=${direction}` : ""}`
   );
 
   if (!departures) throw Error("Missing departures data");
@@ -33,7 +33,7 @@ export const get = async () => {
       }))
       .filter((_, ix) => ix < 5),
     meta: {
-      label: settings.label ?? "Transports",
+      label: transports?.label ?? "Transports",
     },
   };
 };

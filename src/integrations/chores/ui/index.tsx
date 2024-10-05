@@ -35,9 +35,9 @@ const ChoreContainer = styled.li<{
   line-height: 1.3;
   color: ${(p) =>
     p.status === "urgent"
-      ? colors.red
+      ? colors.danger
       : p.status === "close"
-        ? colors.orange
+        ? colors.warning
         : "inherit"};
 
   ${(p) =>

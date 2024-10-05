@@ -4,12 +4,13 @@ import * as config from "../../config";
 type Config = {
   axiosConfig?: AxiosRequestConfig;
   transports?: {
+    label?: string;
     settings?: {
-      label?: string;
       siteId: string;
       type?: Array<
         "BUS" | "TRAIN" | "METRO" | "TRAM" | "SHIP" | "TAXI" | "FERRY"
       >;
+      direction?: number;
     };
   };
   energy?: {

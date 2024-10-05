@@ -3,7 +3,9 @@
 module.exports = {
   axiosConfig: undefined, // optional base config for Axios
   transports: {
+    label: "",
     settings: {
+      direction: 0,
       siteId: "",
       type: "",
     },

@@ -23,7 +23,7 @@ const pebble = css`
   justify-content: center;
   align-items: center;
   border-radius: 3px;
-  font-size: 0.8em;
+  font-size: 16px !important;
   line-height: 0;
 `;
 
@@ -57,6 +57,7 @@ const Time = styled.span`
   color: ${colors.lightGray};
   font-style: italic;
   ${pebble};
+  font-size: 0.8em !important;
   background: ${colors.megaDimmed};
   padding: 0 6px;
   border-top-left-radius: 0;

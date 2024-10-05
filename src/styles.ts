@@ -20,6 +20,8 @@ export const colors = {
   blue: "#2f92d4",
   purple: "#a144cf",
   magenta: "#cf449a",
+  danger: "#f02c0a",
+  warning: "#faac11",
 } as const;
 
 export type Colors = keyof typeof colors;
