@@ -1305,10 +1305,10 @@
     "@types/scheduler" "*"
     csstype "^3.0.2"
 
-"@types/react@^18.3.9":
-  version "18.3.9"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.9.tgz#2cdf5f425ec8a133d67e9e3673909738b783db20"
-  integrity sha512-+BpAVyTpJkNWWSSnaLBk6ePpHLOGJKnEQNbINNovPWzvEUyAe3e+/d494QdEh71RekM/qV7lw6jzf1HGrJyAtQ==
+"@types/react@^18.3.10":
+  version "18.3.12"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.12.tgz#99419f182ccd69151813b7ee24b792fe08774f60"
+  integrity sha512-D2wOSq/d6Agt28q7rSI3jhU7G6aiuzljDGZ2hTZHIkrTLUI+AF3WMeKkEZ9nN2fkBAlcktT6vcZjDFiIhMYEQw==
   dependencies:
     "@types/prop-types" "*"
     csstype "^3.0.2"
@@ -2550,10 +2550,10 @@ ical.js@^1.2.2:
   resolved "https://registry.npmjs.org/ical.js/-/ical.js-1.4.0.tgz"
   integrity sha512-ltHZuOFNNjcyEYbzDgjemS7LWIFh2vydJeznxQHUh3dnarbxqOYsWONYteBVAq1MEOHnwXFGN2eskZReHclnrA==
 
-icloud-shared-album@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/icloud-shared-album/-/icloud-shared-album-1.2.0.tgz#6ae337b5162f11befe768047f571cd595bfe96a6"
-  integrity sha512-1TFMACeNbQR+G7b43lCiXzXjIsKsXMFi6wfWcFQUyLLx4sfvtOQt+ijE2XtsX79GBoSJ5w93GNPBX/kK3rea1A==
+icloud-shared-album@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/icloud-shared-album/-/icloud-shared-album-1.2.1.tgz#30aa10048f84adf34f65098028e89a4559559ff9"
+  integrity sha512-ZP4G55YeZbhCdLzsUQnR0u7X24r29/NN6P6bS7eSi4EmnjIOpZnfZ/RcnBVH5QiARLpsvxxFZAmDMf95rDDwBQ==
   dependencies:
     axios "^0.26.0"
     lodash.chunk "^4.2.0"
