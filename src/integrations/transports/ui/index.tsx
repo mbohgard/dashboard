@@ -9,6 +9,8 @@ import { ServiceResponse } from "../../../types";
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
 `;
 
 type TimeProps = { empty?: boolean };
@@ -16,7 +18,6 @@ type TimeProps = { empty?: boolean };
 const TimeWrapper = styled.div<TimeProps>`
   font-weight: 300;
   font-size: 46px;
-  margin-top: 3px;
   line-height: 1.3;
   white-space: nowrap;
 

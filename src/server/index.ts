@@ -40,7 +40,10 @@ const actionsInProgress = new Set<ServiceName>();
 const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
 
-const stopService = (s: ServiceName) => global.clearTimeout(timers[s]!);
+const stopService = (s: ServiceName) => {
+  global.clearTimeout(timers[s]!);
+  delete timers[s];
+};
 
 const saveToCache = (s: ServiceName, data: ServiceResponse) =>
   (cache[s] = data);
@@ -79,6 +82,7 @@ const formatError = (e: unknown) => {
 
 const fetcher = (service: ServicesUnion, forceWait = false) => {
   const next = (waitOnAction = false) => {
+    global.clearTimeout(timers[service.name]!);
     timers[service.name] = global.setTimeout(
       () => fetcher(service),
       waitOnAction ? 1000 : service.delay()

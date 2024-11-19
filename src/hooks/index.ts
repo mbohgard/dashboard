@@ -63,6 +63,13 @@ export const useService: UseService = <T extends ServiceResponse>(
   const meta = useRef<T["meta"]>(undefined);
   const [data, setData] = useState<T["data"]>(short ? undefined : arg1);
 
+  useEffect(
+    () => () => {
+      socket.emit("unsubscribe", serviceName);
+    },
+    []
+  );
+
   useEffect(() => {
     const listener = (res: T) => {
       meta.current = res.meta;
@@ -80,13 +87,6 @@ export const useService: UseService = <T extends ServiceResponse>(
       socket.off(serviceName, listener);
     };
   }, [connected]);
-
-  useEffect(
-    () => () => {
-      socket.emit("unsubscribe", serviceName);
-    },
-    []
-  );
 
   const emit = useCallback(
     (payload: any) => {

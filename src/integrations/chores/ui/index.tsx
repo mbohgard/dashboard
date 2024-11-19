@@ -45,7 +45,7 @@ const ChoreContainer = styled.li<{
     css`
       &:not(:first-child) {
         padding-top: 8px;
-        border-top: dashed 1px ${colors.ultraDimmed};
+        border-top: dashed 1px ${colors.superDimmed};
         margin-top: 4px;
       }
     `};
@@ -191,7 +191,7 @@ export const Chores: React.FC = () => {
 
         acc.push({
           chore: item,
-          label: `${dayjs(item.start).format("MMM")} ${String(item.year).slice(2)}`,
+          label: dayjs(item.start).format("MMM"),
           hideLabel: month === last?.chore.month,
         });
 
