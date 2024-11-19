@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { colors } from "../../../styles";
-import { useIsIdle, useService } from "../../../hooks";
+import { useIsIdle, useService, useStableCallback } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
 import styled, { css } from "styled-components";
 import { Icon } from "../../../components/Icon";
@@ -107,31 +107,43 @@ export const Food: React.FC = () => {
   const [week, setWeek] = useState(0);
 
   const thisWeek = data?.[0];
+  const selectedWeek = data?.find((w) => w.weekOfYear === week);
+  const thisWeekN = thisWeek?.weekOfYear ?? 0;
+  const isCurrent = thisWeek === selectedWeek;
+  const today = dayjs();
+  const isPastWednesday = today.day() >= 1;
 
-  const reset = useCallback(
-    (newWeek = thisWeek?.weekOfYear ?? 0) => {
-      setWeek(newWeek);
-      list.current?.scrollTo({ top: 0, behavior: "smooth" });
-    },
-    [thisWeek]
-  );
+  const resetScroll = useStableCallback(() => {
+    list.current?.scrollTo({
+      top: isCurrent && isPastWednesday ? list.current?.scrollHeight : 0,
+      behavior: "smooth",
+    });
+  });
+
+  const reset = useStableCallback((next = false) => {
+    const nextWeek = next ? thisWeekN + 1 : thisWeekN;
+
+    setWeek(nextWeek);
+
+    // reset scroll pos if we're on the same week, otherwise scroll after state change
+    if (nextWeek === thisWeekN) resetScroll();
+  });
+
+  // reset scroll on every week change
+  useEffect(() => resetScroll(), [week]);
 
   useEffect(() => {
-    if (!week && thisWeek) reset();
-  }, [reset, week]);
+    if (!week && thisWeekN) setWeek(thisWeekN);
+  }, [week, thisWeekN]);
 
   useIsIdle(reset, { timeout: 15000 });
 
   if (!thisWeek) return <Loader />;
 
-  const selectedWeek = data?.find((w) => w.weekOfYear === week);
-  const isCurrent = thisWeek === selectedWeek;
-  const today = dayjs();
-
   return (
     <Container>
       {Boolean(data.length) && (
-        <WeekButton onClick={() => reset(isCurrent ? week + 1 : week - 1)}>
+        <WeekButton onClick={() => reset(isCurrent)}>
           {!isCurrent && <Icon Arrow />}
           <span>{isCurrent ? "Nästa vecka" : "Denna vecka"}</span>
           {isCurrent && <Icon Arrow />}
