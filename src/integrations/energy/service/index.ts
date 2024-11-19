@@ -1,61 +1,108 @@
 import config from "../../../config";
 
 import { ConfigError, axios } from "../../index";
-import * as cheerio from "cheerio";
 import dayjs from "dayjs";
+import type { PartialDeep } from "type-fest";
 
-import type { ApiResponse } from "../types";
+import type { Data, ApiResponse, Areas } from "../types";
 import { min2Ms, sec2Ms } from "../../../utils/time";
 
 export const name = "energy";
 const { energy } = config;
 
-const zones = {
-  SE1: "se1-lulea",
-  SE2: "se2-sundsvall",
-  SE3: "se3-stockholm",
-  SE4: "se4-malmo",
+const zones: { [Key in "SE1" | "SE2" | "SE3" | "SE4"]: Areas } = {
+  SE1: "One",
+  SE2: "Two",
+  SE3: "Three",
+  SE4: "Four",
 };
-
-const catMap = {
-  "Aktuellt pris": "now",
-  Dagspris: "average",
-  "Lägsta timpris": "low",
-  "Högsta timpris": "high",
-} as const;
 
 export const get = async () => {
   if (!energy?.zone) throw ConfigError(name, "Missing energy zone config");
 
-  const src = (
-    await axios.get<string>(
-      `https://www.elbruk.se/timpriser-${
-        zones[energy.zone as keyof typeof zones]
-      }`
-    )
-  ).data;
+  const { data: res } = await axios.get<ApiResponse>(
+    "https://www.elmarknad.se/api/spotprice/current"
+  );
 
-  const $ = cheerio.load(src);
-  const data: ApiResponse = {
-    now: { value: "N/A", time: "N/A" },
-    high: { value: "N/A", time: "N/A" },
-    low: { value: "N/A", time: "N/A" },
-    average: { value: "N/A", time: "N/A" },
-  };
+  const now = dayjs().startOf("hour").format("HH:mm");
+  const zone = zones[(energy.zone as keyof typeof zones) || "SE3"];
+  const data = res.reduce(
+    (acc: PartialDeep<Data>, { CreatedDate, ...h }, ix, arr) => {
+      const date = dayjs(CreatedDate);
+      const time = `${date.format("HH")}-${date.add(1, "hour").format("HH")}`;
+      const current = h[`CurrentArea${zone}`];
+      const average = h[`AverageArea${zone}`];
+      const forecast = h[`ForecastArea${zone}`];
 
-  $(".info-box-text").each((_, el) => {
-    const text = $(el).text() as keyof typeof catMap;
-    const cat = catMap[text];
+      const isCurrent = date.format("HH:mm") === now;
+      const isLast = ix + 1 === arr.length;
 
-    if (cat)
-      data[cat] = {
-        value: $(el).siblings(".info-box-number").text(),
-        time: $(el)
-          .siblings(".progress-description")
-          .text()
-          .replace("Timpris kl. ", ""),
+      acc.now = isCurrent
+        ? {
+            value: current,
+            time,
+          }
+        : acc.now;
+
+      acc.average = { value: average };
+
+      if ((acc.high?.value ?? -1000) < current) {
+        acc.high = {
+          value: current,
+          time,
+        };
+      }
+
+      if ((acc.low?.value ?? 1000) > current) {
+        acc.low = {
+          value: current,
+          time,
+        };
+      }
+
+      if ((acc.tomorrow?.high?.value ?? -1000) < forecast) {
+        acc.tomorrow = {
+          ...acc.tomorrow,
+          high: {
+            value: forecast,
+            time,
+          },
+        };
+      }
+
+      if ((acc.tomorrow?.low?.value ?? 1000) > forecast) {
+        acc.tomorrow = {
+          ...acc.tomorrow,
+          low: {
+            value: forecast,
+            time,
+          },
+        };
+      }
+
+      const averageSum = (acc.tomorrow?.average?.value ?? 0) + forecast;
+      acc.tomorrow = {
+        ...acc.tomorrow,
+        now: {
+          value: isCurrent ? forecast : (acc.tomorrow?.now?.value ?? 0),
+        },
+        average: {
+          value: isLast ? averageSum / arr.length : averageSum,
+        },
       };
-  });
+
+      if (
+        isLast &&
+        acc.tomorrow.now?.value === 0 &&
+        acc.tomorrow.average?.value === 0
+      ) {
+        delete acc.tomorrow;
+      }
+
+      return acc;
+    },
+    {}
+  ) as Data;
 
   return {
     service: name,

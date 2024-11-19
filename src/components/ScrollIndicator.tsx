@@ -1,7 +1,8 @@
-import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 
 import { colors } from "../styles";
+import { useStableCallback } from "../hooks";
 
 const Container = styled.div`
   position: fixed;
@@ -27,10 +28,14 @@ const Container = styled.div`
   }
 `;
 
-const getMeasurements = (el: HTMLDivElement) => {
-  const app = document.getElementById("app") as HTMLDivElement;
+const getMeasurements = (
+  el: HTMLDivElement,
+  id: string,
+  getInnerWidth: () => number
+) => {
+  const app = document.getElementById(id) as HTMLDivElement;
   const sw = app.scrollWidth;
-  const ww = window.innerWidth;
+  const ww = getInnerWidth() ?? window.innerWidth;
   const width = Math.round((ww / sw) * 100);
 
   return {
@@ -42,16 +47,31 @@ const getMeasurements = (el: HTMLDivElement) => {
   };
 };
 
-export const ScrollIndicator = () => {
+type Props = {
+  className?: string;
+  elementId?: string;
+  getInnerWidth?: () => number;
+  deps?: any[];
+};
+
+export const ScrollIndicator = ({
+  className,
+  getInnerWidth,
+  elementId = "app",
+  deps = [],
+}: Props) => {
   const container = useRef<HTMLDivElement | null>(null);
   const [measurements, setMeasurements] = useState<ReturnType<
     typeof getMeasurements
   > | null>(null);
+  const _getInnerWidth = useStableCallback(getInnerWidth);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!container.current) return;
-    setMeasurements(getMeasurements(container.current));
-  }, []);
+    setMeasurements(
+      getMeasurements(container.current, elementId, _getInnerWidth)
+    );
+  }, [elementId, ...deps]);
 
   useEffect(() => {
     if (!measurements) return;
@@ -67,11 +87,12 @@ export const ScrollIndicator = () => {
 
     app.addEventListener("scroll", listener);
     return () => app.removeEventListener("scroll", listener);
-  }, [measurements]);
+  }, [measurements, ...deps]);
 
   return (
     <Container
       ref={container}
+      className={className}
       style={{ "--width": `${measurements?.width}%` } as React.CSSProperties}
     />
   );
