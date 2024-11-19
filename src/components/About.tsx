@@ -57,7 +57,7 @@ const Status = styled.span<{ connected: boolean }>`
   color: ${colors.white};
 `;
 
-const SettingsContainer = styled.div`
+const ButtonsContainer = styled.div`
   display: flex;
   gap: 10px;
   padding-top: 16px;
@@ -69,7 +69,7 @@ const SettingsContainer = styled.div`
   }
 `;
 
-const Setting = styled.button<{ active: boolean }>`
+const AddonButton = styled.button<{ active?: boolean }>`
   background: ${(p) => (p.active ? colors.green : colors.gray)};
   color: ${(p) => (p.active ? colors.white : colors.lightGray)};
   text-transform: capitalize;
@@ -77,22 +77,27 @@ const Setting = styled.button<{ active: boolean }>`
   padding: 4px 8px;
 `;
 
+const ActionButton = styled(AddonButton)`
+  color: ${colors.white};
+  background: ${colors.red};
+`;
+
 const Settings: React.FC = () => {
   const [settings, setSettings] = settingsStore.useStore();
 
   return (
-    <SettingsContainer>
-      <strong>Settings:</strong>
+    <ButtonsContainer>
+      <strong>Addons:</strong>
       {Object.entries(settings).map(([key, val]) => (
-        <Setting
+        <AddonButton
           key={key}
           active={val}
           onClick={() => setSettings((s) => ({ ...s, [key]: !val }))}
         >
           {key}
-        </Setting>
+        </AddonButton>
       ))}
-    </SettingsContainer>
+    </ButtonsContainer>
   );
 };
 
@@ -136,6 +141,10 @@ export const About = () => {
           </ContentData>
         )}
         <Settings />
+        <ButtonsContainer>
+          <strong>Actions:</strong>
+          <ActionButton onClick={() => location.reload()}>Reload</ActionButton>
+        </ButtonsContainer>
       </Content>
     </Overlay>
   ) : (
