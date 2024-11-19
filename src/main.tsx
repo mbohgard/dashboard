@@ -241,7 +241,7 @@ const App = () => {
             ref={filterRef}
           >
             <Area colStart={1} colEnd={17}>
-              <ICloud />
+              {/* <ICloud /> */}
             </Area>
 
             <Area colStart={1} colEnd={17}>
