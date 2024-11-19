@@ -1,15 +1,34 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled, { css } from "styled-components";
 
-import { useService } from "../../../hooks";
+import { useIsIdle, useService } from "../../../hooks";
 import { colors } from "../../../styles";
 import { Icon } from "../../../components/Icon";
 import { Loader } from "../../../components/Atoms";
+import { ScrollIndicator } from "../../../components/ScrollIndicator";
 
 const Container = styled.div`
-  height: 100%;
+  position: relative;
+  height: calc(100% + 4px);
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-end;
+
+  .energy-scroll {
+    position: absolute;
+    bottom: 12px;
+    top: auto;
+    scale: 0.8;
+  }
+`;
+
+const InnerContainer = styled.div`
+  display: flex;
+  gap: 16px;
+  width: calc(100% - 45px);
+  height: 100%;
+  padding-bottom: 10px;
+  overflow: hidden;
+  overflow-x: auto;
 `;
 
 const DataContainer = styled.ul`
@@ -17,17 +36,29 @@ const DataContainer = styled.ul`
   flex-direction: column;
   justify-content: center;
   height: 100%;
-  gap: 12px;
+  min-width: 100%;
+  font-size: 10px;
+  gap: 18px;
+`;
+
+const Heading = styled.h4`
+  font-size: 15px;
+  color: ${colors.dimmed};
+  text-transform: uppercase;
+  text-align: center;
+  padding: 6px;
+  border-radius: 8px;
+  background: ${colors.megaDimmed};
 `;
 
 const iconSize = (size: number) => css`
-  min-width: ${size}px;
-  min-height: ${size}px;
-  max-width: ${size}px;
-  max-height: ${size}px;
+  min-width: ${size}em;
+  min-height: ${size}em;
+  max-width: ${size}em;
+  max-height: ${size}em;
 `;
 
-const Data = styled.li<{
+const DataItem = styled.li<{
   color: string;
   flipIcon?: boolean;
   size?: 1 | 2;
@@ -35,75 +66,130 @@ const Data = styled.li<{
   display: flex;
   align-items: center;
   font-size: ${({ size }) =>
-    size === 1 ? "30px" : size === 2 ? "40px" : "22px"};
+    size === 1 ? "3em" : size === 2 ? "4em" : "2.2em"};
   gap: 6px;
   color: ${({ size, color }) => (size ? color : colors.dimmed)};
-  margin-top: 5px;
 
   svg {
     ${({ color, size }) => css`
       fill: ${size ? colors.white : color};
-      ${iconSize(size === 1 ? 30 : size === 2 ? 40 : 20)}
+      ${iconSize(1)}
     `}
     transform: rotate(${({ flipIcon }) => (flipIcon ? "180deg" : "0")});
   }
 
-  > span {
-    font-size: 20px;
-  }
-
-  i span {
+  div span {
     font-size: 18px;
     margin-left: 6px;
     color: ${colors.superDimmed};
   }
+
+  div > div {
+    padding-top: 4px;
+    font-size: 20px;
+
+    > em {
+      color: ${colors.superDimmed};
+    }
+  }
 `;
 
-const getColor = (value?: string) => {
-  if (value === undefined) return colors.white;
+type DataProps = {
+  flipIcon?: boolean;
+  icon?: React.ReactNode;
+  value?: number;
+  text?: string;
+  size?: 1 | 2;
+};
 
-  const n = Number(value.split(",").join("."));
+const Data = ({ flipIcon, icon, value, text, size }: DataProps) => (
+  <DataItem size={size} color={color(value)} flipIcon={flipIcon}>
+    {icon}
+    <div>
+      {formatValue(value)}
+      <span>{text}</span>
+    </div>
+  </DataItem>
+);
+
+const color = (n?: number) => {
+  if (n === undefined) return colors.white;
 
   return n > 99 ? colors.red : n > 60 ? colors.orange : colors.green;
 };
 
+const formatValue = (n?: number) =>
+  n ? (Math.round(n * 100) / 100).toFixed(2) : null;
+
 export const Energy = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [data] = useService("energy");
+
+  useIsIdle(() => {
+    containerRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+  });
 
   if (!data) return <Loader />;
 
   return (
     <Container>
-      <DataContainer>
-        <Data size={2} color={getColor(data?.now.value)}>
-          <Icon Plug />
-          <i>
-            {data?.now.value}
-            <span>öre</span>
-          </i>
-        </Data>
-        <Data size={1} color={getColor(data?.average.value)}>
-          <Icon Average />
-          <i>
-            {data?.average.value}
-            <span>öre</span>
-          </i>
-        </Data>
-        <Data color={getColor(data?.high.value)}>
-          <Icon Arrow />
-          <i>
-            {data?.high.value}
-            <span>({data?.high.time})</span>
-          </i>
-        </Data>
-        <Data flipIcon color={getColor(data?.low.value)}>
-          <Icon Arrow />
-          <i>
-            {data?.low.value}
-            <span>({data?.low.time})</span>
-          </i>
-        </Data>
-      </DataContainer>
+      <InnerContainer id="energyContainer" ref={containerRef}>
+        <DataContainer>
+          <Data
+            icon={<Icon Plug />}
+            value={data?.now.value}
+            text="öre"
+            size={2}
+          />
+          <Data
+            icon={<Icon Average />}
+            value={data?.average.value}
+            text="öre"
+            size={1}
+          />
+          <Data
+            icon={<Icon Arrow />}
+            value={data?.high.value}
+            text={`(${data?.high.time})`}
+          />
+          <Data
+            icon={<Icon Arrow />}
+            flipIcon
+            value={data?.low.value}
+            text={`(${data?.low.time})`}
+          />
+        </DataContainer>
+        {data?.tomorrow && (
+          <DataContainer>
+            <Heading>Imorgon</Heading>
+            <Data
+              icon={<Icon Average />}
+              value={data?.tomorrow?.average.value}
+              text="öre"
+              size={1}
+            />
+            <Data
+              icon={<Icon Arrow />}
+              value={data?.tomorrow?.high.value}
+              text={`(${data?.tomorrow?.high.time})`}
+            />
+            <Data
+              icon={<Icon Arrow />}
+              flipIcon
+              value={data?.tomorrow?.low.value}
+              text={`(${data?.tomorrow?.low.time})`}
+            />
+          </DataContainer>
+        )}
+      </InnerContainer>
+      {data?.tomorrow && (
+        <ScrollIndicator
+          className="energy-scroll"
+          getInnerWidth={() => containerRef.current?.clientWidth ?? 0}
+          elementId="energyContainer"
+          deps={[data]}
+        />
+      )}
     </Container>
   );
 };
