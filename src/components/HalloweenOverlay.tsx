@@ -110,7 +110,8 @@ const glitch = keyframes`
 `;
 
 const Overlay = styled.div`
-  position: absolute;
+  position: fixed;
+  z-index: -1;
   top: 0;
   left: 0;
   width: 100%;
@@ -155,11 +156,12 @@ const Inner = styled.div`
   align-items: center;
   width: 200%;
   height: 200%;
-  position: relative;
-  z-index: 79;
+  position: fixed;
+  z-index: 99;
   top: -50%;
   left: -50%;
   animation: ${glitch} forwards 2s;
+  pointer-events: none;
 
   img {
     height: 50%;
@@ -202,15 +204,17 @@ export const HalloweenOverlay: React.FC = () => {
   }, [image]);
 
   return (
-    <Overlay>
-      <img src={spiderweb1} />
-      <img src={spiderweb4} />
-      <img src={spider} />
+    <>
+      <Overlay>
+        <img src={spiderweb1} />
+        <img src={spiderweb4} />
+        <img src={spider} />
+      </Overlay>
       {image && (
         <Inner key={image}>
           <img src={image} />
         </Inner>
       )}
-    </Overlay>
+    </>
   );
 };
