@@ -137,26 +137,26 @@ export const Energy = () => {
         <DataContainer>
           <Data
             icon={<Icon Plug />}
-            value={data?.now.value}
+            value={data?.now?.value}
             text="öre"
             size={2}
           />
           <Data
             icon={<Icon Average />}
-            value={data?.average.value}
+            value={data?.average?.value}
             text="öre"
             size={1}
           />
           <Data
             icon={<Icon Arrow />}
-            value={data?.high.value}
-            text={`(${data?.high.time})`}
+            value={data?.high?.value}
+            text={`(${data?.high?.time})`}
           />
           <Data
             icon={<Icon Arrow />}
             flipIcon
-            value={data?.low.value}
-            text={`(${data?.low.time})`}
+            value={data?.low?.value}
+            text={`(${data?.low?.time})`}
           />
         </DataContainer>
         {data?.tomorrow && (
@@ -164,20 +164,20 @@ export const Energy = () => {
             <Heading>Imorgon</Heading>
             <Data
               icon={<Icon Average />}
-              value={data?.tomorrow?.average.value}
+              value={data?.tomorrow?.average?.value}
               text="öre"
               size={1}
             />
             <Data
               icon={<Icon Arrow />}
-              value={data?.tomorrow?.high.value}
-              text={`(${data?.tomorrow?.high.time})`}
+              value={data?.tomorrow?.high?.value}
+              text={`(${data?.tomorrow?.high?.time})`}
             />
             <Data
               icon={<Icon Arrow />}
               flipIcon
-              value={data?.tomorrow?.low.value}
-              text={`(${data?.tomorrow?.low.time})`}
+              value={data?.tomorrow?.low?.value}
+              text={`(${data?.tomorrow?.low?.time})`}
             />
           </DataContainer>
         )}

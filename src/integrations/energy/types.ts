@@ -19,14 +19,13 @@ interface EnergyMetric {
 }
 
 export interface Data {
-  average: EnergyMetric;
-  high: EnergyMetric;
-  low: EnergyMetric;
-  now: EnergyMetric;
+  average?: EnergyMetric;
+  high?: EnergyMetric;
+  low?: EnergyMetric;
+  now?: EnergyMetric;
   tomorrow?: {
-    average: EnergyMetric;
-    high: EnergyMetric;
-    low: EnergyMetric;
-    now: EnergyMetric;
+    average?: EnergyMetric;
+    high?: EnergyMetric;
+    low?: EnergyMetric;
   };
 }

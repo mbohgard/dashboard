@@ -111,7 +111,7 @@ export const Food: React.FC = () => {
   const thisWeekN = thisWeek?.weekOfYear ?? 0;
   const isCurrent = thisWeek === selectedWeek;
   const today = dayjs();
-  const isPastWednesday = today.day() >= 1;
+  const isPastWednesday = today.day() >= 3;
 
   const resetScroll = useStableCallback(() => {
     list.current?.scrollTo({
