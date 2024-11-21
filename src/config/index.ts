@@ -1,15 +1,13 @@
 import type { AxiosRequestConfig } from "axios";
 import * as config from "../../config";
 
-type Config = {
+export type Config = {
   axiosConfig?: AxiosRequestConfig;
   transports?: {
     label?: string;
     settings?: {
       siteId: string;
-      type?: Array<
-        "BUS" | "TRAIN" | "METRO" | "TRAM" | "SHIP" | "TAXI" | "FERRY"
-      >;
+      type?: "BUS" | "TRAIN" | "METRO" | "TRAM" | "SHIP" | "TAXI" | "FERRY";
       direction?: number;
     };
   };
@@ -53,12 +51,20 @@ type Config = {
       color?: string;
     }>;
   };
+  dayinfo?: {
+    genderKey?: string;
+    birthdays?: Array<{
+      name: string;
+      month: number;
+      day: number;
+    }>;
+  };
   chores?: {
     label?: string;
     url?: string;
   };
   food?: {
-    station?: 0;
+    station?: number;
     label?: string;
   };
   sonos?: {

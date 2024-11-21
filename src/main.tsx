@@ -34,6 +34,7 @@ import { ControlServiceData, InitServiceData } from "./types";
 import { ScrollIndicator } from "./components/ScrollIndicator";
 import { Chores } from "./integrations/chores/ui";
 import { ICloud } from "./integrations/icloud/ui";
+import { NameDay } from "./integrations/dayinfo/ui";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
@@ -64,23 +65,25 @@ const AppContainer = styled.div<{ width?: number }>`
 type AreaProps = {
   colStart?: number;
   colEnd?: number;
+  gap?: number;
   rowStart?: number;
   rowEnd?: number;
   align?: "start" | "end" | "center" | "stretch";
   justify?: "start" | "end" | "center" | "stretch";
   flex?: boolean;
   column?: boolean;
+  allowOverflow?: boolean;
 };
 
 export const Area = styled.div<AreaProps>(
   (p) => css`
-    overflow: hidden;
+    overflow: ${p.allowOverflow ? "visible" : "hidden"};
     position: relative;
     width: 100%;
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    grid-gap: 20px;
+    gap: ${p.gap ?? 20}px;
     grid-column-start: ${p.colStart ?? "auto"};
     grid-column-end: ${p.colEnd ?? "auto"};
     grid-row-start: ${p.rowStart ?? "auto"};
@@ -213,8 +216,9 @@ const App = () => {
             <Area colStart={14} colEnd={21}>
               <Energy />
             </Area>
-            <Area colStart={21} colEnd={33} flex>
+            <Area colStart={21} colEnd={33} flex column gap={12} allowOverflow>
               <Time />
+              <NameDay />
             </Area>
             <Area colStart={1} colEnd={21} flex>
               <ScrollableContainer>

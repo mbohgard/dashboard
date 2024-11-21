@@ -26,12 +26,15 @@ const Container = styled.div`
   justify-content: center;
   display: flex;
   flex-direction: column;
+  gap: 12px;
 `;
 
 const TimeView = styled.h2`
   position: relative;
   font-size: 185px;
   font-weight: 300;
+  scale: 1 0.93;
+  transform-origin: top;
   text-align: right;
   letter-spacing: -7px;
   line-height: 0.8;
@@ -42,7 +45,6 @@ const DateView = styled.h4`
   font-size: 30px;
   font-weight: 300;
   text-align: right;
-  margin-top: 30px;
   white-space: nowrap;
 
   span {

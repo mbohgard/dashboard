@@ -8,7 +8,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding-top: 10px;
+  padding-top: 5px;
 `;
 
 const TabsWrapper = styled.ul`
@@ -79,7 +79,7 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const getInitialState = () =>
     defaultSelected
-      ? items?.findIndex(([label]) => defaultSelected === label) ?? 0
+      ? (items?.findIndex(([label]) => defaultSelected === label) ?? 0)
       : 0;
 
   const [selected, setSelected] = useState(getInitialState);

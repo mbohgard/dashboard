@@ -57,6 +57,15 @@ module.exports = {
       },
     ],
   },
+  dayinfo: {
+    genderKey: "",
+    birthdays: [
+      {
+        name: "",
+        date: "2001-01-01",
+      },
+    ],
+  },
   chores: {
     label: "",
     url: ".ics",
