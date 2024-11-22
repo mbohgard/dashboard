@@ -52,7 +52,7 @@ export type Config = {
     }>;
   };
   dayinfo?: {
-    genderKey?: string;
+    namsorApiKey?: string;
     birthdays?: Array<{
       name: string;
       month: number;

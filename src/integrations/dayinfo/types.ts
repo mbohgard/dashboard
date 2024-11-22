@@ -18,13 +18,29 @@ export interface DayResponse {
   dagar: Day[];
 }
 
-type Gender = "male" | "female";
+export interface NamsorApiBody {
+  personalNames: Array<{
+    id: string;
+    firstName: string;
+    countryIso2: string;
+  }>;
+}
 
-export interface NameResponse {
-  status: boolean;
-  remaining_credits: number;
-  gender: Gender;
-  name: string;
+export type Gender = "male" | "female";
+
+interface PersonalName {
+  script: string;
+  id: string;
+  firstName: string;
+  lastName: string;
+  likelyGender: Gender;
+  genderScale: number;
+  score: number;
+  probabilityCalibrated: number;
+}
+
+export interface NamsorApiResponse {
+  personalNames: PersonalName[];
 }
 
 type NameDay = {

@@ -34,7 +34,7 @@ import { ControlServiceData, InitServiceData } from "./types";
 import { ScrollIndicator } from "./components/ScrollIndicator";
 import { Chores } from "./integrations/chores/ui";
 import { ICloud } from "./integrations/icloud/ui";
-import { NameDay } from "./integrations/dayinfo/ui";
+import { Flag, NameDay, Birthday } from "./integrations/dayinfo/ui";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
@@ -209,6 +209,7 @@ const App = () => {
             rows="30% auto 38%"
             padding={25}
             width={98}
+            allowOverflow
           >
             <Area colStart={1} colEnd={14}>
               <Weather type="big" />
@@ -217,6 +218,8 @@ const App = () => {
               <Energy />
             </Area>
             <Area colStart={21} colEnd={33} flex column gap={12} allowOverflow>
+              <Flag />
+              <Birthday />
               <Time />
               <NameDay />
             </Area>

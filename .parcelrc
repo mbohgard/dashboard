@@ -5,7 +5,7 @@
     "..."
   ],
   "transformers": {
-    "*.svg": [
+    "**/icons/*.svg": [
       "...",
       "@parcel/transformer-svg-react"
     ]

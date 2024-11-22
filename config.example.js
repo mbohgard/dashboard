@@ -58,7 +58,7 @@ module.exports = {
     ],
   },
   dayinfo: {
-    genderKey: "",
+    namsorApiKey: "",
     birthdays: [
       {
         name: "",
