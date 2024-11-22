@@ -2,12 +2,6 @@ import { useSyncExternalStore } from "react";
 
 type Listener<T> = (state: T) => void;
 type SetterCallback<T> = (state: T) => T;
-type Setter<T> = (state: T | SetterCallback<T>) => T;
-type Selector<T, S> = (state: T) => S;
-interface UseStore<T> {
-  (): readonly [T, Setter<T>];
-  <S>(selector: Selector<T, S>): readonly [S, Setter<T>];
-}
 
 const getNewState = <T>(newState: T | SetterCallback<T>, oldState?: T): T =>
   typeof newState === "function"
@@ -39,11 +33,11 @@ export const createStore = <T>(initialState: T | SetterCallback<T>) => {
     },
   };
 
-  const useStore: UseStore<T> = (selector?: Selector<T, T>) => {
-    const getState = () => selector?.(store.getState()) ?? store.getState();
+  const useStore = <S = T>(selector: (state: T) => S = (s) => s as any) => {
+    const getState = () => selector(store.getState());
 
     return [
-      useSyncExternalStore<T>(store.subscribe, getState, getState),
+      useSyncExternalStore<S>(store.subscribe, getState, getState),
       store.setState,
     ] as const;
   };
@@ -52,5 +46,6 @@ export const createStore = <T>(initialState: T | SetterCallback<T>) => {
     useStore,
     get: store.getState,
     set: store.setState,
+    subscribe: store.subscribe,
   };
 };
