@@ -2,7 +2,8 @@ import React, { useRef } from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
-import { useIsIdle, useService } from "../../../hooks";
+import { useIsIdle } from "../../../hooks";
+import { useService } from "../../../hooks/useService";
 import { colors } from "../../../styles";
 
 import { Loader } from "../../../components/Atoms";

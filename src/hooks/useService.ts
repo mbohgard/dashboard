@@ -67,13 +67,13 @@ const subscribeToService = (n: ServiceName) => {
 
 export const useService = <
   Name extends ServiceName,
-  Data extends ServiceResponse<Name>,
-  S = Data,
+  Res extends ServiceResponse<Name>,
+  S = Res["data"],
 >(
   serviceName: Name,
-  selector: (res?: Data) => S = (s) => s as any
+  selector: (res?: Res) => S = (s) => s?.data as any
 ) => {
-  const store = getStore<Data>(serviceName);
+  const store = getStore<Res>(serviceName);
   const [data] = store.useStore<S | undefined>(selector);
 
   const emit = useCallback(
@@ -81,7 +81,7 @@ export const useService = <
       if (socket.connected) {
         socket.emit(serviceName, payload);
 
-        return (data: Data) => store.set({ ...store.get(), data });
+        return (data: Res) => store.set({ ...store.get(), data });
       } else {
         reportError(
           serviceName,
