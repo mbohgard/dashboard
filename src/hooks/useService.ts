@@ -5,7 +5,7 @@ import { socket } from "../utils/socket";
 import { reportError } from "../utils/report";
 import { connectedStore } from "../stores";
 
-type Store<Data> = ReturnType<typeof createStore<Data>>;
+type Store<Data> = ReturnType<typeof createStore<Data | undefined>>;
 type Callback<Data> = (data: Data) => void;
 
 // record of stores for each service
@@ -71,17 +71,18 @@ export const useService = <
   S = Res["data"],
 >(
   serviceName: Name,
-  selector: (res?: Res) => S = (s) => s?.data as any
+  selector: (res: Res) => S = (s) => s.data as any
 ) => {
   const store = getStore<Res>(serviceName);
-  const [data] = store.useStore<S | undefined>(selector);
+  const [data] = store.useStore((s) => (s ? selector(s) : undefined));
 
   const emit = useCallback(
     (payload: Emit<Name>) => {
       if (socket.connected) {
         socket.emit(serviceName, payload);
 
-        return (data: Res) => store.set({ ...store.get(), data });
+        return (data: Res["data"]) =>
+          store.set({ ...store.get(), data } as Res);
       } else {
         reportError(
           serviceName,
