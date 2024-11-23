@@ -1,11 +1,12 @@
 import React, { useRef } from "react";
 import styled, { css } from "styled-components";
 
-import { useIsIdle, useService } from "../../../hooks";
+import { useIsIdle } from "../../../hooks";
 import { colors } from "../../../styles";
 import { Icon } from "../../../components/Icon";
 import { Loader } from "../../../components/Atoms";
 import { ScrollIndicator } from "../../../components/ScrollIndicator";
+import { useService } from "../../../hooks/useService";
 
 const Container = styled.div`
   position: relative;

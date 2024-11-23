@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
-import { useService, useStableCallback, useThrottle } from "../../../hooks";
+import { useStableCallback, useThrottle } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
+import { useService } from "../../../hooks/useService";
 
 const clickAnimation = keyframes`
   from { opacity: 1; }

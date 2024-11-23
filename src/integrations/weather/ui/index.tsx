@@ -2,7 +2,6 @@ import React from "react";
 import styled, { css } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
-import { useService } from "../../../hooks";
 import { colors } from "../../../styles";
 
 import { Loader } from "../../../components/Atoms";
@@ -10,6 +9,7 @@ import { WeatherIcon } from "./WeatherIcon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
 import { getTempColor } from "../../../utils/color";
 import type { Parameter, TimeSerie } from "../types";
+import { useService } from "../../../hooks/useService";
 
 type Type = {
   type?: "normal" | "big";
@@ -226,9 +226,7 @@ export type Props = {
 };
 
 export const Weather: React.FC<Props> = ({ type = "small" }) => {
-  const [data] = useService("weather", (res) =>
-    Boolean(res.data && res.data.timeSeries)
-  );
+  const [data] = useService("weather");
 
   if (!data) return <Loader />;
 

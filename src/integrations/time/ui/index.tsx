@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
-import { useService } from "../../../hooks";
 import { colors } from "../../../styles";
+import { useService } from "../../../hooks/useService";
 
 const dots = keyframes`
   from {
@@ -87,12 +87,11 @@ const getDate = (date: Dayjs) => [
 ];
 
 export const Time: React.FC = () => {
-  const timestamp = useRef<number>();
+  const timestamp = useRef<number>(0);
   if (!timestamp.current) timestamp.current = now();
-  const ts = timestamp.current;
 
   const [data] = useService("time");
-  const [[h, m, time], setTime] = useState(() => getTime(ts));
+  const [[h, m, time], setTime] = useState(() => getTime(timestamp.current));
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -110,7 +109,7 @@ export const Time: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      timestamp.current = data.timestamp - data.gmtOffset;
+      timestamp.current = data;
 
       setTime(getTime(timestamp.current));
     }

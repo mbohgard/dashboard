@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { colors } from "../../../styles";
-import { useIsIdle, useService, useStableCallback } from "../../../hooks";
+import { useIsIdle, useStableCallback } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
 import styled, { css } from "styled-components";
 import { Icon } from "../../../components/Icon";
 import dayjs from "dayjs";
+import { useService } from "../../../hooks/useService";
 
 const Container = styled.div`
   font-size: 21px;

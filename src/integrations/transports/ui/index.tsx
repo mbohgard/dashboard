@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import styled, { css } from "styled-components";
 
-import { useService } from "../../../hooks";
 import { colors } from "../../../styles";
 import { ServiceBox } from "../../../components/Molecules";
 import { ServiceResponse } from "../../../types";
+import { useService } from "../../../hooks/useService";
 
 const Container = styled.div`
   display: flex;
@@ -56,7 +56,10 @@ const fill = (x?: Data) =>
     .map((_, i) => x?.[i]);
 
 export const Transports: React.FC = () => {
-  const [data, _, meta] = useService("transports");
+  const [{ data, meta } = {}] = useService("transports", ({ data, meta }) => ({
+    data,
+    meta,
+  }));
 
   const items = useMemo(() => fill(data), [data]);
 

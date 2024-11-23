@@ -12,13 +12,15 @@ export const get = async () => {
   if (!time?.key || !time.settings?.timezone)
     throw ConfigError(name, "Missing time api key or timezone config");
 
+  const { timestamp, gmtOffset } = (
+    await axios.get<ApiResponse>(
+      `http://api.timezonedb.com/v2.1/get-time-zone?key=${time.key}&format=json&by=zone&zone=${time.settings.timezone}`
+    )
+  ).data;
+
   return {
     service: name,
-    data: (
-      await axios.get<ApiResponse>(
-        `http://api.timezonedb.com/v2.1/get-time-zone?key=${time.key}&format=json&by=zone&zone=${time.settings.timezone}`
-      )
-    ).data,
+    data: timestamp - gmtOffset,
   };
 };
 
