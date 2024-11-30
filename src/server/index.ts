@@ -17,6 +17,7 @@ import type {
   InitServiceData,
   ControlServiceData,
   ServicesUnion,
+  CreateServiceResponse,
 } from "../integrations";
 
 let launched: number;
@@ -54,12 +55,7 @@ const sendCached = (s: ServiceName) => {
   return Boolean(data);
 };
 
-const emit = (
-  data:
-    | { service: string; data?: any; error?: any }
-    | InitServiceData
-    | ControlServiceData
-) => {
+const emit = (data: ServiceResponse | InitServiceData | ControlServiceData) => {
   io.emit(data.service, data);
 
   if (data.error) {
@@ -95,7 +91,7 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
         .get()
         .then((data) => {
           emit({
-            ...data,
+            ...(data as ServiceResponse),
             error: formatError("error" in data ? data.error : undefined),
           });
           saveToCache(data.service as ServiceName, data as ServiceResponse);
@@ -161,7 +157,7 @@ io.on("connection", (socket) => {
       });
     }
 
-    if (service.name && "feed" in service && service.feed.endpoint) {
+    if ("feed" in service && service.feed.endpoint) {
       app.post(service.feed.endpoint, (req, res) => {
         try {
           const result = service.feed.handler(req.body);

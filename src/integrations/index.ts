@@ -41,7 +41,7 @@ export type ServiceName = keyof Services;
 type ServiceReturn<N extends ServiceName> = Awaited<
   ReturnType<Services[N]["get"]>
 >;
-type Data<N extends ServiceName> = ServiceReturn<N>["data"];
+export type Data<N extends ServiceName> = ServiceReturn<N>["data"];
 // @ts-ignore
 export type Meta<N extends ServiceName> = ServiceReturn<N>["meta"];
 export type Emit<N extends ServiceName> =
@@ -50,12 +50,20 @@ export type Emit<N extends ServiceName> =
     ? never
     : // @ts-ignore
       Parameters<Services[N]["listener"]>[number];
+// @ts-ignore
+export type Feed<Name extends ServiceName, T> = {
+  // `endpoint` will register a route to receive updates on, `sse` (server side event) will make a request to receive streaming events on
+  type: "endpoint" | "sse";
+  method: "get" | "post";
+  endpoint?: string;
+  handler: (data: T) => ServiceResponse<Name> | null;
+};
 
-type CreateServiceResponse<N, D, M = unknown> = {
+export type CreateServiceResponse<N = string, D = unknown, M = unknown> = {
   data?: D;
   error?: unknown;
   service: N;
-} & (unknown extends M ? { meta?: undefined } : { meta: M });
+} & (unknown extends M ? { meta?: never } : { meta: M });
 
 export type ServiceResponse<Name extends ServiceName = ServiceName> =
   CreateServiceResponse<Name, Data<Name>, Meta<Name>>;

@@ -1,5 +1,5 @@
 import config from "../../../config";
-import { ConfigError, axios } from "../../index";
+import { ConfigError, Data, type Feed, axios } from "../../index";
 import type { ApiResponse } from "../types";
 
 import { sec2Ms } from "../../../utils/time";
@@ -88,7 +88,6 @@ export const get = () =>
       return {
         service: name,
         data: filterData(),
-        meta: { feed: false },
       };
     });
 
@@ -102,14 +101,15 @@ export const listener = ({ roomName, action, volume }: SonosEmit) => {
   return axios.get(url);
 };
 
-export const feed = {
+export const feed: Feed<typeof name, SonosFeedResponse> = {
+  type: "endpoint",
+  method: "post",
   endpoint: config?.sonos?.feed,
-  handler: (body: SonosFeedResponse) => {
+  handler: (body) => {
     if (!dataCache.length) return null;
 
     const res = {
       service: name,
-      meta: { feed: true },
     } as const;
 
     if (body.type === "transport-state") {
@@ -119,8 +119,8 @@ export const feed = {
       };
     }
 
-    if (body.type === "volume-change") {
-    }
+    // if (body.type === "volume-change") {
+    // }
 
     return null;
   },
