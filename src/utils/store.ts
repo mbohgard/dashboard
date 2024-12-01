@@ -34,12 +34,11 @@ export const createStore = <T>(initialState: T | SetterCallback<T>) => {
   };
 
   const useStore = <S = T>(selector: (state: T) => S = (s) => s as any) => {
-    const getState = () => selector(store.getState());
+    const getState = () => store.getState();
 
-    return [
-      useSyncExternalStore<S>(store.subscribe, getState, getState),
-      store.setState,
-    ] as const;
+    const s = useSyncExternalStore<T>(store.subscribe, getState, getState);
+
+    return [selector(s), store.setState] as const;
   };
 
   return {
