@@ -16,9 +16,8 @@ dayjs.extend(weekOfYear);
 
 export const get = async () => {
   if (!food?.station) throw ConfigError(name, "Missing food station config");
-  const time = (await getTime()).data;
+  const timestamp = (await getTime()).data;
 
-  const timestamp = time.timestamp - time.gmtOffset;
   const date = dayjs.unix(timestamp);
 
   const data = (

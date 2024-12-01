@@ -42,9 +42,14 @@ export const get = async () => {
       if (productname?.includes("temperature")) {
         const target = Object.values(acc).find((t) => t.value === -999);
 
+        console.log(
+          Number(state.temperature),
+          Number(state.temperature) + (hue?.settings?.tempOffset ?? 0)
+        );
+
         if (target)
           target.value =
-            Number(state.temperature) + (hue?.settings?.tempOffset ?? 0);
+            Number(state.temperature) + (hue?.settings?.tempOffset ?? 0) * 100;
       }
 
       return acc;
