@@ -15,7 +15,7 @@ const getData = (day: dayjs.Dayjs, axiosData?: ApiResponse): Data | null => {
 
   return axiosData.reduce<Data>((acc, item, ix) => {
     const start = dayjs(item.time_start);
-    const value = item.SEK_per_kWh;
+    const value = item.SEK_per_kWh * 100;
 
     acc.average = {
       value: ((acc.average?.value ?? 0) * ix + value) / (ix + 1),
