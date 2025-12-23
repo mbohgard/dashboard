@@ -24,3 +24,5 @@ export const get = async () => {
 };
 
 export const delay = () => min2Ms(5);
+
+export const enabled = false;

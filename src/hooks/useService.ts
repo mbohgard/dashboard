@@ -3,7 +3,7 @@ import { Emit, ServiceName, ServiceResponse } from "../integrations";
 import { createStore } from "../utils/store";
 import { socket } from "../utils/socket";
 import { reportError } from "../utils/report";
-import { connectedStore } from "../stores";
+import { connectedStore, useConnected } from "../stores";
 
 type Store<Data> = ReturnType<typeof createStore<Data | undefined>>;
 type Callback<Data> = (data: Data) => void;
@@ -17,10 +17,10 @@ const subscriptionCallbacks: Partial<Record<ServiceName, Callback<any>>> = {};
 
 // get store for a service or create a new one if it doesn't exist
 const getStore = <Data>(n: ServiceName) => {
-  const store = serviceStores[n] ?? createStore<Data | undefined>(undefined);
-  serviceStores[n] = store;
+  serviceStores[n] ??=
+    serviceStores[n] ?? createStore<Data | undefined>(undefined);
 
-  return store as Store<Data>;
+  return serviceStores[n] as Store<Data>;
 };
 
 // register a service callback if it doesn't exist to update the service store
@@ -58,10 +58,6 @@ const subscribeToService = (n: ServiceName) => {
 
   return () => {
     sa[n] = sa[n]! > 0 ? sa[n]! - 1 : 0;
-
-    if (sa[n] === 0) {
-      socket.emit("unsubscribe", n);
-    }
   };
 };
 
@@ -73,6 +69,7 @@ export const useService = <
   serviceName: Name,
   selector: (res: Res) => S = (s) => s.data as any
 ) => {
+  const connected = useConnected();
   const store = getStore<Res>(serviceName);
   const [data] = store.useStore((s) => (s ? selector(s) : undefined));
 
@@ -81,8 +78,9 @@ export const useService = <
       if (socket.connected) {
         socket.emit(serviceName, payload);
 
-        return (data: Res["data"]) =>
-          store.set({ ...store.get(), data } as Res);
+        return (setter: (data?: Res["data"]) => Res["data"] | undefined) => {
+          store.set({ ...store.get(), data: setter(store.get()?.data) } as Res);
+        };
       } else {
         reportError(
           serviceName,
@@ -96,11 +94,13 @@ export const useService = <
   );
 
   useEffect(() => {
+    if (!connected) return;
+
     registerCallback(serviceName);
     const unsubscribe = subscribeToService(serviceName);
 
     return unsubscribe;
-  }, []);
+  }, [connected]);
 
   return [data, emit] as const;
 };

@@ -1,5 +1,5 @@
 import config from "../../../config";
-import { ConfigError, Data, type Feed, axios } from "../../index";
+import { ConfigError, type Feed, axios } from "../../index";
 import type { ApiResponse } from "../types";
 
 import { sec2Ms } from "../../../utils/time";
@@ -125,3 +125,5 @@ export const feed: Feed<typeof name, SonosFeedResponse> = {
     return null;
   },
 };
+
+export const enabled = false;

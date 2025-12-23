@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { useConfig } from "../../../hooks";
+import { useConfig } from "../../../stores";
 import { getTempColor } from "../../../utils/color";
 import { Icon } from "../../../components/Icon";
 import { Loader } from "../../../components/Atoms";

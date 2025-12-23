@@ -71,7 +71,7 @@ module.exports = {
     url: ".ics",
   },
   food: {
-    station: 0,
+    schoool: "",
     label: "",
   },
   sonos: {

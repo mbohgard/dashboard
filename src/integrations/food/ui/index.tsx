@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { colors } from "../../../styles";
 import { useIsIdle, useStableCallback } from "../../../hooks";
@@ -108,8 +108,8 @@ export const Food: React.FC = () => {
   const [week, setWeek] = useState(0);
 
   const thisWeek = data?.[0];
-  const selectedWeek = data?.find((w) => w.weekOfYear === week);
-  const thisWeekN = thisWeek?.weekOfYear ?? 0;
+  const selectedWeek = data?.find((w) => w.week === week);
+  const thisWeekN = thisWeek?.week ?? 0;
   const isCurrent = thisWeek === selectedWeek;
   const today = dayjs();
   const isPastWednesday = today.day() >= 3;
@@ -153,15 +153,12 @@ export const Food: React.FC = () => {
 
       <Week>Vecka {week}</Week>
       <List ref={list}>
-        {selectedWeek?.days.map(({ day, month, year, ...rest }) => {
-          const dateStr = `${year}-${month}-${day}`;
-          const date = dayjs(dateStr);
-          const meals = ("meals" in rest && rest.meals) || null;
-          const reason = ("reason" in rest && rest.reason) || null;
+        {selectedWeek?.Days.map(({ date: utc, Meals: meals }) => {
+          const date = dayjs(utc);
 
           return (
             <Day
-              key={dateStr}
+              key={utc}
               active={date.isToday()}
               past={date.isSameOrBefore(today)}
             >
@@ -170,12 +167,11 @@ export const Food: React.FC = () => {
                 <span>{date.format("D/M")}</span>
               </DayDate>
               <Meals>
-                {reason ??
-                  meals?.map(({ value }, ix) => (
-                    <Meal key={ix} variant={ix}>
-                      {value}
-                    </Meal>
-                  ))}
+                {meals.reverse().map(({ id, name }, ix) => (
+                  <Meal key={id} variant={ix}>
+                    {name}
+                  </Meal>
+                ))}
               </Meals>
             </Day>
           );

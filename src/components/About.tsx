@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { colors } from "../styles";
 import { ms2Sec, sec2Time } from "../utils/time";
-import { useConfig, useConnected } from "../hooks";
+import { useConfig, useConnected } from "../stores";
 
 import { Overlay } from "./Molecules";
 import { settingsStore } from "../stores";

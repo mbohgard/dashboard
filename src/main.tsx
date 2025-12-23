@@ -15,7 +15,8 @@ import { BaseStyles } from "./styles";
 import { configStore, connectedStore, settingsStore } from "./stores";
 import { socket } from "./utils/socket";
 import { reportError } from "./utils/report";
-import { useConnected, useIsIdle, useScroll } from "./hooks";
+import { useIsIdle, useScroll } from "./hooks";
+import { useConnected } from "./stores";
 
 import { StatusDot } from "./components/Atoms";
 import { About } from "./components/About";
@@ -33,8 +34,9 @@ import { HalloweenOverlay } from "./components/HalloweenOverlay";
 import { ControlServiceData, InitServiceData } from "./types";
 import { ScrollIndicator } from "./components/ScrollIndicator";
 import { Chores } from "./integrations/chores/ui";
-import { ICloud } from "./integrations/icloud/ui";
+// import { ICloud } from "./integrations/icloud/ui";
 import { Flag, NameDay, Birthday } from "./integrations/dayinfo/ui";
+import { XmasOverlay } from "./components/XmasOverlay";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
@@ -239,6 +241,7 @@ const App = () => {
             </BottomContainer>
             <Errors />
             {settings.halloween && <HalloweenOverlay />}
+            {settings.xmas && <XmasOverlay />}
           </GridWrapper>
           <GridWrapper
             columns="repeat(16, 1fr)"

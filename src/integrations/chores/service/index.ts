@@ -6,24 +6,14 @@ import { ConfigError, axios } from "../../index";
 import config from "../../../config";
 import { parseCalendarData } from "../../calendar/service";
 import { min2Ms } from "../../../utils/time";
-import type { Chore, Period, Status } from "../types";
+import type { Period, Status } from "../types";
 import { swtch } from "../../../utils/helpers";
+import { CalendarEvent } from "../../calendar/types";
 
 dayjs.extend(duration);
 
 export const name = "chores";
 const { chores } = config;
-
-type SortInput = {
-  start: dayjs.Dayjs;
-};
-
-const sortEvents = (a: SortInput, b: SortInput) => {
-  const timeA = a.start.valueOf();
-  const timeB = b.start.valueOf();
-
-  return timeA > timeB ? 1 : -1;
-};
 
 const getStatus = (
   period: Period,
@@ -38,6 +28,37 @@ const getStatus = (
   return start.subtract(3, "days").isBefore(now) ? "close" : "normal";
 };
 
+const mapEvents =
+  (now: dayjs.Dayjs) =>
+  ({ id, summary, ...e }: CalendarEvent) => {
+    let [text, p] = summary.split("$");
+    const period = (swtch(p, ["day", "day"], ["week", "week"]) ??
+      "month") as Period;
+    const start =
+      swtch(
+        period,
+        ["day", dayjs(e.start).endOf("day")],
+        ["week", dayjs(e.start).endOf("week")]
+      ) ?? dayjs(e.start).endOf("month");
+
+    return {
+      id,
+      summary: text!,
+      start,
+      period,
+      status: getStatus(period, now, start),
+    };
+  };
+
+type MappedEvent = ReturnType<ReturnType<typeof mapEvents>>;
+
+const sortEvents = (a: MappedEvent, b: MappedEvent) => {
+  const timeDiff = a.start.valueOf() - b.start.valueOf();
+  if (timeDiff !== 0) return timeDiff;
+
+  return a.summary.localeCompare(b.summary, undefined, { sensitivity: "base" });
+};
+
 export const get = async () => {
   if (!chores?.url) throw ConfigError(name, "Missing chores url");
 
@@ -50,27 +71,9 @@ export const get = async () => {
   return {
     service: name,
     data: parseCalendarData({ data, from, to, name })
-      .map(({ id, summary, ...e }) => {
-        let [text, p] = summary.split("$");
-        const period = (swtch(p, ["day", "day"], ["week", "week"]) ??
-          "month") as Period;
-        const start =
-          swtch(
-            period,
-            ["day", dayjs(e.start).endOf("day")],
-            ["week", dayjs(e.start).endOf("week")]
-          ) ?? dayjs(e.start).endOf("month");
-
-        return {
-          id,
-          summary: text!,
-          start,
-          period,
-          status: getStatus(period, now, start),
-        };
-      })
+      .map(mapEvents(now))
       .sort(sortEvents)
-      .map<Chore>(({ start, ...rest }) => ({
+      .map(({ start, ...rest }) => ({
         ...rest,
         start: start.valueOf(),
         year: start.year(),

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import styled, { css } from "styled-components";
 
-import { useConfig, useIsPlaying } from "../hooks";
+import { useConfig, useIsPlaying } from "../stores";
 
 import { Tabs } from "./Tabs";
 import { Calendar } from "../integrations/calendar/ui";

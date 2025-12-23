@@ -2,97 +2,76 @@ import config from "../../../config";
 
 import { ConfigError, axios } from "../../index";
 import dayjs from "dayjs";
-import type { PartialDeep } from "type-fest";
 
-import type { Data, ApiResponse, Areas } from "../types";
+import type { Data, ApiResponse } from "../types";
 import { min2Ms, sec2Ms } from "../../../utils/time";
+import { isAxiosError } from "axios";
 
 export const name = "energy";
 const { energy } = config;
 
-const zones: { [Key in "SE1" | "SE2" | "SE3" | "SE4"]: Areas } = {
-  SE1: "One",
-  SE2: "Two",
-  SE3: "Three",
-  SE4: "Four",
+const getData = (day: dayjs.Dayjs, axiosData?: ApiResponse): Data | null => {
+  if (!axiosData) return null;
+
+  return axiosData.reduce<Data>((acc, item, ix) => {
+    const start = dayjs(item.time_start);
+    const value = item.SEK_per_kWh;
+
+    acc.average = {
+      value: ((acc.average?.value ?? 0) * ix + value) / (ix + 1),
+    };
+
+    // only care about full hours
+    if (start.minute() !== 0) return acc;
+
+    const time = `${start.format("HH")}-${start.add(1, "hour").format("HH")}`;
+
+    if (day.isAfter(start) && day.isBefore(start.add(1, "hour"))) {
+      acc.now = { value, time };
+    }
+
+    if ((acc.high?.value ?? -1000) < value) {
+      acc.high = { value, time };
+    }
+
+    if ((acc.low?.value ?? 1000) > value) {
+      acc.low = { value, time };
+    }
+
+    return acc;
+  }, {});
 };
 
 export const get = async () => {
   if (!energy?.zone) throw ConfigError(name, "Missing energy zone config");
 
-  const { data: res } = await axios.get<ApiResponse>(
-    "https://www.elmarknad.se/api/spotprice/current"
+  const now = dayjs();
+  const days = [
+    now.format("YYYY/MM-DD"),
+    now.add(1, "day").format("YYYY/MM-DD"),
+  ];
+
+  const [todayRes, tomorrowRes] = await Promise.all(
+    days.map((d) =>
+      axios
+        .get<ApiResponse>(
+          `https://www.elprisetjustnu.se/api/v1/prices/${d}_${energy.zone}.json`
+        )
+        .catch((e) => {
+          if (isAxiosError(e) && e.status === 404) return null;
+          throw e;
+        })
+    )
   );
 
-  const now = dayjs().startOf("hour").format("HH:mm");
-  const zone = zones[(energy.zone as keyof typeof zones) || "SE3"];
-  const data = res.reduce<Data>((acc, { CreatedDate, ...h }, ix, arr) => {
-    const date = dayjs(CreatedDate);
-    const time = `${date.format("HH")}-${date.add(1, "hour").format("HH")}`;
-    const current = h[`CurrentArea${zone}`];
-    const average = h[`AverageArea${zone}`];
-    const forecast = h[`ForecastArea${zone}`];
+  const data = getData(now, todayRes?.data);
+  const tomorrow = getData(now.add(1, "day"), tomorrowRes?.data);
 
-    const isCurrent = date.format("HH:mm") === now;
-    const isLast = ix + 1 === arr.length;
+  if (!data) {
+    throw Error("Could not fetch energy data for today");
+  }
 
-    acc.now = isCurrent
-      ? {
-          value: current,
-          time,
-        }
-      : acc.now;
-
-    acc.average = { value: average };
-
-    if ((acc.high?.value ?? -1000) < current) {
-      acc.high = {
-        value: current,
-        time,
-      };
-    }
-
-    if ((acc.low?.value ?? 1000) > current) {
-      acc.low = {
-        value: current,
-        time,
-      };
-    }
-
-    if ((acc.tomorrow?.high?.value ?? -1000) < forecast) {
-      acc.tomorrow = {
-        ...acc.tomorrow,
-        high: {
-          value: forecast,
-          time,
-        },
-      };
-    }
-
-    if ((acc.tomorrow?.low?.value ?? 1000) > forecast) {
-      acc.tomorrow = {
-        ...acc.tomorrow,
-        low: {
-          value: forecast,
-          time,
-        },
-      };
-    }
-
-    const averageSum = (acc.tomorrow?.average?.value ?? 0) + forecast;
-    acc.tomorrow = {
-      ...acc.tomorrow,
-      average: {
-        value: isLast ? averageSum / arr.length : averageSum,
-      },
-    };
-
-    if (isLast && acc.tomorrow.average?.value === 0) {
-      delete acc.tomorrow;
-    }
-
-    return acc;
-  }, {});
+  data.tomorrow = tomorrow ?? undefined;
 
   return {
     service: name,

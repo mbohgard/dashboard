@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { reportError } from "./report";
 
 type Listener<T> = (state: T) => void;
 type SetterCallback<T> = (state: T) => T;
@@ -8,7 +9,21 @@ const getNewState = <T>(newState: T | SetterCallback<T>, oldState?: T): T =>
     ? (newState as SetterCallback<T>)(oldState as T)
     : newState;
 
-export const createStore = <T>(initialState: T | SetterCallback<T>) => {
+export const createStore = <T>(
+  initialState: T | SetterCallback<T>,
+  storageKey?: string
+) => {
+  if (storageKey) {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        initialState = JSON.parse(saved) ?? initialState;
+      } catch {
+        reportError(storageKey, "Failed to get store data from localStorage");
+      }
+    }
+  }
+
   let state = getNewState(initialState);
 
   const listeners = new Set<Listener<T>>();
@@ -18,6 +33,14 @@ export const createStore = <T>(initialState: T | SetterCallback<T>) => {
     setState: (newState: T | SetterCallback<T>) => {
       // create the new state
       state = getNewState(newState, state);
+
+      if (storageKey) {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(state));
+        } catch {
+          reportError(storageKey, "Failed to save store data to localStorage");
+        }
+      }
 
       // notify all subscrtibers
       listeners.forEach((listener) => listener(state));

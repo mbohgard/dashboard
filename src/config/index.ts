@@ -64,7 +64,7 @@ export type Config = {
     url?: string;
   };
   food?: {
-    station?: number;
+    school?: string;
     label?: string;
   };
   sonos?: {

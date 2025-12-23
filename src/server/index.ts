@@ -4,11 +4,12 @@ import http from "http";
 import fs from "fs";
 import ws from "socket.io";
 import { v4 as uuid } from "uuid";
+import dayjs from "dayjs";
+import sv from "dayjs/locale/sv";
 
 import { version } from "../../package.json";
 import config, { AppConfig } from "../config";
 
-import * as subscribers from "./subscribers";
 import services, { ServiceName } from "../integrations";
 import { ms2Sec } from "../utils/time";
 import { stringify } from "../utils/helpers";
@@ -17,13 +18,15 @@ import type {
   InitServiceData,
   ControlServiceData,
   ServicesUnion,
-  CreateServiceResponse,
 } from "../integrations";
+
+dayjs.locale(sv);
 
 let launched: number;
 
 const PROD = process.env.NODE_ENV === "production";
 const PORT = 8081;
+const POLL = !process.argv.includes("no-poll");
 
 const app = express();
 app.use(express.json());
@@ -38,22 +41,7 @@ const io = new ws.Server(server, {
 const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
 const cache: { [key in ServiceName]?: ServiceResponse } = {};
 const actionsInProgress = new Set<ServiceName>();
-const poll = !process.argv.includes("no-poll");
 const rootDir = path.join(__dirname, "..", "..");
-
-const stopService = (s: ServiceName) => {
-  global.clearTimeout(timers[s]!);
-  delete timers[s];
-};
-
-const saveToCache = (s: ServiceName, data: ServiceResponse) =>
-  (cache[s] = data);
-const sendCached = (s: ServiceName) => {
-  const data = cache[s];
-  data && emit(data);
-
-  return Boolean(data);
-};
 
 const emit = (data: ServiceResponse | InitServiceData | ControlServiceData) => {
   io.emit(data.service, data);
@@ -71,12 +59,15 @@ const emit = (data: ServiceResponse | InitServiceData | ControlServiceData) => {
 
 const formatError = (e: unknown) => {
   if (e === undefined) return e;
-  if (e instanceof Error)
-    return { message: e.message, name: e.name, id: uuid() };
-  return stringify(e) || "Unknown error";
+
+  return e instanceof Error
+    ? { message: e.message, name: e.name, id: uuid() }
+    : stringify(e) || "Unknown error";
 };
 
 const fetcher = (service: ServicesUnion, forceWait = false) => {
+  if ("enabled" in service && !service.enabled) return;
+
   const next = (waitOnAction = false) => {
     global.clearTimeout(timers[service.name]!);
     timers[service.name] = global.setTimeout(
@@ -94,7 +85,8 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
             ...(data as ServiceResponse),
             error: formatError("error" in data ? data.error : undefined),
           });
-          saveToCache(data.service as ServiceName, data as ServiceResponse);
+          // save to cache
+          cache[data.service as ServiceName] = data as ServiceResponse;
         })
         .catch((e) => {
           emit({
@@ -102,17 +94,18 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
             error: formatError(e),
           });
         })
-        .finally(() => poll && next());
+        .finally(() => POLL && next());
 };
 
-const subscribe = (id: string, s: ServiceName) => {
-  const hasCache = sendCached(s);
+io.on("connection", (socket) => {
+  socket.on("subscribe", (s: ServiceName) => {
+    const service = services[s];
+    const data = cache[s];
 
-  if (subscribers.add(id, s)) {
-    const service = services[s] as ServicesUnion;
-
-    if (service) fetcher(service, hasCache);
-    else {
+    if (service) {
+      // send cached data if available
+      if (data) emit(data);
+    } else {
       emit({
         service: s,
         error: formatError(
@@ -120,29 +113,11 @@ const subscribe = (id: string, s: ServiceName) => {
         ),
       });
     }
-  }
-};
-
-const unsubscribe = (id: string, s?: ServiceName) => {
-  if (s && !subscribers.remove(id, s)) stopService(s);
-  else if (!s) {
-    Object.entries(subscribers.remove(id)).forEach(([k, n]) => {
-      if (!n) stopService(k as ServiceName);
-    });
-  }
-};
-
-io.on("connection", (socket) => {
-  socket.on("subscribe", (service) => subscribe(socket.id, service));
-  socket.on("unsubscribe", (service) => unsubscribe(socket.id, service));
-
-  socket.on("disconnect", () => {
-    unsubscribe(socket.id);
   });
 
   // register listeners
   Object.values(services).forEach((service) => {
-    if (service.name && "listener" in service) {
+    if ("listener" in service) {
       socket.on(service.name, (payload) => {
         actionsInProgress.add(service.name);
         service
@@ -198,6 +173,9 @@ if (PROD) app.use("/", express.static(path.join(rootDir, "dist")));
 server.listen(PORT, () => {
   launched = ms2Sec(Date.now());
   console.log("Server listening on port", PORT);
+
+  // kick off all services
+  Object.values(services).forEach((service) => fetcher(service));
 });
 
 process.on("SIGINT", function () {

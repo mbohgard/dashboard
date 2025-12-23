@@ -8,6 +8,9 @@
     "**/icons/*.svg": [
       "...",
       "@parcel/transformer-svg-react"
+    ],
+    "*.webm": [
+      "@parcel/transformer-raw"
     ]
   }
 }
