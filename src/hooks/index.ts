@@ -24,7 +24,7 @@ export const useSonosService = () => {
 
 const isOutside = (
   { left, top, width, height }: DOMRect,
-  { clientX: x, clientY: y }: React.Touch
+  { clientX: x, clientY: y }: React.Touch,
 ) => {
   if (x < left || x > left + width) return true;
   if (y < top || y > top + height) return true;
@@ -74,7 +74,7 @@ export const useTouchPress = (cbs: {
 };
 
 export const useStableCallback = <T extends (...args: any[]) => any>(
-  f: T | undefined
+  f: T | undefined,
 ) => {
   const ref = useRef(f);
 
@@ -82,13 +82,13 @@ export const useStableCallback = <T extends (...args: any[]) => any>(
 
   return useCallback(
     (...args: Parameters<T>) => ref.current?.(...args) as ReturnType<T>,
-    []
+    [],
   );
 };
 
 export const useIsIdle = (
   cb?: () => void,
-  { timeout = 10000 }: { timeout?: number } = {}
+  { timeout = 10000 }: { timeout?: number } = {},
 ) => {
   const f = useStableCallback(cb);
   const [idle, setIdle] = useState(false);
@@ -114,7 +114,7 @@ export const useIsIdle = (
 
 export const useOnChange = (
   cb: () => void | (() => void),
-  deps: React.DependencyList
+  deps: React.DependencyList,
 ) => {
   const init = useRef(false);
 
@@ -158,7 +158,7 @@ export const useStoredData = <T>(service: ServiceName) => {
       setState(data);
     } catch (e) {
       throw Error(
-        `Could not store ${service} data with payload ${data?.toString()}`
+        `Could not store ${service} data with payload ${data?.toString()}`,
       );
     }
   };
@@ -184,7 +184,7 @@ export const useThrottle = ({
       clearTimeout(t1.current);
       clearTimeout(t2.current);
     },
-    []
+    [],
   );
 
   return useCallback(
@@ -201,7 +201,7 @@ export const useThrottle = ({
         if (finalize) cb();
       }, interval);
     },
-    [interval, finalize]
+    [interval, finalize],
   );
 };
 

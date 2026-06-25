@@ -6,7 +6,7 @@
     "jsx": "react",
     "lib": ["es2020", "dom"],
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,

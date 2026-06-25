@@ -5,6 +5,8 @@ import { useStableCallback, useThrottle } from "../../../hooks";
 import { Loader } from "../../../components/Atoms";
 import { useService } from "../../../hooks/useService";
 
+const FADE_IN_DURATION = 2000;
+
 const clickAnimation = keyframes`
   from { opacity: 1; }
   to { opacity: 0; }
@@ -26,7 +28,7 @@ const Container = styled.div`
     height: 95%;
     object-fit: cover;
     opacity: 0;
-    transition: opacity 2s;
+    transition: opacity ${FADE_IN_DURATION}ms;
     border-radius: 8px;
   }
 `;
@@ -48,6 +50,7 @@ const ClickArea = styled.button`
 
 export const ICloud = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const removeTimerRef = useRef<number>(0);
 
   const [data] = useService("icloud");
   const [id, setId] = useState(-1);
@@ -73,20 +76,33 @@ export const ICloud = () => {
 
     if (id < 0) setId(0);
 
-    const t = setTimeout(next, 10000);
+    const t = window.setTimeout(next, 10000);
 
-    return () => clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+      window.clearTimeout(removeTimerRef.current);
+    };
   }, [data, id]);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el || id < 0) return;
 
-    const prevImg = el.querySelectorAll("img");
     const img = document.createElement("img");
 
-    img.onload = () => (img.style.opacity = "1");
-    img.ontransitionend = () => prevImg.forEach((el) => el.remove());
+    const onLoad = () => {
+      img.style.opacity = "1";
+      removeTimerRef.current = window.setTimeout(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const imgs = el.querySelectorAll("img");
+        imgs.forEach((img, ix) => ix < imgs.length - 1 && img.remove());
+      }, FADE_IN_DURATION);
+    };
+
+    img.onload = onLoad;
+    img.onerror = onLoad;
     img.src = data?.[id]!;
 
     el.appendChild(img);

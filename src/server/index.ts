@@ -72,7 +72,7 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
     global.clearTimeout(timers[service.name]!);
     timers[service.name] = global.setTimeout(
       () => fetcher(service),
-      waitOnAction ? 1000 : service.delay()
+      waitOnAction ? 1000 : service.delay(),
     );
   };
 
@@ -89,6 +89,7 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
           cache[data.service as ServiceName] = data as ServiceResponse;
         })
         .catch((e) => {
+          console.log(`Error in service ${service.name}:`, e);
           emit({
             service: service.name,
             error: formatError(e),
@@ -109,7 +110,7 @@ io.on("connection", (socket) => {
       emit({
         service: s,
         error: formatError(
-          Error(`Service ${s} has the wrong format or doesn't exist`)
+          Error(`Service ${s} has the wrong format or doesn't exist`),
         ),
       });
     }

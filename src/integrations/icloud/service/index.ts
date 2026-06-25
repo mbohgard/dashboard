@@ -8,9 +8,13 @@ export const name = "icloud";
 const { icloud } = config;
 
 export const get = async () => {
-  if (!icloud?.albumToken) throw ConfigError(name, "Missing chores url");
+  if (!icloud?.albumToken) throw ConfigError(name, "Missing icloud url");
+
+  console.log("icloud fetching");
 
   const data = await getImages(icloud.albumToken);
+
+  console.log("icloud", data);
 
   return {
     service: name,
@@ -25,4 +29,4 @@ export const get = async () => {
 
 export const delay = () => min2Ms(5);
 
-export const enabled = false;
+export const enabled = true;

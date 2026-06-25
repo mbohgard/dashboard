@@ -15,9 +15,9 @@ const dots = keyframes`
 
 const seconds = keyframes`
   from {
-    clip-path: inset(99% 0 0 0);
+    clip-path: inset(99% 0 0 -10%);
   } to {
-    clip-path: inset(7% 0 0 0);
+    clip-path: inset(7% 0 0 -10%);
   }
 `;
 
@@ -35,9 +35,9 @@ const TimeView = styled.h2`
   font-weight: 300;
   scale: 1 0.93;
   transform-origin: top;
-  text-align: right;
   letter-spacing: -7px;
   line-height: 0.8;
+  direction: rtl;
   color: ${colors.dimmed};
 `;
 
@@ -61,8 +61,7 @@ const Dots = styled.i`
 const TimeBlind = styled.span`
   position: absolute;
   display: block;
-  /* background: ${colors.black}; */
-  clip-path: inset(99% 0 0 0);
+  clip-path: inset(7% 0 0 -10%);
   font-weight: 400;
   top: 0;
   left: 0;

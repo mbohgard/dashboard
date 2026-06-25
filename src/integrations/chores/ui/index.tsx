@@ -20,7 +20,7 @@ const Container = styled.ul`
   margin-top: 10px;
 `;
 
-const MONTH_LABEL_WIDTH = 70;
+const MONTH_LABEL_WIDTH = 50;
 
 const ChoreContainer = styled.li<{
   status?: Status;
@@ -196,7 +196,7 @@ export const Chores: React.FC = () => {
 
         return acc;
       }, []),
-    [data]
+    [data],
   );
 
   if (!data) return <Loader />;
@@ -208,7 +208,7 @@ export const Chores: React.FC = () => {
     else chores.splice(chores.indexOf(item.chore.id), 1);
 
     setCheckedChores(
-      chores.filter((id) => list!.find((item) => item.chore.id === id))
+      chores.filter((id) => list!.find((item) => item.chore.id === id)),
     );
   };
 

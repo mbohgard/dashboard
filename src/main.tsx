@@ -26,7 +26,7 @@ import { Energy } from "./integrations/energy/ui";
 import { Transports } from "./integrations/transports/ui";
 import { Hue } from "./integrations/hue/ui";
 import { Temp } from "./integrations/temp/ui";
-import { VOC } from "./integrations/voc/ui";
+// import { VOC } from "./integrations/voc/ui";
 import { Errors } from "./components/Errors";
 import { Scrollable } from "./components/Scrollable";
 import { RightTabGroup } from "./components/RightTabGroup";
@@ -34,7 +34,7 @@ import { HalloweenOverlay } from "./components/HalloweenOverlay";
 import { ControlServiceData, InitServiceData } from "./types";
 import { ScrollIndicator } from "./components/ScrollIndicator";
 import { Chores } from "./integrations/chores/ui";
-// import { ICloud } from "./integrations/icloud/ui";
+import { ICloud } from "./integrations/icloud/ui";
 import { Flag, NameDay, Birthday } from "./integrations/dayinfo/ui";
 import { XmasOverlay } from "./components/XmasOverlay";
 
@@ -94,7 +94,7 @@ export const Area = styled.div<AreaProps>(
     justify-self: ${p.justify ?? "auto"};
     display: ${p.flex ? "flex" : "block"};
     flex-direction: ${p.column ? "column" : "row"};
-  `
+  `,
 );
 
 type GridWrapperProps = {
@@ -195,7 +195,7 @@ const App = () => {
     () => {
       document.getElementById("app")?.scrollTo({ left: 0, behavior: "smooth" });
     },
-    { timeout: 30000 }
+    { timeout: 30000 },
   );
 
   return (
@@ -210,7 +210,7 @@ const App = () => {
             columns="repeat(32, 1fr)"
             rows="30% auto 38%"
             padding={25}
-            width={98}
+            width={90}
             allowOverflow
           >
             <Area colStart={1} colEnd={14}>
@@ -225,17 +225,17 @@ const App = () => {
               <Time />
               <NameDay />
             </Area>
-            <Area colStart={1} colEnd={21} flex>
+            <Area colStart={1} colEnd={20} flex>
               <ScrollableContainer>
                 <Weather />
               </ScrollableContainer>
             </Area>
-            <Area colStart={21} colEnd={33} rowStart={2} rowEnd={4}>
+            <Area colStart={20} colEnd={33} rowStart={2} rowEnd={4}>
               <RightTabGroup />
             </Area>
-            <BottomContainer colStart={1} colEnd={21} flex>
+            <BottomContainer colStart={1} colEnd={20} flex>
               <Transports />
-              <VOC />
+              {/* <VOC /> */}
               <Temp />
               <Chores />
             </BottomContainer>
@@ -247,11 +247,11 @@ const App = () => {
             columns="repeat(16, 1fr)"
             rows="60% 40%"
             padding={25}
-            width={50}
+            width={55}
             ref={filterRef}
           >
             <Area colStart={1} colEnd={17}>
-              {/* <ICloud /> */}
+              <ICloud />
             </Area>
 
             <Area colStart={1} colEnd={17}>

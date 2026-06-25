@@ -19,19 +19,17 @@ export const get = async () => {
   const {
     data: { departures },
   } = await axios.get<DeparturesResponse>(
-    `https://transport.integration.sl.se/v1/sites/${siteId}/departures?timewindow=60${type ? `&transport=${type}` : ""}${direction ? `&direction=${direction}` : ""}`
+    `https://transport.integration.sl.se/v1/sites/${siteId}/departures?timewindow=60${type ? `&transport=${type}` : ""}${direction ? `&direction=${direction}` : ""}`,
   );
 
   if (!departures) throw Error("Missing departures data");
 
   return {
     service: name,
-    data: departures
-      .map(({ display, scheduled, journey }) => ({
-        id: `${journey.id}-${scheduled}`,
-        display,
-      }))
-      .filter((_, ix) => ix < 5),
+    data: departures.slice(0, 5).map(({ display, scheduled, journey }) => ({
+      id: `${journey.id}-${scheduled}`,
+      display,
+    })),
     meta: {
       label: transports?.label ?? "Transports",
     },
@@ -47,9 +45,9 @@ export const delay = () => {
   const peakTime =
     !weekend && ((hour >= 7 && hour <= 8) || (hour >= 15 && hour <= 16));
 
-  if (peakTime) sec2Ms(20);
+  if (peakTime) return sec2Ms(20);
 
-  if (dayTime) sec2Ms(30);
+  if (dayTime) return sec2Ms(30);
 
   return min2Ms(1);
 };

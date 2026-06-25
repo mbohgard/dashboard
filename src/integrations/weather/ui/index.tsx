@@ -8,7 +8,7 @@ import { Loader } from "../../../components/Atoms";
 import { WeatherIcon } from "./WeatherIcon";
 import { SunriseIcon, SunsetIcon } from "./SunIcons";
 import { getTempColor } from "../../../utils/color";
-import type { Parameter, TimeSerie } from "../types";
+import type { TimeSerie } from "../types";
 import { useService } from "../../../hooks/useService";
 
 type Type = {
@@ -21,9 +21,6 @@ type SunData = {
   sunset: Dayjs;
   sunsetMinutes: number;
 };
-
-const param = (params: Parameter[], name: string) =>
-  params.find((p) => p.name === name)!.values[0]!;
 
 const minutes = (t: Dayjs) => t.minute() + t.hour() * 60;
 
@@ -75,12 +72,15 @@ type WeatherProps = {
 };
 
 const Degrees: React.FC<WeatherProps & Type> = ({ data, type = "normal" }) => {
-  const deg = Math.round(param(data.parameters, "t"));
-  const color = getTempColor(deg);
+  const deg =
+    typeof data.data.air_temperature === "number"
+      ? Math.round(data.data.air_temperature)
+      : undefined;
+  const color = getTempColor(deg ?? 0);
 
   return (
     <DegreesContainer type={type} color={color}>
-      <span>{deg}</span>
+      <span>{deg ?? "-"}</span>
       {/* <Icon Celsius /> */}
     </DegreesContainer>
   );
@@ -120,8 +120,8 @@ type SingleWeatherProps = WeatherProps & { sun?: SunData };
 export const BigWeather: React.FC<SingleWeatherProps> = ({ data, sun }) => (
   <BigContainer>
     <WeatherIcon
-      code={param(data.parameters, "Wsymb2")}
-      night={sun ? isNight(data.validTime, sun) : false}
+      code={data.data.symbol_code ?? 0}
+      night={sun ? isNight(data.time, sun) : false}
     />
     <Degrees data={data} type="big" />
     {sun && (
@@ -184,12 +184,12 @@ const Small: React.FC<SingleWeatherProps & { day?: string }> = ({
 }) => (
   <SmallContainer>
     <span>
-      {dayjs(data.validTime).format("HH")}
+      {dayjs(data.time).format("HH")}
       {day && <DayOffset day={day}>{day}</DayOffset>}
     </span>
     <WeatherIcon
-      code={param(data.parameters, "Wsymb2")}
-      night={sun ? isNight(data.validTime, sun) : false}
+      code={data.data.symbol_code ?? 0}
+      night={sun ? isNight(data.time, sun) : false}
     />
     <Degrees data={data} />
   </SmallContainer>
@@ -202,16 +202,16 @@ export const SmallWeather: React.FC<{
   <SmallWrapper>
     {data
       .filter((t) => {
-        const hour = dayjs(t.validTime).hour();
+        const hour = dayjs(t.time).hour();
 
         return hour > 7 && hour < 22;
       })
       .map((t) => {
-        const date = dayjs(t.validTime);
+        const date = dayjs(t.time);
 
         return (
           <Small
-            key={t.validTime}
+            key={t.time}
             data={t}
             sun={sun}
             day={date.isToday() ? undefined : date.format("ddd")}

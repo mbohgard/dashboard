@@ -125,7 +125,7 @@ const ActionButtonLink = styled.a<ActionButtonProps>`
             ? color
             : colors.white
         : colors.superDimmed};
-  width: 84px;
+  width: 98px;
   cursor: pointer;
   color: ${({ active, color = colors.white }) =>
     active ? color : colors.superDimmed};
@@ -185,7 +185,7 @@ export const ActionButton = React.memo(
     });
 
     return <ActionButtonLink {...props} {...touchEvents} />;
-  }
+  },
 );
 
 const OverlayContainer = styled.div`
