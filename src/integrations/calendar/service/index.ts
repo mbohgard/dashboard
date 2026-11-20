@@ -1,14 +1,14 @@
-import dayjs, { Dayjs } from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
+import dayjs, { type Dayjs } from "dayjs";
+import isBetween from "dayjs/plugin/isBetween.js";
 // @ts-ignore
 import Ical from "ical-expander";
 
-import { ConfigError, axios } from "../../index";
-import type { CalendarEvent } from "../types";
+import { ConfigError, axios } from "../../index.ts";
+import type { CalendarEvent } from "../types.ts";
 
-import config from "../../../config";
-import { sec2Ms, ms2Hour } from "../../../utils/time";
-import { Colors } from "../../../styles";
+import config from "../../../config/index.ts";
+import { sec2Ms, ms2Hour } from "../../../utils/time.ts";
+import type { Colors } from "../../../styles.ts";
 
 export const name = "calendar";
 const { calendar } = config;
@@ -23,7 +23,7 @@ const createEvent = (
   color: Colors,
   { uid, summary, description, ...e }: any,
   nowDate: Dayjs,
-  now: number
+  now: number,
 ): CalendarEvent => {
   const startDate = e.startDate.toJSDate();
   const endDate = e.endDate.toJSDate();
@@ -49,7 +49,7 @@ export const sortEvents = <
   T extends Pick<CalendarEvent, "ongoing" | "start" | "now">,
 >(
   a: T,
-  b: T
+  b: T,
 ) => {
   const timeA = a.ongoing ? a.now : a.start;
   const timeB = b.ongoing ? b.now : b.start;
@@ -88,7 +88,7 @@ export const parseCalendarData = ({
             description,
             uid,
           };
-        }
+        },
       ),
       ...occurrences.map(
         ({
@@ -103,7 +103,7 @@ export const parseCalendarData = ({
             description,
             uid,
           };
-        }
+        },
       ),
     ]
       .map((e) => createEvent(name, color as Colors, e, nowDate, now))
@@ -130,7 +130,7 @@ export const get = async () => {
       const data = (await axios.get(url)).data;
 
       return parseCalendarData({ data, from, to, name: calendarName, color });
-    }
+    },
   );
 
   return Promise.allSettled(requests).then((events) => ({
@@ -138,7 +138,7 @@ export const get = async () => {
     data: events
       .reduce<CalendarEvent[]>(
         (acc, es) => (es.status === "fulfilled" ? [...acc, ...es.value] : acc),
-        []
+        [],
       )
       .reduce<CalendarEvent[]>((acc, item, ix) => {
         let duplicateIndex = -1;

@@ -1,9 +1,13 @@
-import config from "../../../config";
-import { ConfigError, type Feed, axios } from "../../index";
-import type { ApiResponse } from "../types";
+import config from "../../../config/index.ts";
+import { ConfigError, type Feed, axios } from "../../index.ts";
+import type { ApiResponse } from "../types.ts";
 
-import { sec2Ms } from "../../../utils/time";
-import { SonosCompleteDevice, SonosEmit, SonosFeedResponse } from "../types";
+import { sec2Ms } from "../../../utils/time.ts";
+import type {
+  SonosCompleteDevice,
+  SonosEmit,
+  SonosFeedResponse,
+} from "../types.ts";
 
 export const name = "sonos";
 const { sonos } = config;
@@ -54,7 +58,7 @@ const getAlbumArtSrc = async (device: ApiResponse[number]) => {
 const filterData = (updatedDevice?: SonosCompleteDevice) => {
   if (updatedDevice) {
     const ix = dataCache.findIndex(
-      (device) => device.uuid === updatedDevice.uuid
+      (device) => device.uuid === updatedDevice.uuid,
     );
 
     if (ix > -1)
@@ -70,7 +74,7 @@ const filterData = (updatedDevice?: SonosCompleteDevice) => {
       roomName,
       groupState,
       members: members.map(({ roomName }) => roomName),
-    })
+    }),
   );
 };
 
@@ -95,7 +99,7 @@ export const delay = () => sec2Ms(5);
 
 export const listener = ({ roomName, action, volume }: SonosEmit) => {
   const url = getUrl(
-    `/${roomName}/${action}${action === "volume" ? `/${volume || "+0"}` : ""}`
+    `/${roomName}/${action}${action === "volume" ? `/${volume || "+0"}` : ""}`,
   );
 
   return axios.get(url);

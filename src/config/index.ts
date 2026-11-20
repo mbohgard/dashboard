@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from "axios";
-import * as config from "../../config";
+import config from "../../config.js";
 
 export type Config = {
   axiosConfig?: AxiosRequestConfig;

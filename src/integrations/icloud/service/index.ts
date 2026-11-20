@@ -1,8 +1,8 @@
 import { getImages } from "icloud-shared-album";
 
-import { ConfigError } from "../../index";
-import config from "../../../config";
-import { min2Ms } from "../../../utils/time";
+import { ConfigError } from "../../index.ts";
+import config from "../../../config/index.ts";
+import { min2Ms } from "../../../utils/time.ts";
 
 export const name = "icloud";
 const { icloud } = config;
@@ -10,11 +10,7 @@ const { icloud } = config;
 export const get = async () => {
   if (!icloud?.albumToken) throw ConfigError(name, "Missing icloud url");
 
-  console.log("icloud fetching");
-
   const data = await getImages(icloud.albumToken);
-
-  console.log("icloud", data);
 
   return {
     service: name,

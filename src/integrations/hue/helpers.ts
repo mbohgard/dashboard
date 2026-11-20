@@ -6,14 +6,14 @@ import {
   huePercentage,
   satOrBriPercentage,
   tempPercentage,
-} from "../../utils/color";
+} from "../../utils/color.ts";
 import {
   compressor,
   createMedian,
   percentageOfRange,
   roundValues,
-} from "../../utils/helpers";
-import type { HueApiLight, HueLights, HSV } from "./types";
+} from "../../utils/helpers.ts";
+import type { HueApiLight, HueLights, HSV } from "./types.ts";
 
 export const hue2Hsv = (light: HueApiLight) => {
   let hsv;
@@ -54,7 +54,7 @@ const getColor = (hsv: HSV) => {
 export const lights2background = (
   on: boolean,
   l?: HueLights,
-  deg: number = 0
+  deg: number = 0,
 ) => {
   const start = { value: `linear-gradient(${deg}deg, `, bri: 0 };
 

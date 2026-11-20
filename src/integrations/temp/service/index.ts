@@ -1,11 +1,11 @@
 import https from "https";
 
-import config from "../../../config";
-import type { ApiResponse, HueThermometers } from "../types";
+import config from "../../../config/index.ts";
+import type { ApiResponse, HueThermometers } from "../types.ts";
 
-import { axios } from "../../index";
+import { axios } from "../../index.ts";
 
-import { min2Ms } from "../../../utils/time";
+import { min2Ms } from "../../../utils/time.ts";
 
 const { hue } = config;
 
@@ -27,7 +27,7 @@ export const get = async () => {
         "Cache-Control": "no-cache",
       },
       httpsAgent,
-    }
+    },
   );
 
   const data = Object.values(res.data).reduce<HueThermometers>(
@@ -49,7 +49,7 @@ export const get = async () => {
 
       return acc;
     },
-    {}
+    {},
   );
 
   return {

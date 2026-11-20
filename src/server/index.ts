@@ -2,25 +2,27 @@ import express from "express";
 import path from "path";
 import http from "http";
 import fs from "fs";
-import ws from "socket.io";
+import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
-import sv from "dayjs/locale/sv";
+import sv from "dayjs/locale/sv.js";
 
-import { version } from "../../package.json";
-import config, { AppConfig } from "../config";
+import pkg from "../../package.json" with { type: "json" };
+import config, { type AppConfig } from "../config/index.ts";
 
-import services, { ServiceName } from "../integrations";
-import { ms2Sec } from "../utils/time";
-import { stringify } from "../utils/helpers";
+import services, { type ServiceName } from "../integrations/index.ts";
+import { ms2Sec } from "../utils/time.ts";
+import { stringify } from "../utils/helpers.ts";
 import type {
   ServiceResponse,
   InitServiceData,
   ControlServiceData,
   ServicesUnion,
-} from "../integrations";
+} from "../integrations/index.ts";
 
 dayjs.locale(sv);
+
+const { version } = pkg;
 
 let launched: number;
 
@@ -32,7 +34,7 @@ const app = express();
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = new ws.Server(server, {
+const io = new Server(server, {
   cors: {
     origin: "*",
   },
@@ -41,7 +43,7 @@ const io = new ws.Server(server, {
 const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
 const cache: { [key in ServiceName]?: ServiceResponse } = {};
 const actionsInProgress = new Set<ServiceName>();
-const rootDir = path.join(__dirname, "..", "..");
+const rootDir = path.join(import.meta.dirname, "..", "..");
 
 const emit = (data: ServiceResponse | InitServiceData | ControlServiceData) => {
   io.emit(data.service, data);

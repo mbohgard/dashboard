@@ -1,8 +1,8 @@
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
-import type { ApiResponse } from "../types";
-import { sec2Ms, min2Ms } from "../../../utils/time";
+import { ConfigError, axios } from "../../index.ts";
+import type { ApiResponse } from "../types.ts";
+import { sec2Ms, min2Ms } from "../../../utils/time.ts";
 
 export const name = "voc";
 const { voc = {} } = config;

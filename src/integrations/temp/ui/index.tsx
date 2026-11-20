@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 import { useConfig } from "../../../stores";
@@ -49,7 +48,7 @@ export const Temp = () => {
           const deg = value / 100;
           const color = getTempColor(deg, [5, 35]);
           const icon = Object.values(groups).find(
-            (o) => o.name === name
+            (o) => o.name === name,
           )?.class;
 
           return (

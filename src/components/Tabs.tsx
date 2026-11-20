@@ -65,7 +65,7 @@ const TabContent = styled.div`
 `;
 
 type TabsProps = {
-  items?: Array<[label: string, element: JSX.Element, id?: string]>;
+  items?: Array<[label: string, element: React.JSX.Element, id?: string]>;
   defaultSelected?: string;
   resetDelay?: number;
 };

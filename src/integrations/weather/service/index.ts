@@ -1,9 +1,9 @@
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
-import type { ApiResponse } from "../types";
+import { ConfigError, axios } from "../../index.ts";
+import type { ApiResponse } from "../types.ts";
 
-import { min2Ms } from "../../../utils/time";
+import { min2Ms } from "../../../utils/time.ts";
 
 export const name = "weather";
 const { weather } = config;

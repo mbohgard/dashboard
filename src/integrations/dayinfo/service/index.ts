@@ -1,15 +1,15 @@
 import dayjs from "dayjs";
 import { v4 as uuid } from "uuid";
 
-import { axios, ConfigError } from "../../index";
-import config from "../../../config";
+import { axios, ConfigError } from "../../index.ts";
+import config from "../../../config/index.ts";
 
 import type {
   Data,
   DayResponse,
   NamsorApiBody,
   NamsorApiResponse,
-} from "../types";
+} from "../types.ts";
 
 export const name = "dayinfo";
 const { dayinfo } = config;
@@ -29,7 +29,7 @@ export const get = async () => {
   const datePath = today.format("YYYY/MM/DD");
   const day = (
     await axios.get<DayResponse>(
-      `https://sholiday.faboul.se/dagar/v2.1/${datePath}`
+      `https://sholiday.faboul.se/dagar/v2.1/${datePath}`,
     )
   ).data.dagar[0]!;
 
@@ -53,7 +53,7 @@ export const get = async () => {
               headers: {
                 "X-API-KEY": namsorApiKey,
               },
-            }
+            },
           )
         ).data;
 
@@ -66,13 +66,13 @@ export const get = async () => {
     birthday: (birthdays ?? []).reduce<null | string>(
       (acc, { name, month, day }) =>
         month === today.month() + 1 && day === today.date() ? name : acc,
-      null
+      null,
     ),
     names: genderData.personalNames.map(
       ({ firstName: name, likelyGender: gender }) => ({
         name,
         gender,
-      })
+      }),
     ),
     flag: Boolean(day?.flaggdag),
     red: Boolean(day?.["röd dag"]),

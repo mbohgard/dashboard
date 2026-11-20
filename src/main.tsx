@@ -200,7 +200,7 @@ const App = () => {
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <AppContainer width={145}>
+      <AppContainer width={150}>
         <BaseStyles />
         <ErrorBoundary>
           <Status />
@@ -210,7 +210,7 @@ const App = () => {
             columns="repeat(32, 1fr)"
             rows="30% auto 38%"
             padding={25}
-            width={90}
+            width={95}
             allowOverflow
           >
             <Area colStart={1} colEnd={14}>

@@ -1,14 +1,14 @@
 import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
+import duration from "dayjs/plugin/duration.js";
 
-import { ConfigError, axios } from "../../index";
+import { ConfigError, axios } from "../../index.ts";
 
-import config from "../../../config";
-import { parseCalendarData } from "../../calendar/service";
-import { min2Ms } from "../../../utils/time";
-import type { Period, Status } from "../types";
-import { swtch } from "../../../utils/helpers";
-import { CalendarEvent } from "../../calendar/types";
+import config from "../../../config/index.ts";
+import { parseCalendarData } from "../../calendar/service/index.ts";
+import { min2Ms } from "../../../utils/time.ts";
+import type { Period, Status } from "../types.ts";
+import { swtch } from "../../../utils/helpers.ts";
+import type { CalendarEvent } from "../../calendar/types.ts";
 
 dayjs.extend(duration);
 
@@ -18,7 +18,7 @@ const { chores } = config;
 const getStatus = (
   period: Period,
   now: dayjs.Dayjs,
-  start: dayjs.Dayjs
+  start: dayjs.Dayjs,
 ): Status => {
   if (start.isBefore(now)) return "urgent";
 
@@ -38,7 +38,7 @@ const mapEvents =
       swtch(
         period,
         ["day", dayjs(e.start).endOf("day")],
-        ["week", dayjs(e.start).endOf("week")]
+        ["week", dayjs(e.start).endOf("week")],
       ) ?? dayjs(e.start).endOf("month");
 
     return {

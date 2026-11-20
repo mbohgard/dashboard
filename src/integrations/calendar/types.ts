@@ -1,6 +1,6 @@
 export interface CalendarEvent {
   allDay: boolean;
-  color: import("../../styles").Colors;
+  color: import("../../styles.ts").Colors;
   end: number;
   id: string;
   name: string;

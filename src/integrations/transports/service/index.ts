@@ -1,9 +1,9 @@
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
-import type { DeparturesResponse } from "../types";
+import { ConfigError, axios } from "../../index.ts";
+import type { DeparturesResponse } from "../types.ts";
 
-import { min2Ms, sec2Ms } from "../../../utils/time";
+import { min2Ms, sec2Ms } from "../../../utils/time.ts";
 
 export const name = "transports";
 const { transports } = config;

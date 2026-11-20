@@ -1,13 +1,13 @@
 import dayjs from "dayjs";
-import weekOfYear from "dayjs/plugin/weekOfYear";
+import weekOfYear from "dayjs/plugin/weekOfYear.js";
 
-import config from "../../../config";
-import { ConfigError, axios } from "../../index";
-import type { ApiResponse } from "../types";
+import config from "../../../config/index.ts";
+import { ConfigError, axios } from "../../index.ts";
+import type { ApiResponse } from "../types.ts";
 
-import { min2Ms } from "../../../utils/time";
+import { min2Ms } from "../../../utils/time.ts";
 
-import { get as getTime } from "../../time/service";
+import { get as getTime } from "../../time/service/index.ts";
 
 export const name = "food";
 const { food } = config;
@@ -35,9 +35,9 @@ export const get = async () => {
             headers: {
               "Client-Token": "web-eaa12e50-c84c-4b4a-9cfe-4e3fcbcd9165",
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     )
   )
     .map((res) => res.data.WeekState)

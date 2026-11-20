@@ -1,9 +1,9 @@
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
-import type { ApiResponse } from "../types";
+import { ConfigError, axios } from "../../index.ts";
+import type { ApiResponse } from "../types.ts";
 
-import { min2Ms } from "../../../utils/time";
+import { min2Ms } from "../../../utils/time.ts";
 
 export const name = "time";
 const { time } = config;
@@ -14,7 +14,7 @@ export const get = async () => {
 
   const { timestamp, gmtOffset } = (
     await axios.get<ApiResponse>(
-      `http://api.timezonedb.com/v2.1/get-time-zone?key=${time.key}&format=json&by=zone&zone=${time.settings.timezone}`
+      `http://api.timezonedb.com/v2.1/get-time-zone?key=${time.key}&format=json&by=zone&zone=${time.settings.timezone}`,
     )
   ).data;
 

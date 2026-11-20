@@ -1,10 +1,10 @@
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
+import { ConfigError, axios } from "../../index.ts";
 import dayjs from "dayjs";
 
-import type { Data, ApiResponse } from "../types";
-import { min2Ms, sec2Ms } from "../../../utils/time";
+import type { Data, ApiResponse } from "../types.ts";
+import { min2Ms, sec2Ms } from "../../../utils/time.ts";
 import { isAxiosError } from "axios";
 
 export const name = "energy";
@@ -55,13 +55,13 @@ export const get = async () => {
     days.map((d) =>
       axios
         .get<ApiResponse>(
-          `https://www.elprisetjustnu.se/api/v1/prices/${d}_${energy.zone}.json`
+          `https://www.elprisetjustnu.se/api/v1/prices/${d}_${energy.zone}.json`,
         )
         .catch((e) => {
           if (isAxiosError(e) && e.status === 404) return null;
           throw e;
-        })
-    )
+        }),
+    ),
   );
 
   const data = getData(now, todayRes?.data);

@@ -1,14 +1,18 @@
 import React from "react";
-import styled, { css, type IStyledComponent } from "styled-components";
+import styled, { css } from "styled-components";
 
 import { pascal } from "../utils/helpers";
 
-import allIcons from "../assets/icons/*.svg";
 import type { HueGroupClass } from "../integrations/hue/types";
 
+const allIcons = import.meta.glob<React.FC>("../assets/icons/*.svg", {
+  eager: true,
+  query: "?react",
+  import: "default",
+});
+
 type Props = { size?: number };
-type Imported = { [s: string]: { default: React.FC } };
-type Icon = IStyledComponent<"web", Props>;
+type Icon = ReturnType<typeof createComp>;
 type IconsObj = {
   [s: string]: Icon;
 };
@@ -29,17 +33,15 @@ const Fallback = createComp(
   styled.span`
     background: red;
   `,
-  50
+  50,
 );
 
-const iconsObj: IconsObj = Object.entries(
-  allIcons as unknown as Imported
-).reduce<IconsObj>(
-  (acc, [key, { default: C }]) => ({
+const iconsObj: IconsObj = Object.entries(allIcons).reduce<IconsObj>(
+  (acc, [path, C]) => ({
     ...acc,
-    [pascal(key)]: createComp(C),
+    [pascal(path.slice(path.lastIndexOf("/") + 1, -4))]: createComp(C),
   }),
-  {}
+  {},
 );
 
 const iconNameFromHueClass = (hueClass: HueGroupClass) =>
@@ -47,7 +49,7 @@ const iconNameFromHueClass = (hueClass: HueGroupClass) =>
     (acc, key) =>
       acc ||
       (hueClass.replace(" ", "") === key.replace("Rooms", "") ? key : ""),
-    ""
+    "",
   );
 
 type IconProps = { [name: string]: any } & { name?: string } & {
@@ -62,7 +64,7 @@ export const Icon = React.memo(({ size, name, hueClass, ...p }: IconProps) => {
           ? iconNameFromHueClass(hueClass)
           : Object.entries(p).reduce(
               (acc, [k, v]) => (v === true ? k : acc),
-              ""
+              "",
             ))
     ] || Fallback;
 

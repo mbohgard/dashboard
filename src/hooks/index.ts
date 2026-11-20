@@ -36,7 +36,7 @@ export const useTouchPress = (cbs: {
   onPress?(): void;
   onLongPress?(): void;
 }) => {
-  const timer = useRef<number>();
+  const timer = useRef<number | undefined>(undefined);
   const [active, setActive] = useState(false);
 
   const onTouchStart = () => {
@@ -176,8 +176,8 @@ export const useThrottle = ({
   interval = 300,
   finalize = false,
 }: UseThrottleOptions) => {
-  const t1 = useRef<number>();
-  const t2 = useRef<number>();
+  const t1 = useRef<number | undefined>(undefined);
+  const t2 = useRef<number | undefined>(undefined);
 
   useEffect(
     () => () => {
