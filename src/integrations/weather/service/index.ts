@@ -1,9 +1,9 @@
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
-import type { ApiResponse } from "../types";
+import { ConfigError, axios } from "../../index.ts";
+import type { ApiResponse } from "../types.ts";
 
-import { min2Ms } from "../../../utils/time";
+import { min2Ms } from "../../../utils/time.ts";
 
 export const name = "weather";
 const { weather } = config;
@@ -20,7 +20,7 @@ export const get = async () => {
   if (!lon || !lat)
     throw ConfigError(name, "Missing 'lon' and/or 'lat' config");
 
-  const smhiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${lon}/lat/${lat}/data.json`;
+  const smhiUrl = `https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/${lon}/lat/${lat}/data.json`;
   const sunUrl = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&formatted=0`;
 
   const [smhi, sun] = await Promise.all([

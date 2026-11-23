@@ -1,11 +1,10 @@
 import React from "react";
 
-import { useService } from "../../../hooks";
-
 import { Icon } from "../../../components/Icon";
 import { ButtonGrid } from "../../../components/Atoms";
 import { ActionButton, ServiceBox } from "../../../components/Molecules";
 import { colors } from "../../../styles";
+import { useService } from "../../../hooks/useService";
 
 const getChargeColor = (value?: number) => {
   if (value === undefined) return;

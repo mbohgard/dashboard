@@ -2,16 +2,12 @@ import React, { useMemo, useRef } from "react";
 import styled, { css } from "styled-components";
 
 import { Loader } from "../../../components/Atoms";
-import {
-  useIsIdle,
-  useService,
-  useSparkle,
-  useStoredData,
-} from "../../../hooks";
+import { useIsIdle, useSparkle, useStoredData } from "../../../hooks";
 import { ServiceBox } from "../../../components/Molecules";
 import type { Chore as ChoreContainer, Status } from "../types";
 import { colors } from "../../../styles";
 import dayjs from "dayjs";
+import { useService } from "../../../hooks/useService";
 
 const Container = styled.ul`
   font-size: 18px;
@@ -24,7 +20,7 @@ const Container = styled.ul`
   margin-top: 10px;
 `;
 
-const MONTH_LABEL_WIDTH = 70;
+const MONTH_LABEL_WIDTH = 50;
 
 const ChoreContainer = styled.li<{
   status?: Status;
@@ -175,7 +171,10 @@ type StoreData = string[];
 
 export const Chores: React.FC = () => {
   const listRef = useRef<HTMLUListElement | null>(null);
-  const [data, , meta] = useService("chores");
+  const [{ data, meta } = {}] = useService("chores", ({ data, meta }) => ({
+    data,
+    meta,
+  }));
   const [checkedChores, setCheckedChores] = useStoredData<StoreData>("chores");
 
   useIsIdle(() => {
@@ -197,7 +196,7 @@ export const Chores: React.FC = () => {
 
         return acc;
       }, []),
-    [data]
+    [data],
   );
 
   if (!data) return <Loader />;
@@ -209,7 +208,7 @@ export const Chores: React.FC = () => {
     else chores.splice(chores.indexOf(item.chore.id), 1);
 
     setCheckedChores(
-      chores.filter((id) => list!.find((item) => item.chore.id === id))
+      chores.filter((id) => list!.find((item) => item.chore.id === id)),
     );
   };
 

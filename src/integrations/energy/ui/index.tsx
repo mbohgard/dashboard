@@ -1,21 +1,22 @@
 import React, { useRef } from "react";
 import styled, { css } from "styled-components";
 
-import { useIsIdle, useService } from "../../../hooks";
+import { useIsIdle } from "../../../hooks";
 import { colors } from "../../../styles";
 import { Icon } from "../../../components/Icon";
 import { Loader } from "../../../components/Atoms";
 import { ScrollIndicator } from "../../../components/ScrollIndicator";
+import { useService } from "../../../hooks/useService";
 
 const Container = styled.div`
   position: relative;
   height: calc(100% + 4px);
   display: flex;
-  align-items: flex-end;
+  justify-content: center;
 
   .energy-scroll {
     position: absolute;
-    bottom: 12px;
+    bottom: 5px;
     top: auto;
     scale: 0.8;
   }
@@ -26,7 +27,6 @@ const InnerContainer = styled.div`
   gap: 16px;
   width: calc(100% - 45px);
   height: 100%;
-  padding-bottom: 10px;
   overflow: hidden;
   overflow-x: auto;
 `;

@@ -389,7 +389,7 @@ export const WeatherIcon: React.FC<{ code: number; night: boolean }> = ({
   code,
   night,
 }) => {
-  const iconMap: { [code: number]: JSX.Element } = {
+  const iconMap: { [code: number]: React.JSX.Element } = {
     1: night ? clearNight : clear,
     2: night ? clearNight : clear,
     3: night ? variableNight : variable,

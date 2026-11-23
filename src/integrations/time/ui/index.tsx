@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import dayjs, { Dayjs } from "dayjs";
 
-import { useService } from "../../../hooks";
 import { colors } from "../../../styles";
+import { useService } from "../../../hooks/useService";
 
 const dots = keyframes`
   from {
@@ -15,9 +15,9 @@ const dots = keyframes`
 
 const seconds = keyframes`
   from {
-    clip-path: inset(99% 0 0 0);
+    clip-path: inset(99% 0 0 -10%);
   } to {
-    clip-path: inset(7% 0 0 0);
+    clip-path: inset(7% 0 0 -10%);
   }
 `;
 
@@ -26,15 +26,18 @@ const Container = styled.div`
   justify-content: center;
   display: flex;
   flex-direction: column;
+  gap: 12px;
 `;
 
 const TimeView = styled.h2`
   position: relative;
   font-size: 185px;
   font-weight: 300;
-  text-align: right;
+  scale: 1 0.93;
+  transform-origin: top;
   letter-spacing: -7px;
   line-height: 0.8;
+  direction: rtl;
   color: ${colors.dimmed};
 `;
 
@@ -42,7 +45,6 @@ const DateView = styled.h4`
   font-size: 30px;
   font-weight: 300;
   text-align: right;
-  margin-top: 30px;
   white-space: nowrap;
 
   span {
@@ -59,8 +61,7 @@ const Dots = styled.i`
 const TimeBlind = styled.span`
   position: absolute;
   display: block;
-  /* background: ${colors.black}; */
-  clip-path: inset(99% 0 0 0);
+  clip-path: inset(7% 0 0 -10%);
   font-weight: 400;
   top: 0;
   left: 0;
@@ -85,12 +86,11 @@ const getDate = (date: Dayjs) => [
 ];
 
 export const Time: React.FC = () => {
-  const timestamp = useRef<number>();
+  const timestamp = useRef<number>(0);
   if (!timestamp.current) timestamp.current = now();
-  const ts = timestamp.current;
 
   const [data] = useService("time");
-  const [[h, m, time], setTime] = useState(() => getTime(ts));
+  const [[h, m, time], setTime] = useState(() => getTime(timestamp.current));
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -108,7 +108,7 @@ export const Time: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      timestamp.current = data.timestamp - data.gmtOffset;
+      timestamp.current = data;
 
       setTime(getTime(timestamp.current));
     }

@@ -1,17 +1,10 @@
-export type Areas = "One" | "Two" | "Three" | "Four";
-
-type Hour = {
-  Id: number;
-  CreatedDate: string;
-} & {
-  [Key in Areas as `AverageArea${Key}`]: number;
-} & {
-  [Key in Areas as `CurrentArea${Key}`]: number;
-} & {
-  [Key in Areas as `ForecastArea${Key}`]: number;
-};
-
-export type ApiResponse = Hour[];
+export type ApiResponse = Array<{
+  SEK_per_kWh: number;
+  EUR_per_kWh: number;
+  EXR: number;
+  time_start: string;
+  time_end: string;
+}>;
 
 interface EnergyMetric {
   value: number;

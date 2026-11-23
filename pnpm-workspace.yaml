@@ -1,0 +1,4 @@
+# Keep React type definitions aligned across dependencies.
+overrides:
+  "@types/react": 19.3.0
+autoInstallPeers: false

@@ -57,17 +57,25 @@ module.exports = {
       },
     ],
   },
+  dayinfo: {
+    namsorApiKey: "",
+    birthdays: [
+      {
+        name: "",
+        date: "2001-01-01",
+      },
+    ],
+  },
   chores: {
     label: "",
     url: ".ics",
   },
   food: {
-    station: 0,
+    schoool: "",
     label: "",
   },
   sonos: {
-    api: "", // url to local node-sonos-http-api,
-    feed: "",
+    host: "", // optional speaker IP; leave empty for automatic LAN discovery
   },
   icloud: {
     label: "",

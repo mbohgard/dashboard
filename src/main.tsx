@@ -15,7 +15,8 @@ import { BaseStyles } from "./styles";
 import { configStore, connectedStore, settingsStore } from "./stores";
 import { socket } from "./utils/socket";
 import { reportError } from "./utils/report";
-import { useConnected, useIsIdle, useScroll } from "./hooks";
+import { useIsIdle, useScroll } from "./hooks";
+import { useConnected } from "./stores";
 
 import { StatusDot } from "./components/Atoms";
 import { About } from "./components/About";
@@ -25,7 +26,7 @@ import { Energy } from "./integrations/energy/ui";
 import { Transports } from "./integrations/transports/ui";
 import { Hue } from "./integrations/hue/ui";
 import { Temp } from "./integrations/temp/ui";
-import { VOC } from "./integrations/voc/ui";
+// import { VOC } from "./integrations/voc/ui";
 import { Errors } from "./components/Errors";
 import { Scrollable } from "./components/Scrollable";
 import { RightTabGroup } from "./components/RightTabGroup";
@@ -34,6 +35,8 @@ import { ControlServiceData, InitServiceData } from "./types";
 import { ScrollIndicator } from "./components/ScrollIndicator";
 import { Chores } from "./integrations/chores/ui";
 import { ICloud } from "./integrations/icloud/ui";
+import { Flag, NameDay, Birthday } from "./integrations/dayinfo/ui";
+import { XmasOverlay } from "./components/XmasOverlay";
 
 dayjs.extend(calendar);
 dayjs.extend(updateLocale);
@@ -64,23 +67,25 @@ const AppContainer = styled.div<{ width?: number }>`
 type AreaProps = {
   colStart?: number;
   colEnd?: number;
+  gap?: number;
   rowStart?: number;
   rowEnd?: number;
   align?: "start" | "end" | "center" | "stretch";
   justify?: "start" | "end" | "center" | "stretch";
   flex?: boolean;
   column?: boolean;
+  allowOverflow?: boolean;
 };
 
 export const Area = styled.div<AreaProps>(
   (p) => css`
-    overflow: hidden;
+    overflow: ${p.allowOverflow ? "visible" : "hidden"};
     position: relative;
     width: 100%;
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    grid-gap: 20px;
+    gap: ${p.gap ?? 20}px;
     grid-column-start: ${p.colStart ?? "auto"};
     grid-column-end: ${p.colEnd ?? "auto"};
     grid-row-start: ${p.rowStart ?? "auto"};
@@ -89,7 +94,7 @@ export const Area = styled.div<AreaProps>(
     justify-self: ${p.justify ?? "auto"};
     display: ${p.flex ? "flex" : "block"};
     flex-direction: ${p.column ? "column" : "row"};
-  `
+  `,
 );
 
 type GridWrapperProps = {
@@ -190,12 +195,12 @@ const App = () => {
     () => {
       document.getElementById("app")?.scrollTo({ left: 0, behavior: "smooth" });
     },
-    { timeout: 30000 }
+    { timeout: 30000 },
   );
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <AppContainer width={145}>
+      <AppContainer width={150}>
         <BaseStyles />
         <ErrorBoundary>
           <Status />
@@ -205,7 +210,8 @@ const App = () => {
             columns="repeat(32, 1fr)"
             rows="30% auto 38%"
             padding={25}
-            width={98}
+            width={95}
+            allowOverflow
           >
             <Area colStart={1} colEnd={14}>
               <Weather type="big" />
@@ -213,35 +219,39 @@ const App = () => {
             <Area colStart={14} colEnd={21}>
               <Energy />
             </Area>
-            <Area colStart={21} colEnd={33} flex>
+            <Area colStart={21} colEnd={33} flex column gap={12} allowOverflow>
+              <Flag />
+              <Birthday />
               <Time />
+              <NameDay />
             </Area>
-            <Area colStart={1} colEnd={21} flex>
+            <Area colStart={1} colEnd={20} flex>
               <ScrollableContainer>
                 <Weather />
               </ScrollableContainer>
             </Area>
-            <Area colStart={21} colEnd={33} rowStart={2} rowEnd={4}>
+            <Area colStart={20} colEnd={33} rowStart={2} rowEnd={4}>
               <RightTabGroup />
             </Area>
-            <BottomContainer colStart={1} colEnd={21} flex>
+            <BottomContainer colStart={1} colEnd={20} flex>
               <Transports />
-              <VOC />
+              {/* <VOC /> */}
               <Temp />
               <Chores />
             </BottomContainer>
             <Errors />
             {settings.halloween && <HalloweenOverlay />}
+            {settings.xmas && <XmasOverlay />}
           </GridWrapper>
           <GridWrapper
             columns="repeat(16, 1fr)"
             rows="60% 40%"
             padding={25}
-            width={50}
+            width={55}
             ref={filterRef}
           >
             <Area colStart={1} colEnd={17}>
-              {/* <ICloud /> */}
+              <ICloud />
             </Area>
 
             <Area colStart={1} colEnd={17}>

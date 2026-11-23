@@ -71,9 +71,6 @@ typings/
 # Backup files
 *.backup
 
-# parcel cache
-.parcel-cache
-
 # sensitive config
 config.js
 

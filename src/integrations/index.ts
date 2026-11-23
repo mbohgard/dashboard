@@ -1,21 +1,22 @@
 import _axios from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
-import type { ValueOf } from "../types";
+import type { ValueOf } from "../types/index.ts";
 
-import config, { AppConfig } from "../config";
+import config, { type AppConfig } from "../config/index.ts";
 
-import * as Hue from "./hue/service";
-import * as Time from "./time/service";
-import * as Energy from "./energy/service";
-import * as Transports from "./transports/service";
-import * as Voc from "./voc/service";
-import * as Weather from "./weather/service";
-import * as Calendar from "./calendar/service";
-import * as Chores from "./chores/service";
-import * as Temp from "./temp/service";
-import * as Food from "./food/service";
-import * as Sonos from "./sonos/service";
-import * as ICloud from "./icloud/service";
+import * as Hue from "./hue/service/index.ts";
+import * as Time from "./time/service/index.ts";
+import * as Energy from "./energy/service/index.ts";
+import * as Transports from "./transports/service/index.ts";
+import * as Voc from "./voc/service/index.ts";
+import * as Weather from "./weather/service/index.ts";
+import * as Calendar from "./calendar/service/index.ts";
+import * as Chores from "./chores/service/index.ts";
+import * as Temp from "./temp/service/index.ts";
+import * as Food from "./food/service/index.ts";
+import * as Sonos from "./sonos/service/index.ts";
+import * as ICloud from "./icloud/service/index.ts";
+import * as DayInfo from "./dayinfo/service/index.ts";
 
 const services = {
   hue: Hue,
@@ -30,6 +31,7 @@ const services = {
   food: Food,
   sonos: Sonos,
   icloud: ICloud,
+  dayinfo: DayInfo,
 } as const;
 
 type Services = typeof services;
@@ -39,7 +41,7 @@ export type ServiceName = keyof Services;
 type ServiceReturn<N extends ServiceName> = Awaited<
   ReturnType<Services[N]["get"]>
 >;
-type Data<N extends ServiceName> = ServiceReturn<N>["data"];
+export type Data<N extends ServiceName> = ServiceReturn<N>["data"];
 // @ts-ignore
 export type Meta<N extends ServiceName> = ServiceReturn<N>["meta"];
 export type Emit<N extends ServiceName> =
@@ -48,12 +50,20 @@ export type Emit<N extends ServiceName> =
     ? never
     : // @ts-ignore
       Parameters<Services[N]["listener"]>[number];
+// @ts-ignore
+export type Feed<Name extends ServiceName, T> = {
+  // `endpoint` will register a route to receive updates on, `sse` (server side event) will make a request to receive streaming events on
+  type: "endpoint" | "sse";
+  method: "get" | "post";
+  endpoint?: string;
+  handler: (data: T) => ServiceResponse<Name> | null;
+};
 
-type CreateServiceResponse<N, D, M = unknown> = {
+export type CreateServiceResponse<N = string, D = unknown, M = unknown> = {
   data?: D;
   error?: unknown;
   service: N;
-} & (unknown extends M ? { meta?: undefined } : { meta: M });
+} & (unknown extends M ? { meta?: never } : { meta: M });
 
 export type ServiceResponse<Name extends ServiceName = ServiceName> =
   CreateServiceResponse<Name, Data<Name>, Meta<Name>>;

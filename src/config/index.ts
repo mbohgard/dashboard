@@ -1,15 +1,13 @@
 import type { AxiosRequestConfig } from "axios";
-import * as config from "../../config";
+import config from "../../config.js";
 
-type Config = {
+export type Config = {
   axiosConfig?: AxiosRequestConfig;
   transports?: {
     label?: string;
     settings?: {
       siteId: string;
-      type?: Array<
-        "BUS" | "TRAIN" | "METRO" | "TRAM" | "SHIP" | "TAXI" | "FERRY"
-      >;
+      type?: "BUS" | "TRAIN" | "METRO" | "TRAM" | "SHIP" | "TAXI" | "FERRY";
       direction?: number;
     };
   };
@@ -53,16 +51,27 @@ type Config = {
       color?: string;
     }>;
   };
+  dayinfo?: {
+    namsorApiKey?: string;
+    birthdays?: Array<{
+      name: string;
+      month: number;
+      day: number;
+    }>;
+  };
   chores?: {
     label?: string;
     url?: string;
   };
   food?: {
-    station?: 0;
+    school?: string;
     label?: string;
   };
   sonos?: {
+    host?: string;
+    /** @deprecated No separate Sonos HTTP server is needed. */
     api?: string;
+    /** @deprecated Status is read directly from the speakers. */
     feed?: string;
   };
   icloud?: {

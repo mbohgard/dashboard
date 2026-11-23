@@ -1,11 +1,11 @@
-import React from "react";
 import styled from "styled-components";
 
-import { useConfig, useService } from "../../../hooks";
+import { useConfig } from "../../../stores";
 import { getTempColor } from "../../../utils/color";
 import { Icon } from "../../../components/Icon";
 import { Loader } from "../../../components/Atoms";
 import { ServiceBox } from "../../../components/Molecules";
+import { useService } from "../../../hooks/useService";
 
 const Container = styled.ul`
   display: flex;
@@ -36,8 +36,8 @@ const Degrees = styled.span`
 
 export const Temp = () => {
   const config = useConfig();
-  const [tempData] = useService("temp", {});
-  const [groups] = useService("hue", {});
+  const [tempData] = useService("temp");
+  const [groups] = useService("hue");
 
   if (!tempData || !groups) return <Loader />;
 
@@ -48,7 +48,7 @@ export const Temp = () => {
           const deg = value / 100;
           const color = getTempColor(deg, [5, 35]);
           const icon = Object.values(groups).find(
-            (o) => o.name === name
+            (o) => o.name === name,
           )?.class;
 
           return (

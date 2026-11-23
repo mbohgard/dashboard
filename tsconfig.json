@@ -1,24 +1,26 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
     "allowJs": true,
     "esModuleInterop": true,
-    "jsx": "react",
-    "lib": ["es2020", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "lib": ["es2022", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noUncheckedIndexedAccess": true,
     "outDir": "dist/",
-    "plugins": [{ "name": "typescript-styled-plugin" }],
     "removeComments": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2020"
+    "target": "es2020",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node", "react", "react-dom"],
+    "rootDir": "."
   },
-  "include": ["src", "@types"]
+  "include": ["src", "@types", "vite.config.mts"]
 }

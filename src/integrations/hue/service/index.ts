@@ -1,10 +1,10 @@
 import https from "https";
 
-import config from "../../../config";
+import config from "../../../config/index.ts";
 
-import { ConfigError, axios } from "../../index";
-import { hue2Hsv } from "../helpers";
-import type { ApiResponse } from "../types";
+import { ConfigError, axios } from "../../index.ts";
+import { hue2Hsv } from "../helpers.ts";
+import type { ApiResponse } from "../types.ts";
 
 import type {
   HueGroups,
@@ -12,9 +12,9 @@ import type {
   HueApiActionResponse,
   HSV,
   HueLights,
-} from "../types";
-import { sec2Ms } from "../../../utils/time";
-import { round, pick, createMedian } from "../../../utils/helpers";
+} from "../types.ts";
+import { sec2Ms } from "../../../utils/time.ts";
+import { round, pick, createMedian } from "../../../utils/helpers.ts";
 
 export const name = "hue";
 const { hue } = config;
@@ -47,7 +47,7 @@ const getLights = (l: ApiResponse["lights"]) => {
           },
         ];
       },
-      [0, {}]
+      [0, {}],
     );
 };
 
@@ -79,7 +79,7 @@ export const get = async () => {
         },
       };
     },
-    {}
+    {},
   );
 
   return {

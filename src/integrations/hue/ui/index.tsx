@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 
-import { useService } from "../../../hooks";
+import { useService } from "../../../hooks/useService";
 import { colors } from "../../../styles";
 import { debounce, roundedValueFromPercentage } from "../../../utils/helpers";
 import { satOrBriPercentage } from "../../../utils/color";
@@ -11,28 +11,29 @@ import { ServiceBox } from "../../../components/Molecules";
 import { ActionButton, Overlay } from "../../../components/Molecules";
 import { Range } from "../../../components/Range";
 import { lights2background } from "../helpers";
+import { useStableCallback } from "../../../hooks";
 
 const getIconColor = (bri: number) =>
   satOrBriPercentage(bri) > 50 ? colors.black : colors.white;
 
 export const Hue: React.FC = () => {
-  const [groups, emit] = useService("hue", {});
+  const [groups, emit] = useService("hue");
   const [adjustId, setAdjustId] = useState<string>();
 
-  const send = useCallback(
+  const send = useStableCallback(
     ({ id, ...payload }: Parameters<typeof emit>[0]) => {
       const set = emit({ id, ...payload });
-
-      if (set)
-        set((state) => ({
-          ...state,
-          [id]: {
-            ...state![id]!,
-            ...payload,
-          },
-        }));
-    },
-    [emit]
+      set?.(
+        (state) =>
+          state && {
+            ...state,
+            [id]: {
+              ...state[id]!,
+              ...payload,
+            },
+          }
+      );
+    }
   );
 
   const toggle = useCallback(
@@ -51,7 +52,7 @@ export const Hue: React.FC = () => {
 
   const buttons = useMemo(
     () =>
-      Object.entries(groups).map(([id, group]) => {
+      Object.entries(groups ?? {}).map(([id, group]) => {
         const { value: bg, bri } = lights2background(
           group.on,
           group.lights || undefined
@@ -82,7 +83,9 @@ export const Hue: React.FC = () => {
         <Overlay closeOnPress close={setAdjustId} autoClose={5000}>
           <Range
             onChange={adjust}
-            initialValue={satOrBriPercentage(groups[adjustId]!.bri)}
+            initialValue={
+              groups?.[adjustId] && satOrBriPercentage(groups[adjustId].bri)
+            }
           />
         </Overlay>
       )}

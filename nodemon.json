@@ -1,4 +1,0 @@
-{
-  "watch": ["src/server", "src/integrations"],
-  "ext": "ts"
-}

@@ -2,33 +2,39 @@ import express from "express";
 import path from "path";
 import http from "http";
 import fs from "fs";
-import ws from "socket.io";
+import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
+import dayjs from "dayjs";
+import sv from "dayjs/locale/sv.js";
 
-import { version } from "../../package.json";
-import config, { AppConfig } from "../config";
+import pkg from "../../package.json" with { type: "json" };
+import config, { type AppConfig } from "../config/index.ts";
 
-import * as subscribers from "./subscribers";
-import services, { ServiceName } from "../integrations";
-import { ms2Sec } from "../utils/time";
-import { stringify } from "../utils/helpers";
+import services, { type ServiceName } from "../integrations/index.ts";
+import { ms2Sec } from "../utils/time.ts";
+import { stringify } from "../utils/helpers.ts";
 import type {
   ServiceResponse,
   InitServiceData,
   ControlServiceData,
   ServicesUnion,
-} from "../integrations";
+} from "../integrations/index.ts";
+
+dayjs.locale(sv);
+
+const { version } = pkg;
 
 let launched: number;
 
 const PROD = process.env.NODE_ENV === "production";
 const PORT = 8081;
+const POLL = !process.argv.includes("no-poll");
 
 const app = express();
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = new ws.Server(server, {
+const io = new Server(server, {
   cors: {
     origin: "*",
   },
@@ -37,29 +43,9 @@ const io = new ws.Server(server, {
 const timers: { [key in ServiceName]?: NodeJS.Timeout } = {};
 const cache: { [key in ServiceName]?: ServiceResponse } = {};
 const actionsInProgress = new Set<ServiceName>();
-const poll = !process.argv.includes("no-poll");
-const rootDir = path.join(__dirname, "..", "..");
+const rootDir = path.join(import.meta.dirname, "..", "..");
 
-const stopService = (s: ServiceName) => {
-  global.clearTimeout(timers[s]!);
-  delete timers[s];
-};
-
-const saveToCache = (s: ServiceName, data: ServiceResponse) =>
-  (cache[s] = data);
-const sendCached = (s: ServiceName) => {
-  const data = cache[s];
-  data && emit(data);
-
-  return Boolean(data);
-};
-
-const emit = (
-  data:
-    | { service: string; data?: any; error?: any }
-    | InitServiceData
-    | ControlServiceData
-) => {
+const emit = (data: ServiceResponse | InitServiceData | ControlServiceData) => {
   io.emit(data.service, data);
 
   if (data.error) {
@@ -75,17 +61,30 @@ const emit = (
 
 const formatError = (e: unknown) => {
   if (e === undefined) return e;
-  if (e instanceof Error)
-    return { message: e.message, name: e.name, id: uuid() };
-  return stringify(e) || "Unknown error";
+
+  return e instanceof Error
+    ? { message: e.message, name: e.name, id: uuid() }
+    : stringify(e) || "Unknown error";
+};
+
+const publish = (data: ServiceResponse) => {
+  cache[data.service] = data;
+  emit({ ...data, error: formatError(data.error) });
+};
+
+const serviceError = (name: ServiceName, error: unknown) => {
+  console.log(`Error in service ${name}:`, error);
+  emit({ service: name, error: formatError(error) });
 };
 
 const fetcher = (service: ServicesUnion, forceWait = false) => {
+  if ("enabled" in service && !service.enabled) return;
+
   const next = (waitOnAction = false) => {
     global.clearTimeout(timers[service.name]!);
     timers[service.name] = global.setTimeout(
       () => fetcher(service),
-      waitOnAction ? 1000 : service.delay()
+      waitOnAction ? 1000 : service.delay(),
     );
   };
 
@@ -95,58 +94,43 @@ const fetcher = (service: ServicesUnion, forceWait = false) => {
         .get()
         .then((data) => {
           emit({
-            ...data,
+            ...(data as ServiceResponse),
             error: formatError("error" in data ? data.error : undefined),
           });
-          saveToCache(data.service as ServiceName, data as ServiceResponse);
+          // save to cache
+          cache[data.service as ServiceName] = data as ServiceResponse;
         })
         .catch((e) => {
+          console.log(`Error in service ${service.name}:`, e);
           emit({
             service: service.name,
             error: formatError(e),
           });
         })
-        .finally(() => poll && next());
-};
-
-const subscribe = (id: string, s: ServiceName) => {
-  const hasCache = sendCached(s);
-
-  if (subscribers.add(id, s)) {
-    const service = services[s] as ServicesUnion;
-
-    if (service) fetcher(service, hasCache);
-    else {
-      emit({
-        service: s,
-        error: formatError(
-          Error(`Service ${s} has the wrong format or doesn't exist`)
-        ),
-      });
-    }
-  }
-};
-
-const unsubscribe = (id: string, s?: ServiceName) => {
-  if (s && !subscribers.remove(id, s)) stopService(s);
-  else if (!s) {
-    Object.entries(subscribers.remove(id)).forEach(([k, n]) => {
-      if (!n) stopService(k as ServiceName);
-    });
-  }
+        .finally(() => POLL && next());
 };
 
 io.on("connection", (socket) => {
-  socket.on("subscribe", (service) => subscribe(socket.id, service));
-  socket.on("unsubscribe", (service) => unsubscribe(socket.id, service));
+  socket.on("subscribe", (s: ServiceName) => {
+    const service = services[s];
+    const data = cache[s];
 
-  socket.on("disconnect", () => {
-    unsubscribe(socket.id);
+    if (service) {
+      // send cached data if available
+      if (data) emit(data);
+    } else {
+      emit({
+        service: s,
+        error: formatError(
+          Error(`Service ${s} has the wrong format or doesn't exist`),
+        ),
+      });
+    }
   });
 
   // register listeners
   Object.values(services).forEach((service) => {
-    if (service.name && "listener" in service) {
+    if ("listener" in service) {
       socket.on(service.name, (payload) => {
         actionsInProgress.add(service.name);
         service
@@ -158,22 +142,6 @@ io.on("connection", (socket) => {
             });
           })
           .finally(() => actionsInProgress.delete(service.name));
-      });
-    }
-
-    if (service.name && "feed" in service && service.feed.endpoint) {
-      app.post(service.feed.endpoint, (req, res) => {
-        try {
-          const result = service.feed.handler(req.body);
-          if (result) emit(result);
-        } catch (e) {
-          emit({
-            service: service.name,
-            error: formatError(e),
-          });
-        }
-
-        res.sendStatus(200);
       });
     }
   });
@@ -202,10 +170,34 @@ if (PROD) app.use("/", express.static(path.join(rootDir, "dist")));
 server.listen(PORT, () => {
   launched = ms2Sec(Date.now());
   console.log("Server listening on port", PORT);
+
+  // kick off all services
+  Object.values(services).forEach((service) => {
+    if ("enabled" in service && !service.enabled) return;
+    if (POLL && "start" in service) {
+      service.start(publish, (error) => serviceError(service.name, error));
+    } else {
+      fetcher(service);
+    }
+  });
 });
 
-process.on("SIGINT", function () {
-  console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
-  // some other closing procedures go here
+let shuttingDown = false;
+const shutdown = async () => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  for (const timer of Object.values(timers)) clearTimeout(timer);
+  // Offline speakers must not prevent the watcher from restarting the server.
+  const deadline = setTimeout(() => process.exit(0), 5000);
+  await Promise.allSettled(
+    Object.values(services).map((service) =>
+      "stop" in service ? service.stop() : undefined,
+    ),
+  );
+  clearTimeout(deadline);
+  io.close();
+  server.close();
   process.exit(0);
-});
+};
+process.once("SIGINT", shutdown);
+process.once("SIGTERM", shutdown);

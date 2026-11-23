@@ -8,7 +8,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding-top: 10px;
+  padding-top: 5px;
 `;
 
 const TabsWrapper = styled.ul`
@@ -65,7 +65,7 @@ const TabContent = styled.div`
 `;
 
 type TabsProps = {
-  items?: Array<[label: string, element: JSX.Element, id?: string]>;
+  items?: Array<[label: string, element: React.JSX.Element, id?: string]>;
   defaultSelected?: string;
   resetDelay?: number;
 };
@@ -79,7 +79,7 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const getInitialState = () =>
     defaultSelected
-      ? items?.findIndex(([label]) => defaultSelected === label) ?? 0
+      ? (items?.findIndex(([label]) => defaultSelected === label) ?? 0)
       : 0;
 
   const [selected, setSelected] = useState(getInitialState);

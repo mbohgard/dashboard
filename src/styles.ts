@@ -1,5 +1,5 @@
 import { createGlobalStyle } from "styled-components";
-import reset from "styled-reset";
+import { reset } from "styled-reset";
 
 export const colors = {
   white: "#fff",
@@ -22,6 +22,8 @@ export const colors = {
   magenta: "#cf449a",
   danger: "#f02c0a",
   warning: "#faac11",
+  babyblue: "#a1c3f9",
+  pink: "#f9a1c3",
 } as const;
 
 export type Colors = keyof typeof colors;

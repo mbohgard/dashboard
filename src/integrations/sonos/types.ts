@@ -1,8 +1,8 @@
-interface SonosTrack {
+export interface SonosTrack {
   artist?: string;
   title?: string;
   album?: string;
-  duration: 116;
+  duration: number;
   type: "track" | "line_in";
   stationName?: string;
   uri?: string;

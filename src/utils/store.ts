@@ -1,20 +1,29 @@
 import { useSyncExternalStore } from "react";
+import { reportError } from "./report";
 
 type Listener<T> = (state: T) => void;
 type SetterCallback<T> = (state: T) => T;
-type Setter<T> = (state: T | SetterCallback<T>) => T;
-type Selector<T, S> = (state: T) => S;
-interface UseStore<T> {
-  (): readonly [T, Setter<T>];
-  <S>(selector: Selector<T, S>): readonly [S, Setter<T>];
-}
 
 const getNewState = <T>(newState: T | SetterCallback<T>, oldState?: T): T =>
   typeof newState === "function"
     ? (newState as SetterCallback<T>)(oldState as T)
     : newState;
 
-export const createStore = <T>(initialState: T | SetterCallback<T>) => {
+export const createStore = <T>(
+  initialState: T | SetterCallback<T>,
+  storageKey?: string
+) => {
+  if (storageKey) {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        initialState = JSON.parse(saved) ?? initialState;
+      } catch {
+        reportError(storageKey, "Failed to get store data from localStorage");
+      }
+    }
+  }
+
   let state = getNewState(initialState);
 
   const listeners = new Set<Listener<T>>();
@@ -24,6 +33,14 @@ export const createStore = <T>(initialState: T | SetterCallback<T>) => {
     setState: (newState: T | SetterCallback<T>) => {
       // create the new state
       state = getNewState(newState, state);
+
+      if (storageKey) {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(state));
+        } catch {
+          reportError(storageKey, "Failed to save store data to localStorage");
+        }
+      }
 
       // notify all subscrtibers
       listeners.forEach((listener) => listener(state));
@@ -39,18 +56,18 @@ export const createStore = <T>(initialState: T | SetterCallback<T>) => {
     },
   };
 
-  const useStore: UseStore<T> = (selector?: Selector<T, T>) => {
-    const getState = () => selector?.(store.getState()) ?? store.getState();
+  const useStore = <S = T>(selector: (state: T) => S = (s) => s as any) => {
+    const getState = () => store.getState();
 
-    return [
-      useSyncExternalStore<T>(store.subscribe, getState, getState),
-      store.setState,
-    ] as const;
+    const s = useSyncExternalStore<T>(store.subscribe, getState, getState);
+
+    return [selector(s), store.setState] as const;
   };
 
   return {
     useStore,
     get: store.getState,
     set: store.setState,
+    subscribe: store.subscribe,
   };
 };
