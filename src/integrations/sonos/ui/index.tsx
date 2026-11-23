@@ -1,16 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import styled, { css } from "styled-components";
 
-import { useSonosService } from "../../../hooks";
+import { useSonosService, useThrottle } from "../../../hooks";
 
 import { Loader } from "../../../components/Atoms";
 import { sec2Time } from "../../../utils/time";
 import { colors } from "../../../styles";
 import { addLeadingZero } from "../../../utils/helpers";
 import { Icon } from "../../../components/Icon";
-import type { SonosDevice, SonosEmit } from "../types";
+import type { SonosDevice, SonosEmit, SonosTrack } from "../types";
+import { createPlaybackClock } from "./playbackClock";
 
-const COVER_SIZE = 250;
+const COVER_SIZE = 280;
 
 const Container = styled.div`
   font-size: 16px;
@@ -230,81 +237,45 @@ const getElapsedTime = (duration: number, elapsed: number) => {
   };
 };
 
-const setProgress = (el: HTMLDivElement | null, value: number) => {
-  el?.style.setProperty("--progress", `${value}%`);
-};
-
-const ProgressBar: React.FC<{
-  duration: number;
-  elapsed: number;
-  isPlaying: boolean;
-}> = ({ isPlaying, duration, elapsed }) => {
-  const el = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const bar = el.current;
-    if (!bar) return;
-
-    if (!isPlaying) {
-      setProgress(bar, getPercentage(duration, elapsed));
-      return;
-    }
-
-    let i = 1;
-    const timer = window.setInterval(() => {
-      window.requestAnimationFrame(() => {
-        const percentage = getPercentage(duration, elapsed + i / 10);
-        setProgress(bar, percentage >= 100 ? 100 : percentage);
-
-        if (percentage >= 100) window.clearInterval(timer);
-      });
-      i++;
-    }, 1000 / 10);
-
-    return () => window.clearInterval(timer);
-  }, [isPlaying, duration, elapsed]);
-
-  return <ProgressBarEl ref={el} />;
-};
-
 const Progress: React.FC<{
   isPlaying: boolean;
-  duration: number;
+  track: SonosTrack;
   elapsed: number;
-}> = ({ isPlaying, duration, elapsed }) => {
-  const timer = useRef(0);
-  const [time, setTime] = useState(() => getElapsedTime(duration, elapsed));
+}> = ({ isPlaying, track, elapsed }) => {
+  const duration = track.duration;
+  const [clock] = useState(() =>
+    createPlaybackClock(elapsed, duration, isPlaying),
+  );
+  const [position, setPosition] = useState(() => clock.position());
 
-  useEffect(() => {
-    window.clearTimeout(timer.current);
+  // Optimistic play/pause preserves the track object. A new track object comes
+  // from a speaker update (or room switch) and reconciles the local clock.
+  useLayoutEffect(() => {
+    setPosition(clock.sync(elapsed, duration));
+  }, [clock, track, elapsed, duration]);
 
-    setTime(getElapsedTime(duration, elapsed));
-  }, [duration, elapsed]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
+    setPosition(clock.setPlaying(isPlaying));
     if (!isPlaying) return;
 
-    timer.current = window.setTimeout(() => {
-      setTime((t) => {
-        const dur = t.sec.duration;
-        const ela = t.sec.elapsed + 1;
+    const timer = window.setInterval(() => {
+      const next = clock.position();
+      setPosition(next);
+      if (next >= track.duration) window.clearInterval(timer);
+    }, 100);
+    return () => window.clearInterval(timer);
+  }, [clock, isPlaying, track]);
 
-        if (ela > dur) return t;
-
-        return getElapsedTime(t.sec.duration, t.sec.elapsed + 1);
-      });
-    }, 1000);
-
-    return () => window.clearTimeout(timer.current);
-  }, [time, isPlaying]);
-
+  const time = getElapsedTime(duration, Math.floor(position));
   return (
     <ProgressContainer>
       <i>{time.elapsed}</i>
-      <ProgressBar
-        isPlaying={isPlaying}
-        duration={duration}
-        elapsed={elapsed}
+      <ProgressBarEl
+        style={
+          {
+            "--progress": `${getPercentage(duration, position)}%`,
+          } as React.CSSProperties
+        }
       />
       <i>{time.left}</i>
     </ProgressContainer>
@@ -384,7 +355,7 @@ const Volume: React.FC<{ state: number } & Pick<ControlsProps, "command">> = ({
     if (!isActive.current) setValue(state);
   }, [state]);
 
-  // const send = useCallback(debounce(command, 500), [command]);
+  const send = useThrottle({ interval: 300, finalize: true });
 
   const onTouch = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
     isActive.current = e.type === "touchstart";
@@ -392,9 +363,11 @@ const Volume: React.FC<{ state: number } & Pick<ControlsProps, "command">> = ({
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(Number(e.target.value));
+      const volume = Number(e.target.value);
+      setValue(volume);
+      send(() => command(volume));
     },
-    [command]
+    [command, send],
   );
 
   return (
@@ -415,7 +388,7 @@ const Volume: React.FC<{ state: number } & Pick<ControlsProps, "command">> = ({
 const getCurrentRoom = (
   data: SonosDevice[],
   name?: string | null,
-  isPlaying?: boolean
+  isPlaying?: boolean,
 ) => {
   const predicate = ({ state, roomName }: SonosDevice) => {
     const track = state.currentTrack;
@@ -439,7 +412,8 @@ export const Sonos: React.FC = () => {
   useEffect(() => {
     if (selectedRoom) return;
 
-    if (data) setSelectedRoom(getCurrentRoom(data, null, isPlaying).roomName);
+    if (data?.length)
+      setSelectedRoom(getCurrentRoom(data, null, isPlaying).roomName);
   }, [data, isPlaying, selectedRoom]);
 
   const command: ControlsProps["command"] = useCallback(
@@ -448,16 +422,33 @@ export const Sonos: React.FC = () => {
 
       const isVolume = typeof action === "number";
 
-      emit({
+      const update = emit({
         roomName: selectedRoom,
         action: isVolume ? "volume" : action,
         volume: isVolume ? String(action) : undefined,
       });
+
+      if (action === "play" || action === "pause") {
+        update?.((rooms) =>
+          rooms?.map((room) =>
+            room.roomName === selectedRoom
+              ? {
+                  ...room,
+                  state: {
+                    ...room.state,
+                    playbackState:
+                      action === "play" ? "PLAYING" : "PAUSED_PLAYBACK",
+                  },
+                }
+              : room,
+          ),
+        );
+      }
     },
-    [emit, selectedRoom]
+    [emit, selectedRoom],
   );
 
-  if (!selectedRoom || !data) return <Loader />;
+  if (!selectedRoom || !data?.length) return <Loader />;
 
   const current = getCurrentRoom(data, selectedRoom);
 
@@ -483,7 +474,7 @@ export const Sonos: React.FC = () => {
         <>
           <Progress
             isPlaying={state.playbackState === "PLAYING"}
-            duration={track.duration}
+            track={track}
             elapsed={state.elapsedTime}
           />
         </>

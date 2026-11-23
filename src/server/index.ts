@@ -67,6 +67,16 @@ const formatError = (e: unknown) => {
     : stringify(e) || "Unknown error";
 };
 
+const publish = (data: ServiceResponse) => {
+  cache[data.service] = data;
+  emit({ ...data, error: formatError(data.error) });
+};
+
+const serviceError = (name: ServiceName, error: unknown) => {
+  console.log(`Error in service ${name}:`, error);
+  emit({ service: name, error: formatError(error) });
+};
+
 const fetcher = (service: ServicesUnion, forceWait = false) => {
   if ("enabled" in service && !service.enabled) return;
 
@@ -134,22 +144,6 @@ io.on("connection", (socket) => {
           .finally(() => actionsInProgress.delete(service.name));
       });
     }
-
-    if ("feed" in service && service.feed.endpoint) {
-      app.post(service.feed.endpoint, (req, res) => {
-        try {
-          const result = service.feed.handler(req.body);
-          if (result) emit(result);
-        } catch (e) {
-          emit({
-            service: service.name,
-            error: formatError(e),
-          });
-        }
-
-        res.sendStatus(200);
-      });
-    }
   });
 
   const configBody: AppConfig = {};
@@ -178,11 +172,32 @@ server.listen(PORT, () => {
   console.log("Server listening on port", PORT);
 
   // kick off all services
-  Object.values(services).forEach((service) => fetcher(service));
+  Object.values(services).forEach((service) => {
+    if ("enabled" in service && !service.enabled) return;
+    if (POLL && "start" in service) {
+      service.start(publish, (error) => serviceError(service.name, error));
+    } else {
+      fetcher(service);
+    }
+  });
 });
 
-process.on("SIGINT", function () {
-  console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
-  // some other closing procedures go here
+let shuttingDown = false;
+const shutdown = async () => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  for (const timer of Object.values(timers)) clearTimeout(timer);
+  // Offline speakers must not prevent the watcher from restarting the server.
+  const deadline = setTimeout(() => process.exit(0), 5000);
+  await Promise.allSettled(
+    Object.values(services).map((service) =>
+      "stop" in service ? service.stop() : undefined,
+    ),
+  );
+  clearTimeout(deadline);
+  io.close();
+  server.close();
   process.exit(0);
-});
+};
+process.once("SIGINT", shutdown);
+process.once("SIGTERM", shutdown);

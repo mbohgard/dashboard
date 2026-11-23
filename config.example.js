@@ -75,8 +75,7 @@ module.exports = {
     label: "",
   },
   sonos: {
-    api: "", // url to local node-sonos-http-api,
-    feed: "",
+    host: "", // optional speaker IP; leave empty for automatic LAN discovery
   },
   icloud: {
     label: "",

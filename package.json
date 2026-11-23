@@ -15,7 +15,8 @@
     "serve": "NODE_ENV=production node src/server/index.ts",
     "ts:dev:no-poll": "node src/server/index.ts no-poll",
     "ts:dev": "node src/server/index.ts",
-    "tsc": "tsc --noEmit --noUnusedLocals --noUnusedParameters && tsc -p tsconfig.server.json --noEmit --noUnusedLocals --noUnusedParameters"
+    "tsc": "tsc --noEmit --noUnusedLocals --noUnusedParameters && tsc -p tsconfig.server.json --noEmit --noUnusedLocals --noUnusedParameters",
+    "test": "node --experimental-test-module-mocks --test"
   },
   "dependencies": {
     "@ctrl/tinycolor": "^4.1.0",
@@ -31,6 +32,7 @@
     "react-dom": "19.3.1",
     "socket.io": "4.8.4",
     "socket.io-client": "4.8.4",
+    "sonos": "^1.14.4",
     "styled-components": "^6.6.0",
     "styled-reset": "^5.0.0",
     "styles": "^0.2.1",

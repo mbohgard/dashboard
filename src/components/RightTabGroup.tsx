@@ -6,7 +6,7 @@ import { useConfig, useIsPlaying } from "../stores";
 import { Tabs } from "./Tabs";
 import { Calendar } from "../integrations/calendar/ui";
 import { Food } from "../integrations/food/ui";
-// import { Sonos } from "../integrations/sonos/ui";
+import { Sonos } from "../integrations/sonos/ui";
 import { colors } from "../styles";
 
 export const Container = styled.div<{ isPlaying: boolean }>`
@@ -41,9 +41,10 @@ export const RightTabGroup: React.FC = () => {
         items={[
           [labels.calendar, <Calendar />, "tab-calendar"],
           [labels.food, <Food />, "tab-food"],
-          // [labels.sonos, <Sonos />, "tab-sonos"],
+          [labels.sonos, <Sonos />, "tab-sonos"],
         ]}
-        defaultSelected={labels.calendar}
+        // defaultSelected={isPlaying ? labels.sonos : labels.calendar}
+        defaultSelected={labels.sonos}
         resetDelay={15000}
       />
     </Container>

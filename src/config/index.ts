@@ -68,7 +68,10 @@ export type Config = {
     label?: string;
   };
   sonos?: {
+    host?: string;
+    /** @deprecated No separate Sonos HTTP server is needed. */
     api?: string;
+    /** @deprecated Status is read directly from the speakers. */
     feed?: string;
   };
   icloud?: {

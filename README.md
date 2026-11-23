@@ -10,6 +10,25 @@ cp config.example.js config.js
 
 Fill in `config.js` with your integration settings. It is ignored by Git.
 
+Sonos runs inside this Node backend using the [`sonos`](https://github.com/bencevans/node-sonos)
+library. It discovers speakers, reads an initial snapshot, and uses local UPnP
+subscriptions to push playback, track, volume and group changes to the browser.
+Bursts of notifications trigger one refresh of the affected group. A one-minute
+recovery check reconciles state and renews or repairs subscriptions; no separate
+Sonos process, configured webhook, account or API key is needed.
+The Sonos tab supports play/pause, previous/next and speaker volume. Playback
+commands go to the room's current group coordinator; volume targets that room.
+The backend must be able to reach the speakers on your LAN, and speakers must be
+able to reach its subscription callback listener. The listener runs inside the
+same Node process on an automatically allocated port and closes on shutdown.
+If multicast discovery is unavailable, set the optional `sonos.host` to one
+speaker's IP address. `no-poll` reads a single snapshot without subscriptions or
+the recovery timer.
+The old `sonos.api` and `sonos.feed` settings are ignored.
+
+Run all tests with `pnpm test`. Integration tests stay in their respective
+integration folders; the Sonos tests use simulated speakers.
+
 Start the backend watcher and Vite client together:
 
 ```sh
